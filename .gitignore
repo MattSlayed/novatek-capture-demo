@@ -1,0 +1,28 @@
+# ---- Node / Next ----------------------------------------------------
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# ---- secrets --------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# ---- Vercel ---------------------------------------------------------
+.vercel/
+
+# ---- BMAD: project state is committed; personal settings are not ----
+_bmad/**/*.user.*
+_bmad/**/config.user.yaml
+
+# ---- GSD: planning state IS committed (.planning/) -------------------
+
+# ---- capture harness output (regenerable; see ipv-demo's reasoning) --
+/scripts/out/
+/scripts/.check/
+
+# ---- OS ---------------------------------------------------------------
+.DS_Store
+Thumbs.db
