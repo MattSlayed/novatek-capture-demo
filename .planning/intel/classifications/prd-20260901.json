@@ -1,0 +1,37 @@
+{
+  "source_path": "C:\\Users\\matth\\OneDrive\\Documents\\NOVATEK LLC\\04 KNOWLEDGE-BASE\\Project-Scopes\\Project Scope's\\Business Brain\\novatek-capture-demo\\docs\\planning-artifacts\\prds\\prd-novatek-capture-demo-2026-09-01\\prd.md",
+  "type": "PRD",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "PRD: NOVATEK Capture — designed preview",
+  "summary": "Product requirements for the phone-first NOVATEK Capture preview: work-order-scoped identity, server-attributed captures and decisions, authored proposals, offline reconciliation, honesty labelling, and nine build phases.",
+  "scope": [
+    "NOVATEK Capture preview (PWA)",
+    "Identity and work-order access seam (gate, session, authorisation accessor)",
+    "Work orders and assets",
+    "Clock (server-derived hours, segments)",
+    "Capture at the asset (camera, file-input path, spoken note, hash and thumbnail only)",
+    "Verification (authored, no model)",
+    "Proposals and the decision step (accept/reject, decision context, server attribution)",
+    "Referrals (report something else, asset register resolution, flags, work proposal)",
+    "Offline queue and reconciliation (connectivity probe, conflicts, idempotency)",
+    "Installability and offline shell (service worker, storage persistence, WebKit cap, desktop frame)",
+    "Honesty surface (eight governed sentences, status ribbon, claims audit, build-check command, handover)",
+    "Record handed onward payload",
+    "Cross-cutting NFRs (touch targets, WCAG 2.2, gloved usability)",
+    "Non-goals (no model, no redaction, no database, no supervisor role, no CMMS)",
+    "Nine build phases and ordering constraints",
+    "Enforced-invariant register",
+    "Success metrics SM-1 to SM-5 and counter-metrics SM-C1 to SM-C3",
+    "Three synthetic artisan personas (S. Mabaso, J. van Wyk, third persona)"
+  ],
+  "cross_refs": [
+    "docs/planning-artifacts/briefs/brief-novatek-capture-demo-2026-08-31/brief.md",
+    "docs/CAPTURE-PLAN-SEED.md",
+    "addendum.md",
+    "DESIGN.md"
+  ],
+  "locked": false,
+  "precedence": 2,
+  "notes": ""
+}

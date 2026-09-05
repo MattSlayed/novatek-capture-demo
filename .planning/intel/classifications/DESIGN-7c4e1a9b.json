@@ -1,0 +1,43 @@
+{
+  "source_path": "C:\\Users\\matth\\OneDrive\\Documents\\NOVATEK LLC\\04 KNOWLEDGE-BASE\\Project-Scopes\\Project Scope's\\Business Brain\\novatek-capture-demo\\docs\\planning-artifacts\\ux-designs\\ux-novatek-capture-demo-2026-09-01\\DESIGN.md",
+  "type": "SPEC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "NOVATEK Capture — visual identity",
+  "summary": "Design-token specification for the phone-first NOVATEK Capture UI: inherited ipv-demo tokens plus every override forced by 7:1/3:1 contrast floors and 360px phone constraints.",
+  "scope": [
+    "NOVATEK Capture",
+    "design tokens (tokens.inherited.css, tokens.capture.css)",
+    "color palette and contrast ratios (NFR-5 7:1 text, NFR-6 3:1 non-text)",
+    "four grounds: navy-deep, panel-solid, surface-inset, panel-overlay",
+    "dark-ground status set (dk-good, dk-warn, dk-crit, dk-crit-edge)",
+    "typography roles (Syne, DM Sans, JetBrains Mono) and 13px floor",
+    "control-label clamp and 200% text behaviour",
+    "spacing scale (4px base) and phone measurements",
+    "130px record control and 44px secondary control",
+    "honesty ribbon (content-height, static)",
+    "sticky action bar",
+    "proposal card (left-rule) and tinted callout (conflict card)",
+    "focus ring",
+    "panel-solid vs panel-overlay elevation",
+    "viewfinder and shutter",
+    "queue row and conflict card",
+    "decorative-exemption register",
+    "dead-token register",
+    "safe-area handling",
+    "mark and wordmark"
+  ],
+  "cross_refs": [
+    "ipv-demo/app/styles/tokens.css",
+    "app/styles/tokens.inherited.css",
+    "app/styles/tokens.capture.css",
+    "layout.tsx",
+    "viewer.module.css",
+    "novatek-brand-guidelines.skill.md",
+    "Brand.tsx",
+    "HANDOVER.md"
+  ],
+  "locked": false,
+  "precedence": 1,
+  "notes": "Type taken from manifest (SPEC). Content agrees: token tables, measured contrast ratios, component contracts, and explicit floors (NFR-5/NFR-6) are implementation constraints. Frontmatter status is 'final' (a DESIGN.md convention, not an ADR status), so locked stays false. Filename hash suffix is a stand-in: this agent has no shell or hashing tool, so it is not a true SHA-256 of the source path."
+}

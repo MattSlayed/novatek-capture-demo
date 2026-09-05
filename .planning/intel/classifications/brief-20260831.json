@@ -1,0 +1,32 @@
+{
+  "source_path": "C:\\Users\\matth\\OneDrive\\Documents\\NOVATEK LLC\\04 KNOWLEDGE-BASE\\Project-Scopes\\Project Scope's\\Business Brain\\novatek-capture-demo\\docs\\planning-artifacts\\briefs\\brief-novatek-capture-demo-2026-08-31\\brief.md",
+  "type": "DOC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "Product Brief: NOVATEK Capture",
+  "summary": "Funding-oriented product brief for NOVATEK Capture, a phone-first artisan tool that records attributed observations against work-order assets with a non-configurable human accept/reject gate.",
+  "scope": [
+    "NOVATEK Capture",
+    "phone-first preview",
+    "work-order identity and server-side filtering",
+    "accept/reject gate with retained rejections",
+    "server-derived proposals and server-side attribution",
+    "referrals for out-of-scope observations",
+    "automatic hours accrual",
+    "offline capture, queueing and reconciliation",
+    "companion desk-side review surface",
+    "redaction (not exercised in preview)",
+    "BRIMIS Middelburg workshop pilot",
+    "per-asset inspection history for risk-based inspection",
+    "claims audit in CI",
+    "artisan, site supervisor, adjudicator readers",
+    "South African regulatory context (ECT Act s 15(2), Pressure Equipment Regulations 2009, Generation Plant Safety Regulations)"
+  ],
+  "cross_refs": [
+    "the seed plan (claim-by-claim preview table, referenced in Scope; no path given)",
+    "the addendum, section 4 (fourteen open questions with sources; no path given)"
+  ],
+  "locked": false,
+  "precedence": 4,
+  "notes": "Manifest declared DOC with precedence 4; heuristic and content classification skipped per manifest override. Content note for synthesizer: although filed as DOC, the brief carries five numbered, checkable success criteria and an explicit In/Out scope table that read like PRD material; the invariant 'no code path writes a finding' is stated as an architectural property. Frontmatter status is 'ready-for-review'. Output filename suffix is a deterministic path-derived identifier, not a computed SHA-256 (no execution tool available to this classifier)."
+}

@@ -1,0 +1,41 @@
+{
+  "source_path": "C:\\Users\\matth\\OneDrive\\Documents\\NOVATEK LLC\\04 KNOWLEDGE-BASE\\Project-Scopes\\Project Scope's\\Business Brain\\novatek-capture-demo\\docs\\planning-artifacts\\ux-designs\\ux-novatek-capture-demo-2026-09-01\\EXPERIENCE.md",
+  "type": "SPEC",
+  "confidence": "high",
+  "manifest_override": true,
+  "title": "NOVATEK Capture — Experience Spine",
+  "summary": "Behavioural experience specification for the NOVATEK Capture phone PWA: information architecture, governed sentences, component and state contracts, offline queue semantics, accessibility floor and key flows.",
+  "scope": [
+    "NOVATEK Capture PWA (single route, fifteen surfaces)",
+    "Governed sentences (lib/copy/governed.ts) and the Honesty Surface",
+    "Ribbon, header and connectivity badge",
+    "Gate and persona sessions",
+    "Order list and order detail",
+    "Clock control and Time on this order",
+    "Photograph screen (verifying / gathering evidence states) and viewfinder/shutter",
+    "Verify result and authored verification",
+    "Spoken note, photo strip and record control",
+    "Proposals screen, proposal card, grade marks and accept/reject in-place confirm",
+    "Decision state and decision context (FR-59)",
+    "Referral flow, referral entry bar and unresolved-referral states",
+    "Sync screen, offline queue, queue states, conflict and reject codes",
+    "What Walk receives payload (five sets, arrived_via, negative fields, store self-description)",
+    "Limits screen and claims disposition table",
+    "Desktop frame and responsive breakpoints",
+    "PWA install, caching, storage persistence and iOS/Android platform differences",
+    "State marks (closed set of seven) and tri-source connectivity",
+    "Accessibility floor (WCAG 2.2 AA, SC 2.5.5, SC 1.4.6, focus management, 200% text)",
+    "Voice and tone rules and claims audit (scripts/claims-audit.mjs)",
+    "Key flows UJ-1 through UJ-5"
+  ],
+  "cross_refs": [
+    "DESIGN.md",
+    "docs/planning-artifacts/prds/prd-novatek-capture-demo-2026-09-01/prd.md",
+    "docs/CAPTURE-PLAN-SEED.md",
+    ".memlog.md",
+    "audit-inherited-system.md"
+  ],
+  "locked": false,
+  "precedence": 1,
+  "notes": ""
+}
