@@ -39,7 +39,18 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. The claims audit carries the inherited register with version and inheritance date, its owner named, its additions tested against the copied surfaces; the contrast check (7:1 text, with DESIGN.md's decorative-exemption register as input) and the WCAG A/AA check are wired into the same command
   5. `tokens.inherited.css` is byte-identical to the parent's and CI-asserted; `vercel.json` sets region, `Permissions-Policy: camera=(self), microphone=(self)` and the uncached `/sw.js`; a production build with an unresolved build id fails
 **Scheduled closures**: Re-read the live Vercel region list; scope the TypeScript 6/7 and ESLint 10 cleanup as scheduled work; confirm the Vercel project settings (Deployment Protection off for previews, System Environment Variables on)
-**Plans**: TBD
+**Plans**: 9 plans in 7 waves
+
+Plans:
+- [ ] 01-01-PLAN.md — Scaffold, pins and the shared check/test harness (wave 1)
+- [ ] 01-02-PLAN.md — vercel.json and the header, worker and structure checks (wave 2)
+- [ ] 01-03-PLAN.md — The two token layers, globals.css and the design registers (wave 2)
+- [ ] 01-04-PLAN.md — The governed sentences, the duplicate-literal check and the claims audit (wave 2)
+- [ ] 01-05-PLAN.md — The ribbon, the layout, the shell and the Limits surface (wave 3)
+- [ ] 01-06-PLAN.md — The contrast check and the WCAG A/AA check (wave 4)
+- [ ] 01-07-PLAN.md — verify.mjs, its fail-fast proof and the CI gate (wave 5)
+- [ ] 01-08-PLAN.md — The deployment probe, the toolchain closures and README (wave 6)
+- [ ] 01-09-PLAN.md — Vercel settings, the Deployment Check, the production merge and the phone check (wave 7)
 **UI hint**: yes
 
 ### Phase 2: Fixtures & types
