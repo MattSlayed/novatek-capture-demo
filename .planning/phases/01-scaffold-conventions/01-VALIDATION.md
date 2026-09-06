@@ -60,7 +60,7 @@ Threat refs (from `01-RESEARCH.md` §Security Domain): T-1-01 missing or incorre
 
 - [ ] `scripts/check-governed.test.mjs`, `scripts/claims-audit.test.mjs`, `scripts/check-headers.test.mjs`, `scripts/check-tokens.test.mjs`, `scripts/check-sw.test.mjs`, `scripts/check-structure.test.mjs` — one fixture-driven test per check script proving non-zero exit on a violation (D-23)
 - [ ] `scripts/lib/harness.mjs` — shared Playwright launch profile: Chromium, viewport 390 × 844, `deviceScaleFactor` 3, `isMobile`, `hasTouch` (D-21)
-- [ ] `scripts/check-wcag.mjs` — axe-core A/AA run against `next start` on `/` and `/?s=limits`; the `runOnly` tag list confirmed against the installed `axe-core` 4.13.0 with `getRules(['wcag22aa'])` first (Research Open Question 1)
+- [ ] `scripts/check-wcag.mjs` — axe-core A/AA run against `next start` on `/` and `/?s=limits` with `runOnly` tags `wcag2a, wcag2aa, wcag21a, wcag21aa, wcag22aa` (confirmed against the installed `axe-core` 4.13.0 on 2026-09-06: the `wcag22aa` tag carries `target-size`; no `wcag22a` tag exists) and a startup assertion that `getRules(['wcag22aa'])` is non-empty (Research Open Question 1, resolved)
 - [ ] `scripts/check-contrast.mjs` — WCAG relative-luminance contrast from resolved token values with `docs/design/decorative-exemptions.json` as the only exception source
 - [ ] `.github/workflows/verify.yml` — the CI job (`verify`) that the Vercel Deployment Check depends on (D-22)
 - [ ] Framework install: `npx playwright install --with-deps chromium` locally and in CI (not in Vercel's build)
