@@ -1,0 +1,7 @@
+# The inherited token layer is a byte-identical copy pinned by SHA-256
+# in scripts/check-tokens.mjs (D-12). Git's core.autocrlf would
+# silently rewrite its line endings to CRLF on a future checkout on
+# this machine, breaking the pinned hash everywhere except the
+# already-checked-out copy. Marking it -text disables all newline
+# conversion so the bytes survive checkout unchanged.
+app/styles/tokens.inherited.css -text
