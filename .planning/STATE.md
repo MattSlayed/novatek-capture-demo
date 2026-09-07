@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 1 UI-SPEC approved
-last_updated: "2026-09-07T13:07:56.077Z"
-last_activity: 2026-09-07 -- Phase 1 execution started
+stopped_at: Completed 01-01-PLAN.md
+last_updated: "2026-09-07T18:02:57.254Z"
+last_activity: 2026-09-07
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 9
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 1 (Scaffold & conventions) — EXECUTING
-Plan: 1 of 9
-Status: Executing Phase 1
-Last activity: 2026-09-07 -- Phase 1 execution started
+Plan: 2 of 9
+Status: Ready to execute
+Last activity: 2026-09-07
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 11%
 
 ## Performance Metrics
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: -
 
 *Updated after each plan completion*
+| Phase 1 P1 | 14min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,7 @@ Recent decisions affecting current work:
 - [Ingest]: Every bounded numeric value is code in `lib/limits`, tuned in the phase that first needs it; never restated in planning documents
 - [Ingest]: 130 px record-binding controls (DESIGN.md governs; the PRD's 124 px is retired)
 - [Ingest]: Nine phases 1:1 with the seed's build order; P9 cross-cutting, last only because newest
+- [Phase 1]: Changed package.json's test script to node --test scripts/**/*.test.mjs (Rule 3 fix) — A bare directory argument to node --test fails with MODULE_NOT_FOUND on this Node 24.19.0/Windows install
 
 ### Pending Todos
 
@@ -98,6 +100,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-06T12:20:59.723Z
-Stopped at: Phase 1 UI-SPEC approved
-Resume file: .planning/phases/01-scaffold-conventions/01-UI-SPEC.md
+Last session: 2026-09-07T18:02:57.242Z
+Stopped at: Completed 01-01-PLAN.md
+Resume file: None

@@ -107,7 +107,7 @@ IDs keep the PRD's own numbering (`REQ-{PRD id}`). Each FR carries its verificat
 - [ ] **REQ-FR-49**: The seven sentences other than `preview` each appear at the point where their claim is made; a table mapping each sentence to its rendering location is maintained in the handover (evidence artefact — table vs automated placement check — decided in P8). *[Verified by: demonstration]*
 - [ ] **REQ-FR-50**: A build-time audit sweeps application surfaces against the claims register and fails the build on a violation; the register is inherited verbatim from the companion demo plus the seed's additions, copied into the audit script with version and inheritance date, owned by the SHEQ manager; banned claims enumerated by exact string (retired residency, inference sovereignty and funding claims, competitor names, any TRL claim for Capture as a product, modelled savings as cash, machine-driven reliability claims, uncited performance/cost/time/accuracy/adoption figures, staffing-reduction framing, present-tense claims for nonexistent capabilities). Stated limitation: a string sweep. *[Verified by: test]*
 - [ ] **REQ-FR-51**: One screen presents all eight governed sentences with the live instance identifier and storage state, plus for each product claim its disposition (enforced / authored / not exercised) and for each enforced claim the check a reviewer can run. *[Verified by: demonstration]*
-- [ ] **REQ-FR-65**: One command runs every build-time check — at minimum the claims audit, single-writer rule, actor-field rule, fixture-inputs rule, worker-guard check, duplicate-literal check, accepted-field enumerations; AD-15 enumerates the full gate; each check is a deliverable. *[Verified by: test]*
+- [x] **REQ-FR-65**: One command runs every build-time check — at minimum the claims audit, single-writer rule, actor-field rule, fixture-inputs rule, worker-guard check, duplicate-literal check, accepted-field enumerations; AD-15 enumerates the full gate; each check is a deliverable. *[Verified by: test]*
 - [ ] **REQ-FR-66**: A handover document ships with the build: the claims register as inherited and its owner; the sentence-to-location mapping; the enforced/authored/not-exercised table; the stated limitations of FR-3, FR-45, FR-50, FR-58, FR-63; a note telling a reviewer how to try to break it. *[Verified by: inspection]*
 
 ### The record handed onward (PRD §4.9)
@@ -189,7 +189,7 @@ Addendum candidates adopted into prd.md (UI-01–08 as NFR-1–8, DEV-01 as NFR-
 | REQ-FR-47 | Phase 1 | Pending |
 | REQ-FR-48 | Phase 1 | Pending |
 | REQ-FR-50 | Phase 1 | Pending |
-| REQ-FR-65 | Phase 1 | Pending |
+| REQ-FR-65 | Phase 1 | Complete |
 | REQ-NFR-5 | Phase 1 | Pending |
 | REQ-NFR-9 | Phase 1 | Pending |
 | REQ-SM-5 | Phase 1 | Pending |
