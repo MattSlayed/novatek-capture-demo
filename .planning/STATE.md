@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-06-PLAN.md
-last_updated: "2026-09-07T19:45:59.748Z"
+stopped_at: Completed 01-07-PLAN.md
+last_updated: "2026-09-07T20:08:54.104Z"
 last_activity: 2026-09-07
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 9
-  completed_plans: 6
+  completed_plans: 7
   percent: 0
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 1 (Scaffold & conventions) — EXECUTING
-Plan: 7 of 9
+Plan: 8 of 9
 Status: Ready to execute
 Last activity: 2026-09-07
 
-Progress: [███████░░░] 67%
+Progress: [████████░░] 78%
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: [███████░░░] 67%
 | Phase 01 P04 | 23min | 3 tasks | 5 files |
 | Phase 01 P05 | 18min | 3 tasks | 6 files |
 | Phase 01 P06 | 19min | 2 tasks | 5 files |
+| Phase 1 P7 | 22 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,9 @@ Recent decisions affecting current work:
 - [Phase 01]: A below-floor contrast pair passes only when a decorative-exemptions.json entry matches on ink AND ground AND its measured_ratio agrees with the computed ratio to two decimal places (string comparison, not float equality)
 - [Phase 01]: check-wcag.mjs derives CAPTURE_BUILD_ID from git rev-parse --short HEAD only in the spawned child's environment, never the parent shell, and only when none of the three env vars next.config.ts checks are already set
 - [Phase 01]: app/layout.tsx gained a document title (Rule 2 fix) after the first real check-wcag.mjs run failed axe's document-title rule (WCAG 2.4.2) on both surfaces, reusing the already-locked shell heading name
+- [Phase 01]: The fixture-suite step in verify.mjs uses the unshelled glob scripts/**/*.test.mjs, not the plan's literal node --test scripts/ directory form, which throws MODULE_NOT_FOUND on this Node/Windows install (same class of fix as 01-01)
+- [Phase 01]: next typegen shares the same resolved CAPTURE_BUILD_ID env as next build in verify.mjs, since typegen also loads next.config.ts under a production-like NODE_ENV and trips D-03's gate otherwise
+- [Phase 01]: check-structure.mjs's --build-output D-11 static-marker assertion now accepts the Partial Prerender glyph (◐) alongside the fully-static glyph (○), matching the shell's actual, already-implemented shape from plan 01-05
 
 ### Pending Todos
 
@@ -119,6 +123,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-07T19:45:59.735Z
-Stopped at: Completed 01-06-PLAN.md
+Last session: 2026-09-07T20:08:54.089Z
+Stopped at: Completed 01-07-PLAN.md
 Resume file: None
