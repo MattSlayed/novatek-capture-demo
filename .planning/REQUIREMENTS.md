@@ -102,7 +102,7 @@ IDs keep the PRD's own numbering (`REQ-{PRD id}`). Each FR carries its verificat
 ### The honesty surface (PRD §4.8; built first)
 
 - [x] **REQ-FR-47**: Each governed sentence is defined exactly once and imported wherever rendered; no duplicate literal anywhere in the build. *[Verified by: inspection]*
-- [ ] **REQ-FR-48**: Every screen carries the `preview` sentence in document flow with no dismissal control. *[Verified by: test]*
+- [x] **REQ-FR-48**: Every screen carries the `preview` sentence in document flow with no dismissal control. *[Verified by: test]*
 - [ ] **REQ-FR-48a**: On first entry the gate states which claims are enforced server-side and which are authored, before any is met; on re-entry it shows `preview` plus a control that reopens the long form in full. *[Verified by: test]*
 - [ ] **REQ-FR-49**: The seven sentences other than `preview` each appear at the point where their claim is made; a table mapping each sentence to its rendering location is maintained in the handover (evidence artefact — table vs automated placement check — decided in P8). *[Verified by: demonstration]*
 - [x] **REQ-FR-50**: A build-time audit sweeps application surfaces against the claims register and fails the build on a violation; the register is inherited verbatim from the companion demo plus the seed's additions, copied into the audit script with version and inheritance date, owned by the SHEQ manager; banned claims enumerated by exact string (retired residency, inference sovereignty and funding claims, competitor names, any TRL claim for Capture as a product, modelled savings as cash, machine-driven reliability claims, uncited performance/cost/time/accuracy/adoption figures, staffing-reduction framing, present-tense claims for nonexistent capabilities). Stated limitation: a string sweep. *[Verified by: test]*
@@ -129,7 +129,7 @@ IDs keep the PRD's own numbering (`REQ-{PRD id}`). Each FR carries its verificat
 - [ ] **REQ-NFR-6**: Control boundaries, focus indicators and proposal state 3:1 (SC 1.4.11); state never by colour alone. *[Verified by: CI contrast check + inspection]*
 - [ ] **REQ-NFR-7**: Fully operable at 320 CSS px with no two-dimensional scrolling and at 200 % text, including at NFR-1 sizes; 130 px is the design figure; at most two record-binding targets per row; no screen carries more than one primary record-binding action. *[Verified by: CI reflow assertions]*
 - [ ] **REQ-NFR-8**: Primary controls within one-handed thumb reach on each approved device; accept sits outside the incidental-brush region behind a deliberate in-place confirm. *[Verified by: on-device check + inspection]*
-- [ ] **REQ-NFR-9**: WCAG 2.2 Level AA in full, plus SC 2.5.5 and SC 1.4.6; CI fails on any A or AA violation and on any breach of NFR-1 or NFR-2. *[Verified by: CI WCAG check]*
+- [x] **REQ-NFR-9**: WCAG 2.2 Level AA in full, plus SC 2.5.5 and SC 1.4.6; CI fails on any A or AA violation and on any breach of NFR-1 or NFR-2. *[Verified by: CI WCAG check]*
 - [ ] **REQ-NFR-10**: Gloved usability established by test: at least five artisans across the three trades complete a full capture in their own working gloves on the approved devices; failures recorded; result written down whether it passed or not. Scheduling dependency, lands in P7. *[Verified by: test]*
 - [ ] **REQ-NFR-11**: Glove mode is a device requirement; any approved-device list is constrained to devices whose manufacturer documents a glove mode. *[Verified by: inspection]*
 - [ ] **REQ-NFR-12**: No governing standard exists for handheld field HMI, and the handover says so; requirements are assembled from accessibility standards, vendor guidance and one empirical study, each labelled. *[Verified by: inspection]*
@@ -187,11 +187,11 @@ Addendum candidates adopted into prd.md (UI-01–08 as NFR-1–8, DEV-01 as NFR-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | REQ-FR-47 | Phase 1 | Complete |
-| REQ-FR-48 | Phase 1 | Pending |
+| REQ-FR-48 | Phase 1 | Complete |
 | REQ-FR-50 | Phase 1 | Complete |
 | REQ-FR-65 | Phase 1 | Complete |
 | REQ-NFR-5 | Phase 1 | Complete |
-| REQ-NFR-9 | Phase 1 | Pending |
+| REQ-NFR-9 | Phase 1 | Complete |
 | REQ-SM-5 | Phase 1 | Complete |
 | REQ-FR-21a | Phase 2 | Pending |
 | REQ-FR-1 | Phase 3 | Pending |

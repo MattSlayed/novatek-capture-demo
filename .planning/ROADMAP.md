@@ -58,7 +58,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 01-05-PLAN.md — The ribbon, the layout, the shell and the Limits surface (wave 3)
+- [x] 01-05-PLAN.md — The ribbon, the layout, the shell and the Limits surface (wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -222,7 +222,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Scaffold & conventions | 4/9 | In Progress|  |
+| 1. Scaffold & conventions | 5/9 | In Progress|  |
 | 2. Fixtures & types | 0/TBD | Not started | - |
 | 3. Server seam | 0/TBD | Not started | - |
 | 4. Shell, gate, orders, clock (online) | 0/TBD | Not started | - |

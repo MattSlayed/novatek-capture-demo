@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-04-PLAN.md
-last_updated: "2026-09-07T19:07:07.565Z"
+stopped_at: Completed 01-05-PLAN.md
+last_updated: "2026-09-07T19:25:01.370Z"
 last_activity: 2026-09-07
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 9
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 1 (Scaffold & conventions) — EXECUTING
-Plan: 5 of 9
+Plan: 6 of 9
 Status: Ready to execute
 Last activity: 2026-09-07
 
-Progress: [████░░░░░░] 44%
+Progress: [██████░░░░] 56%
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [████░░░░░░] 44%
 | Phase 01 P02 | 10min | 3 tasks | 7 files |
 | Phase 01 P03 | 19min | 3 tasks | 8 files |
 | Phase 01 P04 | 23min | 3 tasks | 5 files |
+| Phase 01 P05 | 18min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,8 @@ Recent decisions affecting current work:
 - [Phase 01]: Rule 1's funding alternation extends the inherited entry's own pattern in place rather than becoming a second array entry
 - [Phase 01]: Found a third D-18 addition (staffing/headcount framing) already present verbatim in the inherited claims register, not flagged by 01-PATTERNS.md; left the inherited entry unchanged with a documenting comment rather than duplicated
 - [Phase 01]: check-governed.mjs's closed-set assertion is unconditional, so its fixture tests declare the full 8-key GOVERNED shape rather than a partial stand-in
+- [Phase 01]: Fonts load into --font-syne/--font-dm-sans/--font-jetbrains (the sibling's variable names), resolving the alias chain into --font-display/--font-body/--font-mono already declared in tokens.inherited.css
+- [Phase 01]: The ribbon link's ::after hit-area is positioned against the text column, never the link or the section, so the section's own position: static contract stays intact
 
 ### Pending Todos
 
@@ -111,6 +114,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-07T19:07:07.553Z
-Stopped at: Completed 01-04-PLAN.md
+Last session: 2026-09-07T19:25:01.358Z
+Stopped at: Completed 01-05-PLAN.md
 Resume file: None
