@@ -19,6 +19,10 @@ export function Ribbon() {
           <strong>{strong}</strong>
           {after}
         </p>
+        {/* D-11 locks a plain anchor in this phase — no <Link>, no
+            router.push. Phase 4 replaces it with a history.pushState
+            switcher without changing the URL contract. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a href="/?s=limits" className={`label ${styles.link}`}>
           Read the full preview limits
         </a>
