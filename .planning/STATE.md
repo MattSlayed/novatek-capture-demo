@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-02-PLAN.md
-last_updated: "2026-09-07T18:23:00.047Z"
+stopped_at: Completed 01-03-PLAN.md
+last_updated: "2026-09-07T18:45:27.252Z"
 last_activity: 2026-09-07
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 9
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 1 (Scaffold & conventions) — EXECUTING
-Plan: 3 of 9
+Plan: 4 of 9
 Status: Ready to execute
 Last activity: 2026-09-07
 
-Progress: [██░░░░░░░░] 22%
+Progress: [███░░░░░░░] 33%
 
 ## Performance Metrics
 
@@ -54,6 +54,7 @@ Progress: [██░░░░░░░░] 22%
 *Updated after each plan completion*
 | Phase 1 P1 | 14min | 3 tasks | 9 files |
 | Phase 01 P02 | 10min | 3 tasks | 7 files |
+| Phase 01 P03 | 19min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,9 @@ Recent decisions affecting current work:
 - [Phase 1]: Changed package.json's test script to node --test scripts/**/*.test.mjs (Rule 3 fix) — A bare directory argument to node --test fails with MODULE_NOT_FOUND on this Node 24.19.0/Windows install
 - [Phase 01]: check-structure.mjs adds an additive --build-output <path> mode for the D-11 static-marker assertion, run a second time after next build; never replaces the source assertions
 - [Phase 01]: The T-1-02/D-03 next-build test spawns node:child_process directly instead of lib/fixtures.mjs's runCommand, since runCommand's env option merges onto process.env and cannot express true variable deletion
+- [Phase 01]: Added .gitattributes marking app/styles/tokens.inherited.css -text — core.autocrlf=true would otherwise silently corrupt the pinned byte-identity on a future checkout
+- [Phase 01]: Reworded self-tripping comments (#000000, prefers-color-scheme) in tokens.capture.css/globals.css that were caught by check-tokens.mjs's own naive substring guard
+- [Phase 01]: Updated 01-02's placeholder check-structure.test.mjs test to assert exit 0 now that app/globals.css exists, as 01-02's SUMMARY anticipated
 
 ### Pending Todos
 
@@ -103,6 +107,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-07T18:23:00.029Z
-Stopped at: Completed 01-02-PLAN.md
+Last session: 2026-09-07T18:45:27.237Z
+Stopped at: Completed 01-03-PLAN.md
 Resume file: None

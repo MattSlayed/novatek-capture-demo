@@ -125,7 +125,7 @@ IDs keep the PRD's own numbering (`REQ-{PRD id}`). Each FR carries its verificat
 - [ ] **REQ-NFR-3**: No path-based, multipoint or dragging gesture in the capture flow; accept and reject single-tap, never swipe-only. *[Verified by: inspection + test]*
 - [ ] **REQ-NFR-4**: Every consequential control confirms within the 100 ms window NFR-4 sets through a visible state change and is idempotent; the change is legible around a gloved thumb resting on the control. *[Verified by: CI assertion at 360 px]*
 - [ ] **REQ-NFR-4a**: Second channels are additive, never assumed: haptics where present; on iOS the visible change carries NFR-4 alone. *[Verified by: inspection]*
-- [ ] **REQ-NFR-5**: Body and label text 7:1 (SC 1.4.6), checked automatically in CI. *[Verified by: CI contrast check]*
+- [x] **REQ-NFR-5**: Body and label text 7:1 (SC 1.4.6), checked automatically in CI. *[Verified by: CI contrast check]*
 - [ ] **REQ-NFR-6**: Control boundaries, focus indicators and proposal state 3:1 (SC 1.4.11); state never by colour alone. *[Verified by: CI contrast check + inspection]*
 - [ ] **REQ-NFR-7**: Fully operable at 320 CSS px with no two-dimensional scrolling and at 200 % text, including at NFR-1 sizes; 130 px is the design figure; at most two record-binding targets per row; no screen carries more than one primary record-binding action. *[Verified by: CI reflow assertions]*
 - [ ] **REQ-NFR-8**: Primary controls within one-handed thumb reach on each approved device; accept sits outside the incidental-brush region behind a deliberate in-place confirm. *[Verified by: on-device check + inspection]*
@@ -190,7 +190,7 @@ Addendum candidates adopted into prd.md (UI-01–08 as NFR-1–8, DEV-01 as NFR-
 | REQ-FR-48 | Phase 1 | Pending |
 | REQ-FR-50 | Phase 1 | Pending |
 | REQ-FR-65 | Phase 1 | Complete |
-| REQ-NFR-5 | Phase 1 | Pending |
+| REQ-NFR-5 | Phase 1 | Complete |
 | REQ-NFR-9 | Phase 1 | Pending |
 | REQ-SM-5 | Phase 1 | Pending |
 | REQ-FR-21a | Phase 2 | Pending |

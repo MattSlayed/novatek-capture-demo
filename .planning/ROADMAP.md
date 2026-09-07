@@ -53,7 +53,7 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [x] 01-02-PLAN.md — vercel.json and the header, worker and structure checks (wave 2)
-- [ ] 01-03-PLAN.md — The two token layers, globals.css and the design registers (wave 2)
+- [x] 01-03-PLAN.md — The two token layers, globals.css and the design registers (wave 2)
 - [ ] 01-04-PLAN.md — The governed sentences, the duplicate-literal check and the claims audit (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
@@ -222,7 +222,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Scaffold & conventions | 2/9 | In Progress|  |
+| 1. Scaffold & conventions | 3/9 | In Progress|  |
 | 2. Fixtures & types | 0/TBD | Not started | - |
 | 3. Server seam | 0/TBD | Not started | - |
 | 4. Shell, gate, orders, clock (online) | 0/TBD | Not started | - |
