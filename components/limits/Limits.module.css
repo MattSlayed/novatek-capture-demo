@@ -1,0 +1,19 @@
+/* No cards, no panels, no rules between sentences in this phase — the
+   panel primitive is Phase 4/5. Sits directly on the --navy-deep page
+   ground, like the shell surface. */
+
+.main {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-16) var(--safe-x) var(--space-48);
+}
+
+.heading {
+  margin-bottom: var(--space-32);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
