@@ -1,0 +1,44 @@
+[
+  {
+    "id": "ribbon-sentence",
+    "ink": "--viewer-ink-dim",
+    "ground": "--navy-deep",
+    "kind": "text",
+    "note": "The ribbon sentence (01-UI-SPEC.md §Ribbon Contract)."
+  },
+  {
+    "id": "ribbon-strong-and-headings",
+    "ink": "--viewer-ink",
+    "ground": "--navy-deep",
+    "kind": "text",
+    "note": "The ribbon's <strong>, both <h1>s, the Limits body and the English-only sentence."
+  },
+  {
+    "id": "ribbon-link",
+    "ink": "--cobalt-glow-ink",
+    "ground": "--navy-deep",
+    "kind": "text",
+    "note": "The ribbon link."
+  },
+  {
+    "id": "ribbon-dot",
+    "ink": "--cobalt-glow",
+    "ground": "--navy-deep",
+    "kind": "non-text",
+    "note": "The ribbon's 5x5px dot."
+  },
+  {
+    "id": "ribbon-link-underline",
+    "ink": "--control-border",
+    "ground": "--navy-deep",
+    "kind": "non-text",
+    "note": "The ribbon link's underline, the non-colour link cue."
+  },
+  {
+    "id": "ribbon-bottom-border",
+    "ink": "--viewer-border",
+    "ground": "--navy-deep",
+    "kind": "non-text",
+    "note": "The ribbon's bottom border — the one exempted pair (docs/design/decorative-exemptions.json)."
+  }
+]
