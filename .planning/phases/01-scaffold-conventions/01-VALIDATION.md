@@ -30,7 +30,7 @@ created: 2026-09-05
 - **After every task commit:** Run `node --test scripts/*.test.mjs`
 - **After every plan wave:** Run `npm run verify`
 - **Before `/gsd:verify-work`:** Full suite must be green locally and in the GitHub Actions `verify` job
-- **Max feedback latency:** 300 seconds (full `verify`); 20 seconds (quick)
+- **Max feedback latency:** 300 seconds (full `verify`); 20 seconds (quick); per-task commands stay under 60 seconds — the WCAG task samples with `check-wcag.mjs --self-test` (~3s) and defers the full build-and-scan pipeline to wave close and `verify.mjs` step 15
 
 ---
 
@@ -39,11 +39,11 @@ created: 2026-09-05
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
 | 01-04 T2 | 01-04 | 2 | REQ-FR-47 | T-1-06 | A second literal of a governed sentence anywhere in `app/`, `components/`, `lib/` fails the build; the set of eight is closed | fixture | `node --test scripts/check-governed.test.mjs` | created by 01-04 T2 | ⬜ pending |
-| 01-05 T1, 01-05 T3, 01-06 T2 | 01-05, 01-06 | 3, 4 | REQ-FR-48 | T-1-14 | Ribbon present on both surfaces, `position: static`, `max-height: none`, no `aria-hidden`, no dismiss control, ≥44px named link | integration | `node scripts/check-wcag.mjs` | created by 01-06 T2 | ⬜ pending |
+| 01-05 T1, 01-05 T3, 01-06 T2 | 01-05, 01-06 | 3, 4 | REQ-FR-48 | T-1-14 | Ribbon present on both surfaces, `position: static`, `max-height: none`, no `aria-hidden`, no dismiss control, ≥44px named link | integration | `node scripts/check-wcag.mjs --self-test` per task; full scan `node scripts/check-wcag.mjs` at wave close and as `verify.mjs` step 15 | created by 01-06 T2 | ⬜ pending |
 | 01-04 T3 | 01-04 | 2 | REQ-FR-50 | T-1-03 | Register carries version, inheritance date and owner; no prohibited string ships; every addition has a positive and a negative fixture | fixture | `node --test scripts/claims-audit.test.mjs` | created by 01-04 T3 (script inherited, test new) | ⬜ pending |
 | 01-07 T1, 01-07 T2 | 01-07 | 5 | REQ-FR-65 | T-1-04 | `verify` exits non-zero on any single failing check, stops at the first, warns for nothing and has no skip flag | fixture | `node --test scripts/verify.test.mjs` | created by 01-07 T2 | ⬜ pending |
 | 01-06 T1 | 01-06 | 4 | REQ-NFR-5 | T-1-07 | 7:1 text / 3:1 non-text computed from resolved token values; the four-entry register is the only exception source | unit | `node scripts/check-contrast.mjs` | created by 01-06 T1 | ⬜ pending |
-| 01-06 T2 | 01-06 | 4 | REQ-NFR-9 | T-1-07, T-1-16 | axe A/AA on `/` and `/?s=limits` at 390×844; startup guard fails if the `wcag22aa` tag disappears | integration | `node scripts/check-wcag.mjs` | created by 01-06 T2 | ⬜ pending |
+| 01-06 T2 | 01-06 | 4 | REQ-NFR-9 | T-1-07, T-1-16 | axe A/AA on `/` and `/?s=limits` at 390×844; startup guard fails if the `wcag22aa` tag disappears | integration | `node scripts/check-wcag.mjs --self-test` per task; full scan `node scripts/check-wcag.mjs` at wave close and as `verify.mjs` step 15 | created by 01-06 T2 | ⬜ pending |
 | 01-07 T3, 01-09 T2 | 01-07, 01-09 | 5, 7 | REQ-SM-5 | T-1-03, T-1-18 | Full unmodified `npm run verify` on every push under job `verify`; a red job holds production aliasing | CI wiring | `node --test scripts/verify.test.mjs` | created by 01-07 T3 | ⬜ pending |
 | 01-02 T1 | 01-02 | 2 | (D-04) | T-1-01, T-1-05 | `Permissions-Policy: camera=(self), microphone=(self)` and the carried headers asserted by exact string; `camera=()` anywhere is a named failure | fixture | `node --test scripts/check-headers.test.mjs` | created by 01-02 T1 | ⬜ pending |
 | 01-02 T3 | 01-02 | 2 | (D-03, D-05, D-11) | T-1-02, T-1-10 | Production build with the three variables unset exits non-zero; no middleware, no `webpack(`, no `ignoreBuildErrors`, token import order, `/` static | fixture | `node --test scripts/check-structure.test.mjs` | created by 01-02 T3 | ⬜ pending |
