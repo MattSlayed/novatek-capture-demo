@@ -101,11 +101,11 @@ IDs keep the PRD's own numbering (`REQ-{PRD id}`). Each FR carries its verificat
 
 ### The honesty surface (PRD §4.8; built first)
 
-- [ ] **REQ-FR-47**: Each governed sentence is defined exactly once and imported wherever rendered; no duplicate literal anywhere in the build. *[Verified by: inspection]*
+- [x] **REQ-FR-47**: Each governed sentence is defined exactly once and imported wherever rendered; no duplicate literal anywhere in the build. *[Verified by: inspection]*
 - [ ] **REQ-FR-48**: Every screen carries the `preview` sentence in document flow with no dismissal control. *[Verified by: test]*
 - [ ] **REQ-FR-48a**: On first entry the gate states which claims are enforced server-side and which are authored, before any is met; on re-entry it shows `preview` plus a control that reopens the long form in full. *[Verified by: test]*
 - [ ] **REQ-FR-49**: The seven sentences other than `preview` each appear at the point where their claim is made; a table mapping each sentence to its rendering location is maintained in the handover (evidence artefact — table vs automated placement check — decided in P8). *[Verified by: demonstration]*
-- [ ] **REQ-FR-50**: A build-time audit sweeps application surfaces against the claims register and fails the build on a violation; the register is inherited verbatim from the companion demo plus the seed's additions, copied into the audit script with version and inheritance date, owned by the SHEQ manager; banned claims enumerated by exact string (retired residency, inference sovereignty and funding claims, competitor names, any TRL claim for Capture as a product, modelled savings as cash, machine-driven reliability claims, uncited performance/cost/time/accuracy/adoption figures, staffing-reduction framing, present-tense claims for nonexistent capabilities). Stated limitation: a string sweep. *[Verified by: test]*
+- [x] **REQ-FR-50**: A build-time audit sweeps application surfaces against the claims register and fails the build on a violation; the register is inherited verbatim from the companion demo plus the seed's additions, copied into the audit script with version and inheritance date, owned by the SHEQ manager; banned claims enumerated by exact string (retired residency, inference sovereignty and funding claims, competitor names, any TRL claim for Capture as a product, modelled savings as cash, machine-driven reliability claims, uncited performance/cost/time/accuracy/adoption figures, staffing-reduction framing, present-tense claims for nonexistent capabilities). Stated limitation: a string sweep. *[Verified by: test]*
 - [ ] **REQ-FR-51**: One screen presents all eight governed sentences with the live instance identifier and storage state, plus for each product claim its disposition (enforced / authored / not exercised) and for each enforced claim the check a reviewer can run. *[Verified by: demonstration]*
 - [x] **REQ-FR-65**: One command runs every build-time check — at minimum the claims audit, single-writer rule, actor-field rule, fixture-inputs rule, worker-guard check, duplicate-literal check, accepted-field enumerations; AD-15 enumerates the full gate; each check is a deliverable. *[Verified by: test]*
 - [ ] **REQ-FR-66**: A handover document ships with the build: the claims register as inherited and its owner; the sentence-to-location mapping; the enforced/authored/not-exercised table; the stated limitations of FR-3, FR-45, FR-50, FR-58, FR-63; a note telling a reviewer how to try to break it. *[Verified by: inspection]*
@@ -140,7 +140,7 @@ IDs keep the PRD's own numbering (`REQ-{PRD id}`). Each FR carries its verificat
 - [ ] **REQ-SM-2**: Every authored claim is labelled before it is questioned (validates FR-17, 20, 47, 48, 49). *[Verified by: demonstration]*
 - [ ] **REQ-SM-3**: It opens with no signal, on a real phone, after one visit — real iOS and real Android, airplane mode, zero failed sub-resources. *[Verified by: demonstration]*
 - [ ] **REQ-SM-4**: Nothing is typed that the system knows: across a walkthrough the only inputs are persona choice, shutter, record, accept, reject, an optional note, and the referral's tag. *[Verified by: demonstration]*
-- [ ] **REQ-SM-5**: No claim in the build trips the audit, on every commit. *[Verified by: test]*
+- [x] **REQ-SM-5**: No claim in the build trips the audit, on every commit. *[Verified by: test]*
 - [ ] **REQ-SM-C1**: Counter-metric — labelling is not reduced as the preview gets more convincing; polished-and-unlabelled is a failure. *[Verified by: inspection]*
 - [ ] **REQ-SM-C2**: Counter-metric — the offline path is not smoother than the online one; a queued decision always reads as pending rather than done. *[Verified by: demonstration]*
 - [ ] **REQ-SM-C3**: Counter-metric — accept and reject stay equally weighted; a walkthrough in which nothing was rejected is a warning. *[Verified by: demonstration]*
@@ -186,13 +186,13 @@ Addendum candidates adopted into prd.md (UI-01–08 as NFR-1–8, DEV-01 as NFR-
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REQ-FR-47 | Phase 1 | Pending |
+| REQ-FR-47 | Phase 1 | Complete |
 | REQ-FR-48 | Phase 1 | Pending |
-| REQ-FR-50 | Phase 1 | Pending |
+| REQ-FR-50 | Phase 1 | Complete |
 | REQ-FR-65 | Phase 1 | Complete |
 | REQ-NFR-5 | Phase 1 | Complete |
 | REQ-NFR-9 | Phase 1 | Pending |
-| REQ-SM-5 | Phase 1 | Pending |
+| REQ-SM-5 | Phase 1 | Complete |
 | REQ-FR-21a | Phase 2 | Pending |
 | REQ-FR-1 | Phase 3 | Pending |
 | REQ-FR-2 | Phase 3 | Pending |

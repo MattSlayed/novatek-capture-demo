@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-03-PLAN.md
-last_updated: "2026-09-07T18:45:27.252Z"
+stopped_at: Completed 01-04-PLAN.md
+last_updated: "2026-09-07T19:07:07.565Z"
 last_activity: 2026-09-07
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 9
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 1 (Scaffold & conventions) — EXECUTING
-Plan: 4 of 9
+Plan: 5 of 9
 Status: Ready to execute
 Last activity: 2026-09-07
 
-Progress: [███░░░░░░░] 33%
+Progress: [████░░░░░░] 44%
 
 ## Performance Metrics
 
@@ -55,6 +55,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 1 P1 | 14min | 3 tasks | 9 files |
 | Phase 01 P02 | 10min | 3 tasks | 7 files |
 | Phase 01 P03 | 19min | 3 tasks | 8 files |
+| Phase 01 P04 | 23min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,9 @@ Recent decisions affecting current work:
 - [Phase 01]: Added .gitattributes marking app/styles/tokens.inherited.css -text — core.autocrlf=true would otherwise silently corrupt the pinned byte-identity on a future checkout
 - [Phase 01]: Reworded self-tripping comments (#000000, prefers-color-scheme) in tokens.capture.css/globals.css that were caught by check-tokens.mjs's own naive substring guard
 - [Phase 01]: Updated 01-02's placeholder check-structure.test.mjs test to assert exit 0 now that app/globals.css exists, as 01-02's SUMMARY anticipated
+- [Phase 01]: Rule 1's funding alternation extends the inherited entry's own pattern in place rather than becoming a second array entry
+- [Phase 01]: Found a third D-18 addition (staffing/headcount framing) already present verbatim in the inherited claims register, not flagged by 01-PATTERNS.md; left the inherited entry unchanged with a documenting comment rather than duplicated
+- [Phase 01]: check-governed.mjs's closed-set assertion is unconditional, so its fixture tests declare the full 8-key GOVERNED shape rather than a partial stand-in
 
 ### Pending Todos
 
@@ -107,6 +111,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-07T18:45:27.237Z
-Stopped at: Completed 01-03-PLAN.md
+Last session: 2026-09-07T19:07:07.553Z
+Stopped at: Completed 01-04-PLAN.md
 Resume file: None
