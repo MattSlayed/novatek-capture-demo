@@ -1,4 +1,4 @@
-import type { Viewport } from "next";
+import type { Metadata, Viewport } from "next";
 import { Syne, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Ribbon } from "@/components/shell/Ribbon";
@@ -30,6 +30,16 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["500"],
   display: "swap",
 });
+
+/* WCAG 2.4.2 Page Titled (Level A, in the wcag2a tag scope plan
+   01-06's check-wcag.mjs scans) requires a non-empty <title> on every
+   document. "NOVATEK Capture" is the same name already locked as the
+   shell heading (01-UI-SPEC.md §Copywriting Contract) — a document
+   title, not a governed sentence, so it does not go through
+   lib/copy/governed.ts. */
+export const metadata: Metadata = {
+  title: "NOVATEK Capture",
+};
 
 export const viewport: Viewport = {
   themeColor: "#0c1e35",
