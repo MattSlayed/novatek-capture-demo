@@ -1,0 +1,69 @@
+/* Ribbon contract — 01-UI-SPEC.md §Ribbon Contract. position: static and
+   max-height: none are load-bearing (asserted by plan 01-06's WCAG
+   check): the ribbon is never fixed, never sticky, never capped. */
+
+.ribbon {
+  background: var(--navy-deep);
+  border-bottom: 1px solid var(--viewer-border);
+  min-height: var(--ribbon-min-h);
+  max-height: none;
+  position: static;
+  padding: var(--space-12) var(--gutter);
+  display: flex;
+  gap: var(--space-12);
+  align-items: flex-start;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background: var(--cobalt-glow);
+  flex: 0 0 5px;
+  margin-top: 6px;
+}
+
+/* The flex remainder — 311px at a 360px viewport (328 - 5 - 12).
+   position: relative so the link's ::after hit-area below resolves
+   its containing block here, never on the section. */
+.column {
+  position: relative;
+  flex: 1 1 auto;
+}
+
+/* A sentence, not a label — sentence case even though it borrows the
+   label type role. The load-bearing clause promotes to --viewer-ink
+   via the descendant `strong` rule. */
+.sentence {
+  color: var(--viewer-ink-dim);
+  text-transform: none;
+}
+
+.sentence strong {
+  color: var(--viewer-ink);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--ribbon-link-min-h);
+  margin-top: 2px;
+  text-transform: uppercase;
+  color: var(--cobalt-glow-ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--control-border);
+}
+
+/* Extends the link's hit area to fill the whole band — the 44px
+   target overlaps the sentence's last line; permitted because band
+   and link resolve to the same destination. Inset by the negative of
+   the ribbon's own padding plus the dot column (5px dot + 12px gap =
+   17px on the left). */
+.link::after {
+  content: "";
+  position: absolute;
+  top: calc(-1 * var(--space-12));
+  bottom: calc(-1 * var(--space-12));
+  right: calc(-1 * var(--gutter));
+  left: calc(-1 * (var(--gutter) + 17px));
+}
