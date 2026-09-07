@@ -20,6 +20,14 @@ async function realCapture() {
   return readFile(path.join(repoRoot(), "app/styles/tokens.capture.css"), "utf8");
 }
 
+async function realExemptions() {
+  const raw = await readFile(
+    path.join(repoRoot(), "docs/design/decorative-exemptions.json"),
+    "utf8",
+  );
+  return JSON.parse(raw);
+}
+
 test("the real repository exits 0", async () => {
   const { code, stdout, stderr } = await runCheck("scripts/check-tokens.mjs");
   assert.equal(code, 0, stdout + stderr);
@@ -106,6 +114,59 @@ test("a capture layer with --target-record: 124px exits non-zero", async () => {
     {
       "app/styles/tokens.inherited.css": inherited,
       "app/styles/tokens.capture.css": capture,
+    },
+    async (dir) => {
+      const { code } = await runCheck("scripts/check-tokens.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+    },
+  );
+});
+
+test("a decorative-exemption register with five entries exits non-zero", async () => {
+  const inherited = await realInherited();
+  const capture = await realCapture();
+  const exemptions = await realExemptions();
+  exemptions.push({ ...exemptions[0], id: "a-fifth-entry" });
+  assert.equal(exemptions.length, 5);
+  await withFixture(
+    {
+      "app/styles/tokens.inherited.css": inherited,
+      "app/styles/tokens.capture.css": capture,
+      "docs/design/decorative-exemptions.json": JSON.stringify(exemptions, null, 2),
+    },
+    async (dir) => {
+      const { code } = await runCheck("scripts/check-tokens.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+    },
+  );
+});
+
+test("a decorative-exemption register whose second entry has no measured_ratio exits non-zero", async () => {
+  const inherited = await realInherited();
+  const capture = await realCapture();
+  const exemptions = await realExemptions();
+  delete exemptions[1].measured_ratio;
+  await withFixture(
+    {
+      "app/styles/tokens.inherited.css": inherited,
+      "app/styles/tokens.capture.css": capture,
+      "docs/design/decorative-exemptions.json": JSON.stringify(exemptions, null, 2),
+    },
+    async (dir) => {
+      const { code } = await runCheck("scripts/check-tokens.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+    },
+  );
+});
+
+test("a decorative-exemption register that is not valid JSON exits non-zero", async () => {
+  const inherited = await realInherited();
+  const capture = await realCapture();
+  await withFixture(
+    {
+      "app/styles/tokens.inherited.css": inherited,
+      "app/styles/tokens.capture.css": capture,
+      "docs/design/decorative-exemptions.json": "{ not valid json",
     },
     async (dir) => {
       const { code } = await runCheck("scripts/check-tokens.mjs", { cwd: dir });

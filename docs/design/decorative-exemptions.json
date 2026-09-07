@@ -1,0 +1,39 @@
+[
+  {
+    "id": "ribbon-bottom-border",
+    "element": "The ribbon's bottom border (a decorative rule, never a control boundary)",
+    "ink": "--viewer-border",
+    "ground": "--navy-deep",
+    "measured_ratio": 1.33,
+    "reason": "A decorative divider carries no word; --viewer-border is never a control boundary — --control-border is every meaning-bearing boundary.",
+    "source": "01-UI-SPEC.md §Text Ink Permissions and Contrast Floors"
+  },
+  {
+    "id": "eyebrow-trailing-rule",
+    "element": "The eyebrow's 40×1px ::after rule at 0.35 opacity",
+    "ink": "--cobalt",
+    "ground": "--navy-deep",
+    "measured_ratio": 2.23,
+    "measured_ratio_panel": 2.17,
+    "reason": "A decorative trailing rule carries no word.",
+    "source": "01-UI-SPEC.md §Text Ink Permissions and Contrast Floors"
+  },
+  {
+    "id": "accept-control-rest-border",
+    "element": "The accept control's 1px --control-border rest border, measured against its own fill",
+    "ink": "--control-border",
+    "ground": "the accept control's own fill",
+    "measured_ratio": 1.905,
+    "reason": "A control boundary rendered against its own fill carries no word.",
+    "source": "01-UI-SPEC.md §Text Ink Permissions and Contrast Floors"
+  },
+  {
+    "id": "panel-solid-tone",
+    "element": "The --panel-solid tone against the page ground",
+    "ink": "--panel-solid",
+    "ground": "--navy-deep",
+    "measured_ratio": 1.136,
+    "reason": "The panel is read by its 1px --control-border edge, not by its tone; the tone itself carries no word.",
+    "source": "01-UI-SPEC.md §Text Ink Permissions and Contrast Floors"
+  }
+]

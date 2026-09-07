@@ -23,6 +23,12 @@
       permitted shadow (--viewer-ink-dim) — plus --target-record
       pinned at 130px and no literal #000000 anywhere in the file.
 
+   3. docs/design/decorative-exemptions.json is the contrast check's
+      only source of permitted exceptions: it must parse as JSON, be
+      an array of exactly four objects, and every object must carry
+      non-empty id/element/ink/ground/reason/source strings and a
+      numeric measured_ratio (D-16).
+
      node scripts/check-tokens.mjs
 
    Exit 0 = clean. Exit 1 = at least one defect.
@@ -174,6 +180,66 @@ if (captureSrc !== null) {
 }
 
 /* ---------------------------------------------------------------
+   3. the decorative-exemption register (D-16)
+   --------------------------------------------------------------- */
+
+const EXEMPTIONS_PATH = "docs/design/decorative-exemptions.json";
+const EXEMPTION_STRING_KEYS = [
+  "id",
+  "element",
+  "ink",
+  "ground",
+  "reason",
+  "source",
+];
+
+let exemptionsRaw = null;
+try {
+  exemptionsRaw = await readFile(EXEMPTIONS_PATH, "utf8");
+} catch (e) {
+  problems.push(`could not read ${EXEMPTIONS_PATH}: ${e.message}`);
+}
+
+if (exemptionsRaw !== null) {
+  let exemptions = null;
+  try {
+    exemptions = JSON.parse(exemptionsRaw);
+  } catch (e) {
+    problems.push(`${EXEMPTIONS_PATH} does not parse as JSON: ${e.message}`);
+  }
+
+  if (exemptions !== null) {
+    if (!Array.isArray(exemptions)) {
+      problems.push(`${EXEMPTIONS_PATH} is not an array`);
+    } else {
+      if (exemptions.length !== 4) {
+        problems.push(
+          `${EXEMPTIONS_PATH} has ${exemptions.length} entries — expected exactly 4 (D-16)`,
+        );
+      }
+      exemptions.forEach((entry, i) => {
+        for (const key of EXEMPTION_STRING_KEYS) {
+          if (
+            !entry ||
+            typeof entry[key] !== "string" ||
+            entry[key].length === 0
+          ) {
+            problems.push(
+              `${EXEMPTIONS_PATH} entry ${i} is missing a non-empty ${key}`,
+            );
+          }
+        }
+        if (!entry || typeof entry.measured_ratio !== "number") {
+          problems.push(
+            `${EXEMPTIONS_PATH} entry ${i} is missing a numeric measured_ratio`,
+          );
+        }
+      });
+    }
+  }
+}
+
+/* ---------------------------------------------------------------
    report
    --------------------------------------------------------------- */
 
@@ -188,8 +254,9 @@ if (problems.length) {
 }
 
 console.log(
-  "\nThe inherited layer is byte-identical to its pinned parent digest, and",
+  "\nThe inherited layer is byte-identical to its pinned parent digest, the",
 );
 console.log(
-  "the Capture layer declares the complete D-13 manifest with no clash.",
+  "Capture layer declares the complete D-13 manifest with no clash, and the",
 );
+console.log("decorative-exemption register has exactly its four entries.");
