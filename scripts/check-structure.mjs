@@ -22,10 +22,14 @@
    The --build-output mode runs all five assertions above and then
    ADDS the D-11 static-marker assertion, read from a captured
    `next build` log: the route table row for "/" must be present and
-   marked static (the "○" glyph). It never replaces the source
-   assertions — verify.mjs (plan 01-07) runs this script twice on
-   every build, once before next build and once after with
-   --build-output, and neither invocation is optional.
+   marked static — the fully static glyph ("○") or the Partial
+   Prerender glyph ("◐"), since D-11's own shape (a statically
+   prerendered shell whose searchParams reader sits behind Suspense,
+   with cacheComponents: true) builds as a Partial Prerender, not a
+   fully static route. It never replaces the source assertions —
+   verify.mjs (plan 01-07) runs this script twice on every build,
+   once before next build and once after with --build-output, and
+   neither invocation is optional.
 
    Exit 0 = clean. Exit 1 = at least one defect.
    ================================================================ */
@@ -146,11 +150,18 @@ if (buildOutputPath) {
         break;
       }
     }
+    /* D-11's own shape is a statically prerendered shell whose
+       searchParams reader sits behind <Suspense> — with
+       cacheComponents: true this is exactly what Next marks as a
+       Partial Prerender ("◐"), not a fully static route ("○"). Both
+       glyphs satisfy the static claim; anything else (dynamic,
+       "ƒ", or absent) does not. */
+    const STATIC_GLYPHS = new Set(["○", "◐"]);
     if (rootGlyph === null) {
       problems.push(
         `no route table row for "/" found in ${buildOutputPath} — cannot confirm the static claim (D-11)`,
       );
-    } else if (rootGlyph !== "○") {
+    } else if (!STATIC_GLYPHS.has(rootGlyph)) {
       problems.push(
         `route "/" is marked dynamic (glyph "${rootGlyph}") in ${buildOutputPath} — D-11's static claim does not hold`,
       );

@@ -142,6 +142,29 @@ test("--build-output: a build log whose / row is marked static exits 0", async (
   );
 });
 
+test("--build-output: a build log whose / row is marked Partial Prerender exits 0 (D-11's actual shape)", async () => {
+  await withFixture(
+    {
+      "next.config.ts": GOOD_NEXT_CONFIG,
+      "app/globals.css": GOOD_GLOBALS_CSS,
+      "build.log": `Route (app)                                Size     First Load JS
+┌ ◐ /                                      142 B          87.4 kB
+└ ○ /_not-found                            871 B          88.1 kB
+
+○  (Static)             prerendered as static content
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+`,
+    },
+    async (dir) => {
+      const { code, stdout, stderr } = await runCheck("scripts/check-structure.mjs", {
+        cwd: dir,
+        args: ["--build-output", "build.log"],
+      });
+      assert.equal(code, 0, stdout + stderr);
+    },
+  );
+});
+
 /* T-1-02 / D-03 — the slowest test in this suite (a real `next build`,
    ~5-6s on this machine). Not deferred: it is the only proof that an
    unresolved build id actually fails a production build rather than
