@@ -10,7 +10,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test": "node --test scripts/",
+    "test": "node --test scripts/**/*.test.mjs",
     "verify": "node scripts/verify.mjs"
   },
   "dependencies": {

@@ -89,7 +89,12 @@ describe("package.json — declared pins (D-01)", () => {
     assert.equal(pkg.scripts.build, "next build");
     assert.equal(pkg.scripts.start, "next start");
     assert.equal(pkg.scripts.lint, "eslint .");
-    assert.equal(pkg.scripts.test, "node --test scripts/");
+    // "node --test scripts/" (a bare directory argument) treats the
+    // directory as a CommonJS module path and fails with
+    // MODULE_NOT_FOUND on this Node 24.19.0 / Windows combination
+    // (reproduced in a clean directory with no special characters);
+    // the recursive glob form is the working equivalent (Rule 3 fix).
+    assert.equal(pkg.scripts.test, "node --test scripts/**/*.test.mjs");
     assert.equal(pkg.scripts.verify, "node scripts/verify.mjs");
   });
 });
