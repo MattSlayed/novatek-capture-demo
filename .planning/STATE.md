@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-05-PLAN.md
-last_updated: "2026-09-07T19:25:01.370Z"
+stopped_at: Completed 01-06-PLAN.md
+last_updated: "2026-09-07T19:45:59.748Z"
 last_activity: 2026-09-07
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 9
-  completed_plans: 5
+  completed_plans: 6
   percent: 0
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 1 (Scaffold & conventions) — EXECUTING
-Plan: 6 of 9
+Plan: 7 of 9
 Status: Ready to execute
 Last activity: 2026-09-07
 
-Progress: [██████░░░░] 56%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
@@ -57,6 +57,7 @@ Progress: [██████░░░░] 56%
 | Phase 01 P03 | 19min | 3 tasks | 8 files |
 | Phase 01 P04 | 23min | 3 tasks | 5 files |
 | Phase 01 P05 | 18min | 3 tasks | 6 files |
+| Phase 01 P06 | 19min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,10 @@ Recent decisions affecting current work:
 - [Phase 01]: check-governed.mjs's closed-set assertion is unconditional, so its fixture tests declare the full 8-key GOVERNED shape rather than a partial stand-in
 - [Phase 01]: Fonts load into --font-syne/--font-dm-sans/--font-jetbrains (the sibling's variable names), resolving the alias chain into --font-display/--font-body/--font-mono already declared in tokens.inherited.css
 - [Phase 01]: The ribbon link's ::after hit-area is positioned against the text column, never the link or the section, so the section's own position: static contract stays intact
+- [Phase 01]: check-contrast.mjs follows a single level of var(--other) indirection and alpha-composites an rgba() ink over its pair's opaque ground before computing luminance, matching the exemption register's --viewer-border measurement exactly
+- [Phase 01]: A below-floor contrast pair passes only when a decorative-exemptions.json entry matches on ink AND ground AND its measured_ratio agrees with the computed ratio to two decimal places (string comparison, not float equality)
+- [Phase 01]: check-wcag.mjs derives CAPTURE_BUILD_ID from git rev-parse --short HEAD only in the spawned child's environment, never the parent shell, and only when none of the three env vars next.config.ts checks are already set
+- [Phase 01]: app/layout.tsx gained a document title (Rule 2 fix) after the first real check-wcag.mjs run failed axe's document-title rule (WCAG 2.4.2) on both surfaces, reusing the already-locked shell heading name
 
 ### Pending Todos
 
@@ -114,6 +119,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-07T19:25:01.358Z
-Stopped at: Completed 01-05-PLAN.md
+Last session: 2026-09-07T19:45:59.735Z
+Stopped at: Completed 01-06-PLAN.md
 Resume file: None

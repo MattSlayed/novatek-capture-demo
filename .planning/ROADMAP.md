@@ -62,7 +62,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 01-06-PLAN.md — The contrast check and the WCAG A/AA check (wave 4)
+- [x] 01-06-PLAN.md — The contrast check and the WCAG A/AA check (wave 4)
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
@@ -222,7 +222,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Scaffold & conventions | 5/9 | In Progress|  |
+| 1. Scaffold & conventions | 6/9 | In Progress|  |
 | 2. Fixtures & types | 0/TBD | Not started | - |
 | 3. Server seam | 0/TBD | Not started | - |
 | 4. Shell, gate, orders, clock (online) | 0/TBD | Not started | - |
