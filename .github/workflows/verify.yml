@@ -1,0 +1,18 @@
+# Topology (D-22): this job runs the full, unmodified `npm run verify` on
+# every push. Vercel's own build runs the same script with the axe step
+# excluded by the platform's own VERCEL variable. Vercel Deployment Checks
+# holds production aliasing on this job — its id, `verify`, is registered
+# there and must never be renamed.
+name: verify
+on: push
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run verify
