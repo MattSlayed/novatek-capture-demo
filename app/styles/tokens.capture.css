@@ -1,0 +1,73 @@
+/* ================================================================
+   CAPTURE TOKENS — layer 2
+
+   Loads after app/styles/tokens.inherited.css (D-13). Declares the
+   complete Capture override and authored-token set at once, so no
+   later phase invents a token outside this file. Every override
+   below carries the measured contrast ratio that forced it, ground
+   first and panel second, from 01-UI-SPEC.md §Text Ink Permissions
+   and Contrast Floors. Only --viewer-ink-dim shadows an inherited
+   declaration; every other name here is new (01-PATTERNS.md's
+   load-bearing finding — the sibling's same-purpose names,
+   --viewer-panel-solid and --viewer-border, are different
+   identifiers and are not overridden here). Never pure black in any
+   shadow or fill.
+   ================================================================ */
+
+:root {
+  /* ---- layer-2 overrides ---------------------------------------- */
+
+  /* shadows the inherited rgba(232, 238, 246, 0.62) declaration —
+     the one permitted shadow (D-13) */
+  --viewer-ink-dim: #AAB4C0; /* 7.98:1 ground / 7.03:1 panel — the tightest pass in the system */
+  --rule-faint: #606D7E; /* 3.18:1 ground / 2.80:1 panel — non-text, hairline on --navy-deep only */
+  --record-fill: #7DB3FB;
+  --record-fill-armed: #93C5FD; /* declared and unused in this phase */
+  --record-ink: #0c1e35;
+  --cobalt-glow-ink: #8CBDFC; /* 8.62:1 ground / 7.59:1 panel */
+  --control-border: #487FC3; /* 4.07:1 ground / 3.58:1 panel */
+  --panel-solid: #16293F; /* 1.136:1 against the ground — in the exemption register, read by its border, never its tone */
+
+  /* ---- layer-2 authored tokens ------------------------------------ */
+  --dk-good: #4ade80;
+  --dk-warn: #fbbf24;
+  --dk-crit: #fca5a5; /* 8.83:1 ground / 7.78:1 panel */
+  --dk-crit-edge: #f87171; /* 6.06:1 ground / 5.33:1 panel — non-text only */
+  --surface-inset: #081424;
+
+  /* ---- spacing scale, 4px base ------------------------------------ */
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+  /* no --space-64 is ever declared in this system */
+
+  /* ---- measured phone tokens --------------------------------------- */
+  --gutter: 16px;
+  --content: 328px;
+  --row-gap: 12px;
+  --target-record: 130px; /* never 124 — see docs/design/dead-token-register.md */
+  --target-min: 44px;
+  --ribbon-min-h: 44px;
+  --ribbon-h-100: 89px;
+  --ribbon-h-150: 182px;
+  --ribbon-h-200: 309px;
+  --ribbon-link-min-h: 44px;
+  --header-h: 56px;
+  --sticky-bar-h: 60px;
+  --viewfinder-min-h: 200px;
+  --safe-x: max(env(safe-area-inset-left), 16px);
+  --safe-b: max(env(safe-area-inset-bottom), 16px);
+
+  /* ---- shadows — never pure black -------------------------------------- */
+  --shadow-panel: 0 18px 48px rgba(4,12,24,0.5);
+  --shadow-sheet: 0 28px 70px rgba(4,12,24,0.62);
+
+  /* ---- radius ------------------------------------------------------- */
+  --radius-control: 10px;
+}

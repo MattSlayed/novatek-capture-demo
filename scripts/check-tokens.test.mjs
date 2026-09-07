@@ -16,6 +16,10 @@ async function realInherited() {
   return readFile(path.join(repoRoot(), "app/styles/tokens.inherited.css"));
 }
 
+async function realCapture() {
+  return readFile(path.join(repoRoot(), "app/styles/tokens.capture.css"), "utf8");
+}
+
 test("the real repository exits 0", async () => {
   const { code, stdout, stderr } = await runCheck("scripts/check-tokens.mjs");
   assert.equal(code, 0, stdout + stderr);
@@ -47,6 +51,62 @@ test("trailing whitespace appended to the inherited layer exits non-zero", async
   const mutated = Buffer.concat([real, Buffer.from(" ")]);
   await withFixture(
     { "app/styles/tokens.inherited.css": mutated },
+    async (dir) => {
+      const { code } = await runCheck("scripts/check-tokens.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+    },
+  );
+});
+
+test("a capture layer missing --ribbon-h-200 exits non-zero", async () => {
+  const inherited = await realInherited();
+  const capture = (await realCapture()).replace(
+    /\s*--ribbon-h-200:\s*309px;/,
+    "",
+  );
+  assert.doesNotMatch(capture, /--ribbon-h-200/);
+  await withFixture(
+    {
+      "app/styles/tokens.inherited.css": inherited,
+      "app/styles/tokens.capture.css": capture,
+    },
+    async (dir) => {
+      const { code } = await runCheck("scripts/check-tokens.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+    },
+  );
+});
+
+test("a capture layer that redeclares --navy-deep exits non-zero", async () => {
+  const inherited = await realInherited();
+  const capture = (await realCapture()).replace(
+    ":root {",
+    ":root {\n  --navy-deep: #123456;",
+  );
+  await withFixture(
+    {
+      "app/styles/tokens.inherited.css": inherited,
+      "app/styles/tokens.capture.css": capture,
+    },
+    async (dir) => {
+      const { code } = await runCheck("scripts/check-tokens.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+    },
+  );
+});
+
+test("a capture layer with --target-record: 124px exits non-zero", async () => {
+  const inherited = await realInherited();
+  const capture = (await realCapture()).replace(
+    "--target-record: 130px;",
+    "--target-record: 124px;",
+  );
+  assert.match(capture, /--target-record:\s*124px/);
+  await withFixture(
+    {
+      "app/styles/tokens.inherited.css": inherited,
+      "app/styles/tokens.capture.css": capture,
+    },
     async (dir) => {
       const { code } = await runCheck("scripts/check-tokens.mjs", { cwd: dir });
       assert.notEqual(code, 0);

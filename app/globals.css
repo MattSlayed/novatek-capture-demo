@@ -1,0 +1,138 @@
+@import "./styles/tokens.inherited.css";
+@import "./styles/tokens.capture.css";
+
+/* ================================================================
+   RESET + BASE
+
+   Navy-deep is the universal page ground on every screen, with no
+   light-mode variant and no user-preference media-query branch for
+   it (D-14) — do not add either back.
+   ================================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  background: var(--navy-deep);
+  color: var(--viewer-ink);
+}
+
+/* ================================================================
+   TYPE ROLES (D-15)
+
+   Each family carries exactly one weight. Family, size, weight,
+   line-height and letter-spacing only — none of these sets
+   text-transform, since the ribbon sentence renders in sentence
+   case while the ribbon link is uppercased locally.
+   ================================================================ */
+
+.screen-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.object-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.prose {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.prose-sm {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.control-label {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: clamp(15px, 0.9375rem, 23px);
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+}
+
+.tag {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.2;
+  letter-spacing: 0.15em;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.3;
+  letter-spacing: 0.06em;
+}
+
+.figure {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A governed sentence's load-bearing clause is 500, never 700. */
+strong { font-weight: 500; }
+
+/* ================================================================
+   FOCUS RING
+   ================================================================ */
+
+:focus-visible {
+  outline: 2px solid var(--cobalt-glow);
+  outline-offset: 2px;
+}
+
+/* ================================================================
+   SCREEN-READER ONLY
+   ================================================================ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

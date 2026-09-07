@@ -23,10 +23,9 @@ const GOOD_GLOBALS_CSS = `@import "./styles/tokens.inherited.css";
 @import "./styles/tokens.capture.css";
 `;
 
-test("the real repository fails today only on the missing app/globals.css", async () => {
+test("the real repository exits 0 now that app/globals.css exists (01-03)", async () => {
   const { code, stdout, stderr } = await runCheck("scripts/check-structure.mjs");
-  assert.notEqual(code, 0);
-  assert.match(stdout + stderr, /app\/globals\.css does not exist yet/);
+  assert.equal(code, 0, stdout + stderr);
 });
 
 test("a fixture with app/middleware.ts exits non-zero", async () => {
