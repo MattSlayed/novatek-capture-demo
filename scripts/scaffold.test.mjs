@@ -60,6 +60,11 @@ describe("package.json — declared pins (D-01)", () => {
     assert.equal(pkg.devDependencies.typescript, "5.9.3");
     assert.equal(pkg.devDependencies.playwright, "1.62.1");
     assert.equal(pkg.devDependencies["@axe-core/playwright"], "4.13.0");
+    // scripts/check-wcag.mjs imports axe-core directly for its startup
+    // guard; declared explicitly (not left to hoisting from
+    // @axe-core/playwright's transitive dependency) so the guard always
+    // inspects the same copy the scan runs.
+    assert.equal(pkg.devDependencies["axe-core"], "4.13.0");
     assert.equal(pkg.devDependencies["@types/node"], "^24");
     assert.equal(pkg.devDependencies["@types/react"], "^19");
     assert.equal(pkg.devDependencies["@types/react-dom"], "^19");
@@ -111,13 +116,14 @@ describe("node_modules — installed versions match the pins", () => {
     assert.equal(readJson("node_modules/react-dom/package.json").version, "19.2.8");
   });
 
-  test("eslint, playwright, @axe-core/playwright", () => {
+  test("eslint, playwright, @axe-core/playwright, axe-core", () => {
     assert.equal(readJson("node_modules/eslint/package.json").version, "10.9.1");
     assert.equal(readJson("node_modules/playwright/package.json").version, "1.62.1");
     assert.equal(
       readJson("node_modules/@axe-core/playwright/package.json").version,
       "4.13.0",
     );
+    assert.equal(readJson("node_modules/axe-core/package.json").version, "4.13.0");
   });
 });
 
