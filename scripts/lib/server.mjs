@@ -24,6 +24,7 @@
    ================================================================ */
 
 import { spawn, execSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 
 const DEFAULT_STOP_TIMEOUT_MS = 5000;
 const POLL_INTERVAL_MS = 100;
@@ -46,7 +47,36 @@ export function startServer(command, args, opts = {}) {
   });
 }
 
-function isAlive(pid) {
+/**
+ * True if `pid` names a running, non-zombie process.
+ *
+ * `process.kill(pid, 0)` alone is not enough: on Linux, a process that
+ * has already exited but has not yet been reaped by its parent (a
+ * zombie) still answers that probe successfully. This is not a
+ * theoretical case — it is exactly what a two-hop tree (an
+ * intermediate process spawning a long-lived grandchild, then dying
+ * itself in the same SIGTERM) produces once the grandchild is
+ * reparented to the container's pid 1: GitHub Actions' ubuntu-latest
+ * runner reaps it immediately (systemd as pid 1), so the zombie never
+ * shows there, but Vercel's build container runs no reaping init, so
+ * the zombie stays in the process table and `kill(pid, 0)` reports it
+ * alive indefinitely (reproduced on Vercel deployment 8FN8Kb43W of
+ * `293fa89`). `/proc/<pid>/stat`'s state field is `Z` for a zombie;
+ * treat that as dead. Any platform without `/proc` (win32, or a
+ * missing entry) falls back to the plain kill-signal-0 probe, which is
+ * exact there because Windows has no zombie-process concept.
+ */
+export function isAlive(pid) {
+  if (process.platform === "linux") {
+    try {
+      const stat = readFileSync(`/proc/${pid}/stat`, "utf8");
+      const closeParen = stat.lastIndexOf(")");
+      const state = stat.slice(closeParen + 2, closeParen + 3);
+      return state !== "Z";
+    } catch {
+      return false;
+    }
+  }
   try {
     process.kill(pid, 0);
     return true;

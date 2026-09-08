@@ -16,24 +16,53 @@
    report section now follows — so this also proves that once
    stopServer resolves, nothing is left open that keeps the runner's
    own event loop (and therefore the runner process itself) alive.
+
+   TEARDOWN PROOF, REVISED. The grandchild's own liveness used to be
+   asserted with `process.kill(pid, 0)` alone. That is not a proof of
+   "the grandchild is no longer running" in every environment this
+   gate runs in — it is a proof of "the OS has reaped this pid",
+   which is a different claim. GitHub Actions' ubuntu-latest runner
+   reaps a reparented zombie immediately (systemd as pid 1); Vercel's
+   build container does not, so the same tree that passed on GitHub
+   (run 34201360044) failed the Vercel build of `293fa89` (deployment
+   8FN8Kb43W) on that exact assertion, with the runner itself already
+   having reported STOP_MS and STOPPED. The grandchild now writes a
+   heartbeat file every ~100ms (see GRANDCHILD_SRC); the primary proof
+   below is that the heartbeat stops growing and stays stopped across
+   a quiet window after stopServer resolves — true regardless of
+   whether the OS has reaped the pid, because a zombie cannot execute
+   JavaScript and so can never write another heartbeat line. The pid
+   probe is kept only as a secondary, zombie-tolerant corroboration
+   (see isAlive in server.mjs).
    ================================================================ */
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 import { withFixture, repoRoot } from "./fixtures.mjs";
+import { isAlive } from "./server.mjs";
 
 const RUNNER_TIMEOUT_MS = 15_000;
 
-/* A long-lived leaf process that prints its own pid then never exits
-   on its own. No regex, no "\n" escape and no backtick appears in any
-   of the three fixture sources below — they are generated strings
-   embedded in this file's own source, so avoiding those characters
-   sidesteps a second layer of escaping entirely. */
-const GRANDCHILD_SRC = `console.log("GRANDCHILD_PID:" + process.pid);
-setInterval(function () {}, 1000);
+/* A long-lived leaf process that prints its own pid, then writes its
+   own heartbeat into the fixture directory every 100ms until it is
+   killed, and never exits on its own. The heartbeat file — not this
+   process's pid — is the runner's actual teardown proof (see
+   waitForHeartbeatToStop below): appendFileSync is synchronous, so
+   each tick either lands before the process dies or does not happen
+   at all, with nothing in between for a poll to race against. No
+   regex, no "\n" escape and no backtick appears in any of the three
+   fixture sources below — they are generated strings embedded in this
+   file's own source, so avoiding those characters sidesteps a second
+   layer of escaping entirely. */
+const GRANDCHILD_SRC = `import { appendFileSync } from "node:fs";
+console.log("GRANDCHILD_PID:" + process.pid);
+setInterval(function () {
+  appendFileSync("heartbeat.txt", Date.now() + ";");
+}, 100);
 `;
 
 /* The intermediate hop — mimics the shell that used to wrap
@@ -102,19 +131,61 @@ await new Promise(function (resolve) {
 
 console.log("GRANDCHILD_PID:" + grandchildPid);
 
+/* Give the grandchild's 100ms heartbeat interval (see GRANDCHILD_SRC)
+   a couple of ticks to land before teardown begins, so the outer
+   test process has a non-empty heartbeat file to prove has stopped
+   growing, rather than one that was merely always empty. */
+await new Promise(function (resolve) {
+  setTimeout(resolve, 250);
+});
+
 var stopStarted = Date.now();
 await stopServer(child);
 console.log("STOP_MS:" + (Date.now() - stopStarted));
 console.log("STOPPED");
 `;
 
-function isAlive(pid) {
+const HEARTBEAT_POLL_MS = 400;
+const HEARTBEAT_QUIET_SAMPLES = 2;
+const HEARTBEAT_MAX_WAIT_MS = 3000;
+
+/** Contents of `dir`/heartbeat.txt, or "" if it does not exist (yet). */
+async function readHeartbeat(dir) {
   try {
-    process.kill(pid, 0);
-    return true;
+    return await readFile(path.join(dir, "heartbeat.txt"), "utf8");
   } catch {
-    return false;
+    return "";
   }
+}
+
+/**
+ * Poll heartbeat.txt — written every 100ms by the fixture's
+ * grandchild process (see GRANDCHILD_SRC) — until its contents stop
+ * growing across HEARTBEAT_QUIET_SAMPLES consecutive samples, bounded
+ * by HEARTBEAT_MAX_WAIT_MS. This is the actual claim under proof —
+ * "the grandchild is no longer running" — and it holds in every
+ * environment this gate runs in: a zombie process cannot execute
+ * JavaScript, so its heartbeat can never grow again once the process
+ * has exited, whether or not the OS has reaped its pid yet.
+ */
+async function waitForHeartbeatToStop(dir) {
+  const deadline = Date.now() + HEARTBEAT_MAX_WAIT_MS;
+  let last = await readHeartbeat(dir);
+  let quietStreak = 0;
+  while (Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, HEARTBEAT_POLL_MS));
+    const current = await readHeartbeat(dir);
+    if (current === last) {
+      quietStreak += 1;
+      if (quietStreak >= HEARTBEAT_QUIET_SAMPLES) {
+        return { stopped: true, content: current };
+      }
+    } else {
+      quietStreak = 0;
+      last = current;
+    }
+  }
+  return { stopped: false, content: last };
 }
 
 function digitsAfter(haystack, marker) {
@@ -202,10 +273,25 @@ test(
 
         assert.ok(stdout.includes("STOPPED"), `runner never printed STOPPED; stdout: ${stdout}`);
 
+        const heartbeat = await waitForHeartbeatToStop(dir);
+        assert.ok(
+          heartbeat.content.length > 0,
+          "grandchild never wrote a heartbeat before stopServer was called — fixture timing assumption broken",
+        );
+        assert.equal(
+          heartbeat.stopped,
+          true,
+          `grandchild heartbeat kept growing for ${HEARTBEAT_MAX_WAIT_MS}ms after stopServer resolved — it is still running`,
+        );
+
+        /* Secondary corroboration only — the heartbeat above is the
+           primary proof. isAlive is zombie-tolerant on Linux (see
+           server.mjs), so it no longer reports a reaped-but-present
+           zombie as alive the way a bare kill(pid, 0) probe does. */
         assert.equal(
           isAlive(grandchildPid),
           false,
-          `grandchild pid ${grandchildPid} is still alive after stopServer resolved`,
+          `grandchild pid ${grandchildPid} is still alive (non-zombie) after stopServer resolved`,
         );
       },
     );
