@@ -21,6 +21,7 @@
 import { spawn, execSync } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const BUILD_LOG_PATH = "scripts/.check/build.log";
 
@@ -219,10 +220,28 @@ async function defaultRun(step) {
 
 /* ---------------------------------------------------------------
    execution — guarded so scripts/verify.test.mjs can import STEPS,
-   resolveSteps and runSteps without running the gate.
+   resolveSteps, runSteps and spawnStep without running the gate.
+
+   `import.meta.main` exists from Node 24.2. On 24.0/24.1, which the
+   "24" engines pin admits, it is undefined — and a guard that tests
+   that value alone would then run no step and exit 0 having checked
+   nothing. isMainModule uses the boolean when Node provides
+   one and otherwise compares the entry script's path with this
+   module's own, so the gate runs on every 24.x instead of silently
+   passing.
    --------------------------------------------------------------- */
 
-if (import.meta.main) {
+export function isMainModule(meta, argv = process.argv) {
+  if (typeof meta.main === "boolean") return meta.main;
+  if (typeof argv[1] !== "string" || argv[1].length === 0) return false;
+  const entry = path.resolve(argv[1]);
+  const self = fileURLToPath(meta.url);
+  return process.platform === "win32"
+    ? entry.toLowerCase() === self.toLowerCase()
+    : entry === self;
+}
+
+if (isMainModule(import.meta)) {
   console.log("VERIFY");
   console.log("=".repeat(72));
   const steps = resolveSteps(STEPS, process.env);

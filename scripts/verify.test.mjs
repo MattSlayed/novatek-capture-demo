@@ -17,7 +17,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { STEPS, resolveSteps, runSteps, spawnStep } from "./verify.mjs";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+import { STEPS, resolveSteps, runSteps, spawnStep, isMainModule } from "./verify.mjs";
 
 /* ---------------------------------------------------------------
    order assertions (D-20)
@@ -242,6 +244,34 @@ test("verify.mjs's source contains no branch that turns a failure into a pass", 
   assert.ok(src.includes("git rev-parse --short HEAD"), "must derive CAPTURE_BUILD_ID from git");
   assert.ok(src.includes("CAPTURE_BUILD_ID"));
   assert.ok(src.includes("scripts/.check/build.log"));
+});
+
+/* ---------------------------------------------------------------
+   entry-guard assertions — the gate must run on Node 24.0/24.1,
+   where import.meta.main is undefined, rather than exit 0 untested
+   --------------------------------------------------------------- */
+
+test("isMainModule returns a boolean import.meta.main as-is", () => {
+  const self = fileURLToPath(import.meta.url);
+  assert.equal(isMainModule({ main: true, url: import.meta.url }, [process.execPath, "/elsewhere.mjs"]), true);
+  assert.equal(isMainModule({ main: false, url: import.meta.url }, [process.execPath, self]), false);
+});
+
+test("isMainModule falls back to the entry-script path when import.meta.main is undefined", () => {
+  const self = fileURLToPath(import.meta.url);
+  assert.equal(isMainModule({ url: import.meta.url }, [process.execPath, self]), true);
+  assert.equal(
+    isMainModule({ url: import.meta.url }, [process.execPath, path.join(path.dirname(self), "verify.mjs")]),
+    false,
+    "a different entry script must not count as main",
+  );
+  assert.equal(isMainModule({ url: import.meta.url }, [process.execPath]), false, "no entry script at all is not main");
+});
+
+test("verify.mjs's entry guard goes through isMainModule, never a bare import.meta.main", async () => {
+  const src = await readFile(new URL("./verify.mjs", import.meta.url), "utf8");
+  assert.ok(src.includes("if (isMainModule(import.meta))"), "the guard must call isMainModule(import.meta)");
+  assert.doesNotMatch(src, /if\s*\(\s*import\.meta\.main\s*\)/, "a bare import.meta.main guard is a silent no-op on Node 24.0/24.1");
 });
 
 /* ---------------------------------------------------------------
