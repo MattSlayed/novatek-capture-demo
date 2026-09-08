@@ -13,10 +13,12 @@
    here would itself be a second definition.
 
    It also enforces D-09's closed-set assertion: the keys of GOVERNED
-   must be exactly the eight in the locked order, and no additional
-   exported binding may hold an object shaped like a GovernedSentence
-   (before/strong/after) other than PLATFORM_413. A ninth sentence,
-   wherever it is added, fails the build.
+   must be exactly the eight in the locked order, and no other object
+   literal shaped like a GovernedSentence (before/strong/after) may
+   exist anywhere under app/, components/ or lib/ — exported or not,
+   in this module or another, frozen, re-exported or nested — other
+   than PLATFORM_413. A ninth sentence, wherever it is added, fails
+   the build.
 
      node scripts/check-governed.mjs
 
@@ -186,9 +188,12 @@ function needleFor(key, fields) {
  *  - `platform413`: { before, strong, after } | null
  *  - `extraExports`: names of other top-level `export const` bindings whose
  *    value is an object literal carrying before/strong/after fields.
+ *  - `ownedRanges`: the [start, end] source spans of the GOVERNED and
+ *    PLATFORM_413 object literals — the only two places a
+ *    before/strong/after shape may legitimately appear (section 3).
  */
 function parseGovernedModule(source) {
-  const result = { entries: null, platform413: null, extraExports: [] };
+  const result = { entries: null, platform413: null, extraExports: [], ownedRanges: [] };
 
   const governedIdx = source.indexOf("export const GOVERNED");
   if (governedIdx !== -1) {
@@ -196,6 +201,7 @@ function parseGovernedModule(source) {
     if (eqIdx !== -1) {
       const block = extractBraceBlock(source, eqIdx);
       if (block) {
+        result.ownedRanges.push([block.start, block.end]);
         const inner = source.slice(block.start + 1, block.end);
         result.entries = extractTopLevelEntries(inner).map(({ key, block: b }) => ({
           key,
@@ -231,6 +237,7 @@ function parseGovernedModule(source) {
     };
     if (name === "PLATFORM_413") {
       result.platform413 = sentence;
+      result.ownedRanges.push([afterEq, closeIdx]);
     } else {
       result.extraExports.push({ name, ...sentence });
     }
@@ -252,9 +259,11 @@ try {
 }
 
 let needles = [];
+let ownedRanges = null;
 
 if (governedSource !== null) {
   const parsed = parseGovernedModule(governedSource);
+  ownedRanges = parsed.ownedRanges;
 
   if (!parsed.entries) {
     problems.push(`could not find or parse GOVERNED in ${GOVERNED_PATH}`);
@@ -310,6 +319,75 @@ if (needles.length) {
           );
         }
       }
+    }
+  }
+}
+
+/* ---------------------------------------------------------------
+   3. the closed set across the module boundary (D-09) — a
+      before/strong/after-shaped object literal anywhere under the
+      roots, other than GOVERNED and PLATFORM_413 themselves in
+      lib/copy/governed.ts, is a ninth sentence wherever and however
+      it is declared: a second module, a non-exported const, a frozen
+      or re-exported object, an array element. Type and interface
+      declarations are blanked first — they carry the field names,
+      not a sentence — and so are the two owned blocks.
+   --------------------------------------------------------------- */
+
+const SENTENCE_SHAPE = /\bbefore\s*:[\s\S]{0,300}?\bstrong\s*:[\s\S]{0,300}?\bafter\s*:/g;
+const SWEPT_FOR_SHAPE = new Set([".ts", ".tsx"]);
+
+/** Overwrite [start, end] (inclusive) with spaces, keeping every other offset. */
+function blankRange(text, start, end) {
+  return text.slice(0, start) + " ".repeat(end + 1 - start) + text.slice(end + 1);
+}
+
+/** Blank every `type X = { ... }` and `interface X { ... }` block. */
+function blankTypeDeclarations(text) {
+  let out = text;
+  const re =
+    /\b(?:type\s+[A-Za-z_$][A-Za-z0-9_$]*\s*(?:<[^>]*>)?\s*=|interface\s+[A-Za-z_$][A-Za-z0-9_$]*(?:\s+extends\s+[^{]+)?)/g;
+  let m;
+  while ((m = re.exec(out))) {
+    const open = out.indexOf("{", m.index + m[0].length);
+    if (open === -1 || out.slice(m.index + m[0].length, open).trim() !== "") continue;
+    const close = findMatchingBrace(out, open);
+    if (close === -1) continue;
+    out = blankRange(out, m.index, close);
+    re.lastIndex = close + 1;
+  }
+  return out;
+}
+
+function lineOf(text, index) {
+  return text.slice(0, index).split("\n").length;
+}
+
+/** Line numbers (in the original text) of every sentence-shaped literal. */
+function shapeHits(text) {
+  return [...blankTypeDeclarations(text).matchAll(SENTENCE_SHAPE)].map((m) =>
+    lineOf(text, m.index),
+  );
+}
+
+if (governedSource !== null && ownedRanges !== null) {
+  let own = governedSource;
+  for (const [start, end] of ownedRanges) own = blankRange(own, start, end);
+  for (const line of shapeHits(own)) {
+    problems.push(
+      `${GOVERNED_PATH}:${line} declares a before/strong/after-shaped object outside GOVERNED and PLATFORM_413 — the set of eight is closed (D-09)`,
+    );
+  }
+}
+
+for (const root of ROOTS) {
+  for (const file of await walk(root)) {
+    if (resolve(file) === governedAbs || !SWEPT_FOR_SHAPE.has(extname(file))) continue;
+    const text = await readFile(file, "utf8");
+    for (const line of shapeHits(text)) {
+      problems.push(
+        `${file}:${line} declares a before/strong/after-shaped object — a ninth governed sentence outside ${GOVERNED_PATH} (D-09)`,
+      );
     }
   }
 }

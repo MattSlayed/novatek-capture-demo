@@ -202,6 +202,89 @@ test("a governed entry whose three fields are all empty exits non-zero", async (
   });
 });
 
+/* ---------------------------------------------------------------
+   the closed set holds across the module boundary — a ninth
+   sentence is caught wherever and however it is declared
+   --------------------------------------------------------------- */
+
+const NINTH_SHAPE = `{\n  before: "",\n  strong: "Fixture ninth clause.",\n  after: "",\n}`;
+
+test("a GovernedSentence-shaped object in a second module under lib/ exits non-zero", async () => {
+  await withFixture(
+    {
+      "lib/copy/governed.ts": governedModuleSource(),
+      "lib/copy/more.ts": `export const NINTH = ${NINTH_SHAPE};\n`,
+    },
+    async (dir) => {
+      const { code, stdout } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+      assert.match(stdout, /more\.ts:2 declares a before\/strong\/after-shaped object/);
+    },
+  );
+});
+
+test("a non-exported GovernedSentence-shaped const inside lib/copy/governed.ts exits non-zero", async () => {
+  await withFixture(
+    {
+      "lib/copy/governed.ts": governedModuleSource() + `\nconst NINTH = ${NINTH_SHAPE};\n`,
+    },
+    async (dir) => {
+      const { code, stdout } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+      assert.match(stdout, /governed\.ts:\d+ declares a before\/strong\/after-shaped object outside GOVERNED and PLATFORM_413/);
+    },
+  );
+});
+
+test("a frozen GovernedSentence-shaped export inside lib/copy/governed.ts exits non-zero", async () => {
+  await withFixture(
+    {
+      "lib/copy/governed.ts":
+        governedModuleSource() + `\nexport const NINTH = Object.freeze(${NINTH_SHAPE});\n`,
+    },
+    async (dir) => {
+      const { code, stdout } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+      assert.match(stdout, /governed\.ts:\d+ declares a before\/strong\/after-shaped object/);
+    },
+  );
+});
+
+test("a GovernedSentence-shaped object inside a component under components/ exits non-zero", async () => {
+  await withFixture(
+    {
+      "lib/copy/governed.ts": governedModuleSource(),
+      "components/shell/Extra.tsx":
+        `const extra = ${NINTH_SHAPE};\n` +
+        `export function Extra() {\n  return <p>{extra.strong}</p>;\n}\n`,
+    },
+    async (dir) => {
+      const { code, stdout } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+      assert.match(stdout, /Extra\.tsx:2 declares a before\/strong\/after-shaped object/);
+    },
+  );
+});
+
+test("a type or interface carrying the three field names is not a sentence and exits 0", async () => {
+  await withFixture(
+    {
+      "lib/copy/governed.ts": governedModuleSource(),
+      "components/shell/Props.tsx":
+        `import { GOVERNED } from "@/lib/copy/governed";\n\n` +
+        `type Props = { before: string; strong: string; after: string };\n` +
+        `interface Wide extends Props {\n  before: string;\n  strong: string;\n  after: string;\n}\n\n` +
+        `export function Sentence({ before, strong, after }: Props) {\n` +
+        `  return (\n    <p>\n      {before}\n      <strong>{strong}</strong>\n      {after}\n    </p>\n  );\n}\n\n` +
+        `export function Preview() {\n  return <Sentence {...GOVERNED.preview} />;\n}\n`,
+    },
+    async (dir) => {
+      const { code, stdout, stderr } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
+      assert.equal(code, 0, stdout + stderr);
+    },
+  );
+});
+
 test("a module that reorders two keys exits non-zero", async () => {
   const reordered = [...BASE_KEYS];
   [reordered[0], reordered[1]] = [reordered[1], reordered[0]];
