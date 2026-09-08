@@ -65,14 +65,22 @@ for (const dir of FORBIDDEN_DIRS) {
    --------------------------------------------------------------- */
 
 const NEXT_CONFIG = "next.config.ts";
-let nextConfigSrc = "";
+let nextConfigSrc = null;
 try {
   nextConfigSrc = await readFile(NEXT_CONFIG, "utf8");
 } catch (e) {
   problems.push(`could not read ${NEXT_CONFIG}: ${e.message}`);
 }
 
-if (nextConfigSrc) {
+/* Asserted on read success, never on truthiness: an empty
+   next.config.ts is not "nothing to check", it is a config that
+   declares no cacheComponents and must fail exactly like one. */
+if (nextConfigSrc !== null) {
+  if (nextConfigSrc.trim().length === 0) {
+    problems.push(
+      `${NEXT_CONFIG} is empty — it declares nothing, so none of its D-05/D-11 conditions can hold`,
+    );
+  }
   if (/webpack\(/.test(nextConfigSrc)) {
     problems.push(`${NEXT_CONFIG} contains a webpack( key — not permitted (D-05)`);
   }
@@ -131,7 +139,7 @@ const buildOutputPath =
   buildOutputFlagIndex !== -1 ? process.argv[buildOutputFlagIndex + 1] : null;
 
 if (buildOutputPath) {
-  let logText = "";
+  let logText = null;
   try {
     logText = await readFile(buildOutputPath, "utf8");
   } catch (e) {
@@ -140,7 +148,15 @@ if (buildOutputPath) {
     );
   }
 
-  if (logText) {
+  /* Same rule as next.config.ts above: an empty build log carries no
+     route table and cannot confirm the static claim — it must fail,
+     not pass by having nothing to assert on. */
+  if (logText !== null) {
+    if (logText.trim().length === 0) {
+      problems.push(
+        `build output log ${buildOutputPath} is empty — no route table to confirm the static claim from (D-11)`,
+      );
+    }
     const lines = logText.split(/\r?\n/);
     let rootGlyph = null;
     for (const line of lines) {

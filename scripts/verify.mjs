@@ -19,7 +19,7 @@
    ================================================================ */
 
 import { spawn, execSync } from "node:child_process";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -161,9 +161,18 @@ export async function runSteps(steps, run) {
    defaultRun — spawns one real step, streaming stdout/stderr to the
    console and, when `capture` is set, also writing the combined
    output to that path once the child closes.
+
+   A captured step's log is this run's evidence and nothing else's:
+   any stale file at `capture` is removed before the child starts, so
+   a later step can never parse a previous run's log as if it were
+   this build's, and a capture that cannot be written resolves the
+   step as a failure rather than leaving that stale file in place.
    --------------------------------------------------------------- */
 
-export function spawnStep(step, onSpawn) {
+export async function spawnStep(step, onSpawn) {
+  if (step.capture) {
+    await rm(step.capture, { force: true });
+  }
   return new Promise((resolveSpawn) => {
     const child = spawn(step.command, step.args, {
       cwd: process.cwd(),
@@ -184,12 +193,16 @@ export function spawnStep(step, onSpawn) {
       if (step.capture) combined += chunk;
     });
     child.on("close", async (code, signal) => {
+      let captureWritten = true;
       if (step.capture) {
         try {
           await mkdir(path.dirname(step.capture), { recursive: true });
           await writeFile(step.capture, combined, "utf8");
         } catch (e) {
-          process.stderr.write(`could not write ${step.capture}: ${e.message}\n`);
+          captureWritten = false;
+          process.stderr.write(
+            `\n✖ step "${step.id}": could not write ${step.capture}: ${e.message} — an unrecorded log is a failure, never a pass\n`,
+          );
         }
       }
       /* A signal-terminated child (an OOM SIGKILL, a runner's SIGTERM,
@@ -199,6 +212,10 @@ export function spawnStep(step, onSpawn) {
         process.stderr.write(
           `\n✖ step "${step.id}" was terminated by ${signal ?? "an unknown signal"} — treated as a failure\n`,
         );
+        resolveSpawn(1);
+        return;
+      }
+      if (code === 0 && !captureWritten) {
         resolveSpawn(1);
         return;
       }

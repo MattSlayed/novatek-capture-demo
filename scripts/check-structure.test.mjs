@@ -42,6 +42,38 @@ test("a fixture with app/middleware.ts exits non-zero", async () => {
   );
 });
 
+test("a fixture whose next.config.ts is empty exits non-zero", async () => {
+  await withFixture(
+    {
+      "next.config.ts": "",
+      "app/globals.css": GOOD_GLOBALS_CSS,
+    },
+    async (dir) => {
+      const { code, stdout } = await runCheck("scripts/check-structure.mjs", { cwd: dir });
+      assert.notEqual(code, 0, "an empty config declares no cacheComponents and must not pass");
+      assert.match(stdout, /next\.config\.ts is empty/);
+    },
+  );
+});
+
+test("--build-output: an empty build log exits non-zero", async () => {
+  await withFixture(
+    {
+      "next.config.ts": GOOD_NEXT_CONFIG,
+      "app/globals.css": GOOD_GLOBALS_CSS,
+      "build.log": "",
+    },
+    async (dir) => {
+      const { code, stdout } = await runCheck("scripts/check-structure.mjs", {
+        cwd: dir,
+        args: ["--build-output", "build.log"],
+      });
+      assert.notEqual(code, 0, "an empty log has no route table and must not confirm the static claim");
+      assert.match(stdout, /build\.log is empty/);
+    },
+  );
+});
+
 test("a fixture whose next.config.ts contains a webpack( key exits non-zero", async () => {
   await withFixture(
     {

@@ -19,6 +19,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { withFixture } from "./lib/fixtures.mjs";
 import { STEPS, resolveSteps, runSteps, spawnStep, isMainModule } from "./verify.mjs";
 
 /* ---------------------------------------------------------------
@@ -170,6 +171,62 @@ test("spawnStep resolves 0 for a child that exits 0", async () => {
   const step = { id: "exit-zero", command: process.execPath, args: ["-e", "process.exit(0)"] };
   const code = await spawnStep(step);
   assert.equal(code, 0);
+});
+
+/* ---------------------------------------------------------------
+   capture assertions — a captured log is this run's evidence only
+   --------------------------------------------------------------- */
+
+test("spawnStep resolves non-zero when the capture file cannot be written, even though the child exited 0", async () => {
+  await withFixture({ blocker: "a file, not a directory\n" }, async (dir) => {
+    const step = {
+      id: "capture-unwritable",
+      command: process.execPath,
+      args: ["-e", "process.stdout.write('ran fine')"],
+      capture: path.join(dir, "blocker", "build.log"),
+    };
+    const { result: code, written } = await captureStderr(() => spawnStep(step));
+    assert.notEqual(code, 0, "an unrecorded capture must not resolve as a pass");
+    assert.ok(
+      written.some((w) => w.includes('"capture-unwritable"') && w.includes("could not write")),
+      `expected a stderr line naming the step and the write failure, got: ${JSON.stringify(written)}`,
+    );
+  });
+});
+
+test("spawnStep removes a stale capture file before the child runs and writes only this run's output", async () => {
+  await withFixture({ "out/build.log": "STALE ROW\n" }, async (dir) => {
+    const capture = path.join(dir, "out", "build.log");
+    const step = {
+      id: "capture-fresh",
+      command: process.execPath,
+      args: ["-e", "process.stdout.write('FRESH OUTPUT')"],
+      capture,
+    };
+    const code = await spawnStep(step);
+    assert.equal(code, 0);
+    const log = await readFile(capture, "utf8");
+    assert.match(log, /FRESH OUTPUT/);
+    assert.doesNotMatch(log, /STALE ROW/);
+  });
+});
+
+test("spawnStep removes a stale capture file even when the child is terminated before writing anything", async () => {
+  await withFixture({ "out/build.log": "STALE ROW\n" }, async (dir) => {
+    const capture = path.join(dir, "out", "build.log");
+    const step = {
+      id: "capture-killed",
+      command: process.execPath,
+      args: ["-e", "setInterval(() => {}, 1000)"],
+      capture,
+    };
+    const { result: code } = await captureStderr(() =>
+      spawnStep(step, (child) => child.kill("SIGTERM")),
+    );
+    assert.notEqual(code, 0);
+    const log = await readFile(capture, "utf8");
+    assert.doesNotMatch(log, /STALE ROW/, "the previous run's log must never survive into this run");
+  });
 });
 
 /* ---------------------------------------------------------------
