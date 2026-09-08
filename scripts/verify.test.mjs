@@ -2,7 +2,7 @@
    VERIFY — fixture proof of the fail-fast contract (D-20, D-23)
 
    Demonstrates, from injected synthetic steps and never a real
-   check, that: STEPS carries D-20's exact fifteen-step order;
+   check, that: STEPS carries D-20's exact seventeen-step order;
    runSteps stops at the first non-zero exit and never continues past
    it; resolveSteps removes only the two check-wcag steps, only under
    the platform's own VERCEL variable, and nothing else — no other
@@ -37,14 +37,16 @@ const EXPECTED_ORDER = [
   "check-headers",
   "check-sw",
   "check-structure",
+  "check-register-isolation",
   "next-build",
   "check-structure-build-output",
+  "check-register-isolation-bundle",
   "check-contrast",
   "check-wcag-self-test",
   "check-wcag",
 ];
 
-test("STEPS carries D-20's fifteen ids in the exact order", () => {
+test("STEPS carries D-20's seventeen ids in the exact order", () => {
   assert.deepEqual(
     STEPS.map((s) => s.id),
     EXPECTED_ORDER,
@@ -60,6 +62,19 @@ test("check-structure appears twice, once before and once after next-build", () 
   const buildIndex = ids.indexOf("next-build");
   assert.ok(structureIndices[0] < buildIndex, "check-structure runs before next-build");
   assert.ok(structureIndices[1] > buildIndex, "check-structure-build-output runs after next-build");
+});
+
+test("check-register-isolation and check-register-isolation-bundle are both present, one before and one after next-build, and neither is vercelExcluded", () => {
+  const ids = STEPS.map((s) => s.id);
+  const buildIndex = ids.indexOf("next-build");
+  const sourceIndex = ids.indexOf("check-register-isolation");
+  const bundleIndex = ids.indexOf("check-register-isolation-bundle");
+  assert.notEqual(sourceIndex, -1, "check-register-isolation must be present");
+  assert.notEqual(bundleIndex, -1, "check-register-isolation-bundle must be present");
+  assert.ok(sourceIndex < buildIndex, "check-register-isolation runs before next-build");
+  assert.ok(bundleIndex > buildIndex, "check-register-isolation-bundle runs after next-build");
+  assert.ok(!STEPS[sourceIndex].vercelExcluded, "check-register-isolation must run on Vercel too (D-17)");
+  assert.ok(!STEPS[bundleIndex].vercelExcluded, "check-register-isolation-bundle must run on Vercel too (D-17)");
 });
 
 test("the two check-wcag steps are the last two", () => {
@@ -268,15 +283,15 @@ test("VERCEL=1 excludes exactly the two check-wcag steps and reports the exclusi
   } finally {
     console.log = originalLog;
   }
-  assert.equal(kept.length, 13);
+  assert.equal(kept.length, 15);
   assert.ok(!kept.some((s) => s.id === "check-wcag-self-test" || s.id === "check-wcag"));
   assert.ok(messages.some((m) => m.includes("check-wcag-self-test")));
   assert.ok(messages.some((m) => m.includes("check-wcag") && !m.includes("check-wcag-self-test")));
 });
 
-test("VERCEL unset retains all fifteen steps", () => {
+test("VERCEL unset retains all seventeen steps", () => {
   const kept = resolveSteps(STEPS, {});
-  assert.equal(kept.length, 15);
+  assert.equal(kept.length, 17);
   assert.deepEqual(kept.map((s) => s.id), EXPECTED_ORDER);
 });
 
@@ -291,7 +306,7 @@ test("no environment variable other than VERCEL changes the step list", () => {
   ];
   for (const env of distractors) {
     const kept = resolveSteps(STEPS, env);
-    assert.equal(kept.length, 15, `env ${JSON.stringify(env)} must not change the step list`);
+    assert.equal(kept.length, 17, `env ${JSON.stringify(env)} must not change the step list`);
   }
 });
 
@@ -302,7 +317,7 @@ test("no argv flag changes the step list (--skip, --only, --fast, --no-wcag)", (
     for (const flag of flags) {
       process.argv = [...originalArgv, flag];
       const kept = resolveSteps(STEPS, {});
-      assert.equal(kept.length, 15, `argv flag ${flag} must not change the step list`);
+      assert.equal(kept.length, 17, `argv flag ${flag} must not change the step list`);
     }
   } finally {
     process.argv = originalArgv;

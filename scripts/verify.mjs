@@ -88,6 +88,11 @@ export const STEPS = [
   { id: "check-sw", command: process.execPath, args: ["scripts/check-sw.mjs"] },
   { id: "check-structure", command: process.execPath, args: ["scripts/check-structure.mjs"] },
   {
+    id: "check-register-isolation",
+    command: process.execPath,
+    args: ["scripts/check-register-isolation.mjs"],
+  },
+  {
     id: "next-build",
     command: "npx",
     args: ["next", "build"],
@@ -101,6 +106,14 @@ export const STEPS = [
     id: "check-structure-build-output",
     command: process.execPath,
     args: ["scripts/check-structure.mjs", "--build-output", BUILD_LOG_PATH],
+  },
+  /* Scans .next/static/** only, never .next/server/**, where the
+     sentinel legitimately appears because register.ts is server
+     code. */
+  {
+    id: "check-register-isolation-bundle",
+    command: process.execPath,
+    args: ["scripts/check-register-isolation.mjs", "--bundle", ".next/static"],
   },
   { id: "check-contrast", command: process.execPath, args: ["scripts/check-contrast.mjs"] },
   {
