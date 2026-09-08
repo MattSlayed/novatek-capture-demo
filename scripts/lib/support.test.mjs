@@ -19,9 +19,10 @@ import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
+import { spawn } from "node:child_process";
 import path from "node:path";
 
-import { withFixture, runCheck } from "./fixtures.mjs";
+import { withFixture, runCheck, collect } from "./fixtures.mjs";
 import { MOBILE_PROFILE } from "./harness.mjs";
 
 describe("withFixture", () => {
@@ -71,6 +72,36 @@ describe("runCheck", () => {
         assert.match(stdout, /ok from fixture/);
       },
     );
+  });
+
+  test("resolves non-zero when the check script is terminated by a signal rather than exiting", async () => {
+    await withFixture(
+      {
+        "self-kill.mjs":
+          'process.kill(process.pid, "SIGTERM");\nsetInterval(() => {}, 1000);\n',
+      },
+      async (dir) => {
+        const { code } = await runCheck(path.join(dir, "self-kill.mjs"));
+        assert.notEqual(code, 0, "a signal-terminated check must never read as a pass");
+      },
+    );
+  });
+});
+
+describe("collect", () => {
+  test("resolves code 1 and names the signal for a child killed by SIGTERM (code === null)", async () => {
+    const child = spawn(process.execPath, ["-e", "setInterval(() => {}, 1000)"]);
+    const pending = collect(child);
+    child.kill("SIGTERM");
+    const { code, signal } = await pending;
+    assert.equal(code, 1);
+    assert.equal(signal, "SIGTERM");
+  });
+
+  test("passes a real exit code through unchanged", async () => {
+    const { code, signal } = await collect(spawn(process.execPath, ["-e", "process.exit(5)"]));
+    assert.equal(code, 5);
+    assert.equal(signal, null);
   });
 });
 

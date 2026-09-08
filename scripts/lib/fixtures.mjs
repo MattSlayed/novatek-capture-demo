@@ -51,13 +51,22 @@ export async function withFixture(files, fn) {
   }
 }
 
-function collect(child) {
+/**
+ * Resolve `{ code, signal, stdout, stderr }` once `child` closes. A
+ * child terminated by a signal reports `code === null`; that is never
+ * a pass — it resolves as 1, with the signal surfaced so an assertion
+ * message can show it. (Otherwise every "the real repository exits 0"
+ * test would pass if the check script were killed mid-run.)
+ */
+export function collect(child) {
   return new Promise((resolve) => {
     let stdout = "";
     let stderr = "";
     child.stdout?.on("data", (d) => (stdout += d));
     child.stderr?.on("data", (d) => (stderr += d));
-    child.on("close", (code) => resolve({ code: code ?? 0, stdout, stderr }));
+    child.on("close", (code, signal) =>
+      resolve({ code: code === null ? 1 : code, signal, stdout, stderr }),
+    );
   });
 }
 

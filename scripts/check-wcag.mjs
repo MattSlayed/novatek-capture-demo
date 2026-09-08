@@ -200,6 +200,10 @@ if (selfTest) {
    full scan — build, start, scan both surfaces, always tear down
    --------------------------------------------------------------- */
 
+/* A signal-terminated `next build` reports code === null. It resolves
+   as 1 here, never 0 — otherwise the scan would proceed to `next
+   start` against whatever stale .next/ was already on disk and report
+   on an artefact that is not the one just built. */
 function runToCompletion(command, args, env) {
   return new Promise((resolve) => {
     const child = spawn(command, args, { cwd: process.cwd(), env, shell: true });
@@ -207,7 +211,9 @@ function runToCompletion(command, args, env) {
     let stderr = "";
     child.stdout?.on("data", (d) => (stdout += d));
     child.stderr?.on("data", (d) => (stderr += d));
-    child.on("close", (code) => resolve({ code: code ?? 0, stdout, stderr }));
+    child.on("close", (code, signal) =>
+      resolve({ code: code === null ? 1 : code, signal, stdout, stderr }),
+    );
   });
 }
 
@@ -259,7 +265,7 @@ const build = await runToCompletion("npx", ["next", "build"], childEnv);
 
 if (build.code !== 0) {
   problems.push(
-    `next build exited ${build.code}:\n${(build.stdout + build.stderr).slice(-2000)}`,
+    `next build exited ${build.code}${build.signal ? ` (terminated by ${build.signal})` : ""}:\n${(build.stdout + build.stderr).slice(-2000)}`,
   );
 } else {
   let serverProcess = null;
