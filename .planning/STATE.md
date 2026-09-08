@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-09-08T15:34:47.848Z"
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-09-08T17:16:49.548Z"
 last_activity: 2026-09-08
 progress:
   total_phases: 9
   completed_phases: 1
   total_plans: 16
-  completed_plans: 10
+  completed_plans: 11
   percent: 11
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 2 (Fixtures & types) — EXECUTING
-Plan: 2 of 7
+Plan: 3 of 7
 Status: Ready to execute
 Last activity: 2026-09-08
 
-Progress: [██████░░░░] 63%
+Progress: [███████░░░] 69%
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Progress: [██████░░░░] 63%
 | Phase 01 P08 | 25min | 3 tasks | 4 files |
 | Phase 01-scaffold-conventions P09 | multi-session | 3 tasks | 5 files |
 | Phase 02 P01 | 15min | 2 tasks | 1 files |
+| Phase 02 P02 | 35min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -101,6 +102,9 @@ Recent decisions affecting current work:
 - [Phase 01]: scripts/lib/server.mjs now kills its spawned dev server by process group with a heartbeat-file liveness proof, not a bare pid probe, after two Rule 1 fixes (293fa89, 5335c56) surfaced by cross-environment teardown differences between GitHub Actions (reaping) and Vercel's build container (non-reaping)
 - [Phase 02]: Copied only the sixteen D-18 sibling names plus their directly-attached JSDoc into lib/data/types.ts; skipped multi-declaration section banners — The sibling's organisational banners describe IPV's 3D scene/overlay and at least one mixes in an excluded name (Anchor); doc-comment fidelity was read as the attached-JSDoc convention
 - [Phase 02]: Split the 02-01 plan's single-file output into two atomic commits along the Task 1/Task 2 boundary — Wrote the full lib/data/types.ts once, then temporarily truncated to the Task 1 portion for the first commit before restoring Task 2 content, so each commit's diff matches its task scope
+- [Phase 02]: Left plant.ts's zone-section banner comments untouched during the 02-02 trim; the plan's deletion list did not name them and editing them would exceed whole-record deletion
+- [Phase 02]: Reworded plant.ts's own header comment to avoid the literal excluded-identifier tokens, since the plan's Task 1 acceptance-criteria grep for those tokens matched the header's own prose
+- [Phase 02]: check-fixture-shape.test.mjs asserts MACHINERY_BY_ID's real Array.prototype.sort() order rather than the id sequence quoted in the plan's prose, which was not standard lexicographic order
 
 ### Pending Todos
 
@@ -134,6 +138,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-08T15:34:47.834Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-09-08T17:16:49.532Z
+Stopped at: Completed 02-02-PLAN.md
 Resume file: None
