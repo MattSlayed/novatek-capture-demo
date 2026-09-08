@@ -12,7 +12,7 @@ The preview is real where it claims to be real: every claim labelled enforced (w
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Validated in Phase 1: Scaffold & conventions (2026-09-08) — one definition per governed sentence with the duplicate-literal check failing the build on a second literal (FR-47); the non-dismissible ribbon in document flow on a public production URL, checked on iPhone and Android at default and 200 % text size (FR-48); the claims audit carrying the inherited register (FR-50); one command, `npm run verify`, running every build-time check and failing rather than degrading (FR-65); 7:1 text and 3:1 non-text contrast computed from the token files (NFR-5); the WCAG A/AA scan on both surfaces at 390 × 844 (NFR-9); the audit trips on every push in the GitHub `verify` job, registered as the Vercel Deployment Check that holds production promotion (SM-5). Evidence: `01-VERIFICATION.md` (5/5), `docs/analysis/vercel-regions.md`, `docs/analysis/deployment-gate.md`.
 
 ### Active
 
@@ -47,8 +47,8 @@ Full register with IDs and verification methods: `.planning/REQUIREMENTS.md` (10
 
 - Ingested 2026-09-04 from nine documents: one locked architecture spine (ADR), four specs (DESIGN, EXPERIENCE, SPEC, epics), two PRDs (prd.md governs; addendum is candidates), the brief and the seed plan. Conflict report: 0 blockers, 1 acknowledged warning (citation-only cycle), 17 auto-resolved. Intel: `.planning/intel/`.
 - Inherits from ipv-demo: the enforced/authored split, the claims register and its banned strings (owned by the SHEQ manager), uniform not-found, "a forgeable audit field is no audit field", "proposals queue; there is no offline inference", byte-identical inherited tokens, the synthetic plant vocabulary, RBAC 1:1 from BRIMIS with a recorded field-technician extension the parent programme should ratify before production.
-- Repo `MattSlayed/novatek-capture-demo` (public), Vercel project Git-connected, `CAPTURE_SESSION_KEY` set on Production and Preview, region cpt1 confirmed, Node 24.x; framework preset becomes Next once `vercel.json` lands in P1. Still dashboard-only for the user: turn off Vercel Authentication on previews. BMAD 6.11.0 project-local produced the specs; GSD builds.
-- The first deployment of a new project is a production deployment, whatever the flags — so the governed-sentence module and the ribbon ship before any other surface.
+- Repo `MattSlayed/novatek-capture-demo` (public), Vercel project Git-connected, `CAPTURE_SESSION_KEY` set on Production and Preview, region cpt1 re-read and confirmed 2026-09-08, Node 24.x locally and in CI; `vercel.json` declares the Next framework and the dashboard preset still reads “Other”, which does not affect the build. Dashboard settings done 2026-09-08: Vercel Authentication off, System Environment Variables exposed, Deployment Check registered on the GitHub job `verify`. Vercel’s build container cannot install Chromium (no `apt-get`), so the axe scan runs only in the GitHub job (D-22 falsified and recorded). BMAD 6.11.0 project-local produced the specs; GSD builds.
+- The first deployment of a new project is a production deployment, whatever the flags — so the governed-sentence module and the ribbon ship before any other surface. Done: Phase 1 complete 2026-09-08; production at `novatek-capture-demo.vercel.app` serves `main`@`50a246c`, the labelled shell and the Limits surface, promoted through the `verify` gate.
 - Vocabulary is PRD §3 verbatim in code and copy alike: artisan, account, session, gate, work order, asset, capture, verification, observation, proposal, decision, finding, referral, asset register, flag, clock, queue, reconciliation, conflict, governed sentence. A synonym is a discipline violation. Finding means an asserted fact, which nothing in this system creates.
 - Every bounded numeric value (media and thumbnail caps, note duration, batch ceilings, store caps and TTL, probe interval and staleness window, offline window, platform floor) is code in `lib/limits`, tuned in the phase that first needs it. Planning documents do not restate them.
 - Verification posture: the curl suite A–H from a shell (P3), the phone walkthrough on a real iPhone and a real Android (P5, P7, P8), the Playwright harness that proves its own offline-ness (P6), and the published hostile script SM-1 (P8).
@@ -133,4 +133,4 @@ All entries below are locked by the architecture spine (precedence 0) and are no
 | Handover documentation matters: does the brief's "binds to nothing" wording still hold (Q3); is naming the SHEQ manager sufficient ownership evidence (Q4); label-placement evidence artefact (table vs automated check) | P8 | Owned by the handover; if automated, the placement check joins AD-15's gate |
 
 ---
-*Last updated: 2026-09-04 after ingest (new-project-from-ingest)*
+*Last updated: 2026-09-08 after Phase 1 completion (execute-phase)*
