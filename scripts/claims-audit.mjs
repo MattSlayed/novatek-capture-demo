@@ -209,9 +209,17 @@ const PROHIBITED = [
   },
 ];
 
-/** Marks prose that is quoting a claim in order to retire or deny it. */
+/** Marks prose that is quoting a claim in order to retire or deny it.
+    Every alternative up to `never claim` is the ipv-demo marker,
+    inherited verbatim; `never as (a )?finding` is Capture's addition.
+    `no model` was also added here and has been removed again: it is
+    ordinary product copy on every honesty surface ("No model ran.",
+    "no model observed"), so any allowQuoted phrase within three lines
+    of a governed sentence was auto-excused as quoted-to-retire rather
+    than reported. A marker must recognise a retirement note, not the
+    copy it guards. */
 const RETIREMENT_MARKER =
-  /retired|withdrawn|never restate|no longer|prohibited|do not (use|claim)|must not|does not claim|does not model|superseded|stop claiming|not claimable|out of scope|ceded|what this is not|rather than claimed|never claim|never as (a )?finding|no model/i;
+  /retired|withdrawn|never restate|no longer|prohibited|do not (use|claim)|must not|does not claim|does not model|superseded|stop claiming|not claimable|out of scope|ceded|what this is not|rather than claimed|never claim|never as (a )?finding/i;
 
 /**
  * How many lines either side of a hit to search for that marker.

@@ -111,6 +111,33 @@ test("findings-verb family: excused as 'never as a finding'", async () => {
   );
 });
 
+test("retirement marker: an allowQuoted phrase two lines below ordinary 'no model' copy is reported, not excused", async () => {
+  await withFixture(
+    {
+      "lib/fixture.md":
+        "Authored for this preview. No model ran.\n\nCapture is at TRL 6.",
+    },
+    async (dir) => {
+      const { code, stdout } = await runCheck("scripts/claims-audit.mjs", { cwd: dir });
+      assert.notEqual(code, 0, "ordinary honesty copy must not excuse a prohibited claim beside it");
+      assert.match(stdout, /live violations: 1/);
+    },
+  );
+});
+
+test("retirement marker: the same phrase beside a genuine retirement note is still excused", async () => {
+  await withFixture(
+    {
+      "lib/fixture.md":
+        "Authored for this preview. No model ran.\n\nCapture is at TRL 6.\nRetired: never restate a readiness level for Capture.",
+    },
+    async (dir) => {
+      const { code, stdout, stderr } = await runCheck("scripts/claims-audit.mjs", { cwd: dir });
+      assert.equal(code, 0, stdout + stderr);
+    },
+  );
+});
+
 test("findings-verb family: 'Matched to record, and no model ran.' does not fail the build", async () => {
   await withFixture(
     { "lib/fixture.md": "Matched to record, and no model ran." },
