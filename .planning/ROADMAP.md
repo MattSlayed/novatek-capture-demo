@@ -91,7 +91,33 @@ Plans:
   4. The claims audit is clean over the copied surfaces; the fixture version is a single named export (not the build id); the register (`lib/data/register.ts`) is typed as server-only and the register-isolation rule is wired into the verify command
 
 **Scheduled closures**: FR-21a human provenance check (the one gate no command can run); the fixture-version export; RBAC tier carried as a display-only attribute
-**Plans**: TBD
+**Plans**: 7 plans in 6 waves
+
+Plans:
+**Wave 1**
+
+- [ ] 02-01-PLAN.md — types.ts: the sibling's fourteen copied names, the eleven closed sets and the seed's entity types (wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 02-02-PLAN.md — plant.ts trimmed to the eleven records plus m-aa605, and the fixture-shape test (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 02-03-PLAN.md — The three artisan accounts, the five work orders and their integrity assertions (wave 3)
+- [ ] 02-04-PLAN.md — The server-only register and the two-layer register-isolation rule wired into verify (wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 02-05-PLAN.md — observations.ts and the resolver / comment-fidelity check with its failing fixtures (wave 4)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 02-06-PLAN.md — The human provenance check: the review sheet, the blocking checkpoint and the signed provenance-check.md (wave 5, not autonomous)
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
+- [ ] 02-07-PLAN.md — FIXTURE_VERSION, the pinned content hash and the hash check wired into verify (wave 6)
 
 ### Phase 3: Server seam
 

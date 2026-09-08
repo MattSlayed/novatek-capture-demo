@@ -598,17 +598,17 @@ const FORBIDDEN = ["lib/data/register", "lib/access/register"];
 
 **If this table is empty:** N/A — three low-risk drafting recommendations are logged above; nothing load-bearing to the architecture is assumed. Every mechanism claim in this document (`server-only`'s transitive behaviour, Node's native TS stripping, the `.next/static` vs `.next/server` split, the `checkpoint:human-verify` protocol, the exact governed-sentence keys, every fact id and deviation id in the sibling repo) was either directly reproduced against this repository's real toolchain or read verbatim from a committed file — none of those are tagged `[ASSUMED]`.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Exact comment syntax for D-11's citation comment**
    - What we know: it must be "one fixed, parseable form," must name the cited id, and must quote the record's own field verbatim (`label: value` with unit, or `id.field: "…"` for a deviation).
    - What's unclear: the precise punctuation/marker (`// cites f-gs001-iso: "Isolations applied: 1 — transfer set C"` is the example `02-CONTEXT.md` itself offers, but this is explicitly Claude's Discretion).
-   - Recommendation: adopt the `02-CONTEXT.md` example verbatim (`// cites <id>: "<label>: <value>"` for a fact; `// cites <id>.<field>: "<value>"` for a deviation) — it's already been shown to the user once during discuss-phase and not objected to, minimising re-litigation risk at plan review.
+   - RESOLVED (recommendation adopted by the plans): adopt the `02-CONTEXT.md` example verbatim (`// cites <id>: "<label>: <value>"` for a fact; `// cites <id>.<field>: "<value>"` for a deviation) — it's already been shown to the user once during discuss-phase and not objected to, minimising re-litigation risk at plan review.
 
 2. **Whether `drawn_from` is a bare string id or the full `ObservationProvenance` tuple**
    - What we know: `02-CONTEXT.md` recommends the bare id ("one string the resolver test checks"), with the full tuple composed later by a P3/P5 module from the cited record's own provenance.
    - What's unclear: nothing structurally — this is a clean recommendation with a stated fallback. Including it here only so the planner sees it's Claude's Discretion, not locked.
-   - Recommendation: bare string id, matching `02-CONTEXT.md`'s own recommendation and this research's confirmation that the resolver test (Pattern/Code Example above) is simplest against a bare id.
+   - RESOLVED (recommendation adopted by the plans): bare string id, matching `02-CONTEXT.md`'s own recommendation and this research's confirmation that the resolver test (Pattern/Code Example above) is simplest against a bare id.
 
 ## Environment Availability
 
