@@ -19,6 +19,33 @@ test("the real repository exits 0 with the six expected ratios", async () => {
   }
 });
 
+/* ---------------------------------------------------------------
+   an empty or non-array pairs register must never pass vacuously
+   --------------------------------------------------------------- */
+
+const TOKENS_FOR_EMPTY_PAIRS = {
+  "app/styles/tokens.inherited.css": `:root {\n  --navy-deep: #0c1e35;\n}\n`,
+  "app/styles/tokens.capture.css": `:root {\n  --viewer-ink-dim: #16293F;\n}\n`,
+  "docs/design/decorative-exemptions.json": JSON.stringify([]),
+};
+
+for (const [label, contents] of [
+  ["an empty array", "[]"],
+  ["a JSON object", "{}"],
+  ["null", "null"],
+]) {
+  test(`a pairs register that is ${label} exits non-zero rather than passing vacuously`, async () => {
+    await withFixture(
+      { ...TOKENS_FOR_EMPTY_PAIRS, "scripts/check-contrast.pairs.json": contents },
+      async (dir) => {
+        const { code, stdout } = await runCheck("scripts/check-contrast.mjs", { cwd: dir });
+        assert.notEqual(code, 0, "no pairs means nothing was measured, which is not a pass");
+        assert.match(stdout, /must be a non-empty array/);
+      },
+    );
+  });
+}
+
 test("a fixture whose capture layer sets --viewer-ink-dim below 7:1 with no exemption exits non-zero", async () => {
   await withFixture(
     {

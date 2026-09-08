@@ -237,6 +237,18 @@ const tokens = {
 
 const results = [];
 
+/* The register must be a non-empty array: an empty, null or non-array
+   pairs file would otherwise iterate nothing and report a clean floor
+   for surfaces that were never measured — deleting the pairs is the
+   easiest way to silence a contrast defect, and the header's promise
+   that the exemption register is the only source of exceptions does
+   not cover it. */
+if (!Array.isArray(pairs) || pairs.length === 0) {
+  problems.push(
+    `${PAIRS_PATH} must be a non-empty array of ink/ground pairs — got ${Array.isArray(pairs) ? "an empty array" : JSON.stringify(pairs)}`,
+  );
+}
+
 for (const pair of Array.isArray(pairs) ? pairs : []) {
   const label = pair.id ?? `${pair.ink} on ${pair.ground}`;
 
