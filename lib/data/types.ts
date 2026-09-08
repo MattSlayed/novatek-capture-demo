@@ -441,3 +441,272 @@ export const SYNC_ITEM_SCHEMA_VERSIONS: Record<SyncItemKind, readonly number[]> 
   decision: [1],
   referral: [1],
 };
+
+/* ================================================================
+   ENTITY TYPES (D-18)
+
+   The seed's new types, following its own §Data model shape and
+   referencing the closed sets above by name. `lib/data` imports
+   nothing from `lib/store`, `lib/reconcile` or `lib/access` (D-DEP,
+   D-20).
+   ================================================================ */
+
+/**
+ * D-20 / AD-2: `rbac_tier` is a display-only attribute. No function
+ * under `lib/data` reads it, and no later access decision may — the
+ * work order is the only authorisation (FR-57).
+ */
+export interface Artisan {
+  id: string;
+  name: string;
+  trade: ArtisanTrade;
+  competency: string;
+  employee_no: string;
+  rbac_tier: RbacTier;
+}
+
+export interface Session {
+  sid: string;
+  account_id: string;
+  issued_at: string;
+  expires_at: string;
+}
+
+/**
+ * `id` (the internal `wo-NNNN` id) and `number` (the display
+ * `WO-2026-NNNN` string) are two different strings and are never
+ * conflated.
+ */
+export interface WorkOrder {
+  id: string;
+  number: string;
+  title: string;
+  description: string;
+  assigned_to: string;
+  zone_id: string;
+  asset_ids: string[];
+  governing_docs: string[];
+  priority: string;
+  raised_on: string;
+  due_by: string;
+  status: "assigned" | "in_progress" | "closed";
+  provenance: Provenance;
+}
+
+/** Server-only: `observation_ids` is stripped from responses. */
+export type OrderAsset = Machinery & { observation_ids: string[] };
+
+/**
+ * `drawn_from` is a bare record id, not a `Provenance` tuple:
+ * Claude's Discretion, resolved to the bare id because the resolver
+ * test checks one string and because the full `ObservationProvenance`
+ * tuple is composed from the cited record's own provenance by the
+ * P3/P5 module. The id space is a `CitedFact` id or a `Deviation`
+ * `id` and nothing else (D-09).
+ */
+export interface AuthoredObservation {
+  id: string;
+  asset_id: string;
+  kind: ObservationKind;
+  wording: string;
+  grade: ObservationGrade;
+  drawn_from: string;
+  relation: ObservationRelation;
+}
+
+/** AD-8: authored results declare exactly (assetId, fixtureSet). */
+export type ObservationProvenance = Omit<
+  Provenance,
+  "confidence" | "extractor_hash"
+> & {
+  confidence: null;
+  extractor: "authored";
+};
+
+/**
+ * AD-13: the thumbnail's byte cap is a bounded quantity that lives in
+ * `lib/limits` in P3 — no number appears here.
+ */
+export interface Capture {
+  id: string;
+  order_id: string;
+  asset_id: string;
+  kind: "photo" | "voice";
+  purpose: "verify" | "evidence";
+  captured_at: string;
+  mime: string;
+  bytes: number;
+  sha256: string;
+  duration_ms?: number;
+  thumb?: string;
+  captured_by: string | null;
+  recorded_at: string;
+}
+
+/**
+ * `label` is typed as `GovernedKey`, which is what makes the
+ * `GovernedKey` import load-bearing: the sentence is resolved through
+ * `GOVERNED` at render time and never restated here.
+ */
+export interface VerificationResult {
+  capture_id: string;
+  asset_id: string;
+  outcome: "matched" | "pending";
+  matched_tag: string | null;
+  matched_serial: string | null;
+  method: "authored";
+  confidence: null;
+  label: GovernedKey;
+  verified_at: string;
+}
+
+export interface Proposal {
+  id: string;
+  capture_id: string;
+  asset_id: string;
+  order_id: string;
+  observation: string;
+  provenance: ObservationProvenance;
+  issued_at: string;
+  state: ProposalState;
+}
+
+/**
+ * AD-3: `arrived_via` is server-derived and the client's
+ * `decided_where_claimed` is shown as a claim, never as fact;
+ * `decided_by` is server-stamped and any body value is ignored.
+ * AD-5: decision identity is `capture_client_id` plus
+ * `observation_id`.
+ */
+export interface Decision {
+  id: string;
+  proposal_id: string;
+  outcome: "accept" | "reject";
+  decided_at: string;
+  decided_where_claimed: "online" | "on_device";
+  arrived_via: "immediate" | "queued";
+  decided_by: string | null;
+  note?: string;
+  recorded_at: string;
+  device_offset_s: number;
+  reconciled: ReconciledState;
+  conflict?: ConflictCode;
+}
+
+/**
+ * A referral has no proposals, no verification, no decision and no
+ * `drawn_from`. `typed_tag` is the artisan's own claim, recorded as
+ * typed and never overwritten.
+ */
+export interface Referral {
+  id: string;
+  order_id: string;
+  typed_tag: string | null;
+  plate_capture_id: string;
+  capture_ids: string[];
+  note_capture_id?: string;
+  observed_at: string;
+  resolution: ReferralResolution;
+  resolved_asset_id: string | null;
+  flag_id: string | null;
+  raised_by: string | null;
+  recorded_at: string;
+  reconciled: ReconciledState;
+}
+
+/**
+ * AD-19: a flag records that a person raised something, not that a
+ * condition obtains. It carries no grade, no wording about the
+ * plant's condition and no provenance tuple, and no operation
+ * promotes one.
+ */
+export interface Flag {
+  id: string;
+  asset_id: string;
+  referral_id: string;
+  raised_by: string;
+  raised_at: string;
+  state: "raised";
+}
+
+export interface OrderClock {
+  order_id: string;
+  account_id: string;
+  segments: {
+    opened_at: string;
+    closed_at: string | null;
+    source: "server" | "device_reconciled";
+  }[];
+  elapsed_s: number;
+}
+
+/**
+ * AD-18: the emitted set is enumerated beside the type in
+ * `SYNC_ITEM_SCHEMA_VERSIONS`. `claimed_account_id` is compared,
+ * never trusted.
+ */
+export interface SyncItem<K> {
+  client_id: string;
+  kind: SyncItemKind;
+  schema_version: number;
+  order_id: string;
+  created_at: string;
+  attempts: number;
+  state: QueueItemState;
+  claimed_account_id: string;
+  payload: K;
+  last_result?: SyncItemResult;
+}
+
+export interface SyncItemResult {
+  client_id: string;
+  status: "recorded" | "duplicate" | "conflict" | "rejected";
+  code?: ConflictCode | RejectCode;
+  detail: string;
+  server?: {
+    verification?: VerificationResult;
+    proposals?: Proposal[];
+    decision?: Decision;
+    clock?: OrderClock;
+  };
+}
+
+/**
+ * The seed's shape at docs/CAPTURE-PLAN-SEED.md line 216. The fields
+ * the P8 route actually populates are P8's concern; this is the
+ * shape only.
+ */
+export interface WalkPayload {
+  schema: "novatek.capture.walk/1";
+  issued_at: string;
+  store: { kind: "memory"; instance: string; ttl_s: number; statement: string };
+  account: string;
+  order: WorkOrder;
+  clock: OrderClock;
+  assets: {
+    asset_id: string;
+    tag: string;
+    verification: VerificationResult;
+    captures: (Capture & { thumb_present: boolean; audio_left_device: false })[];
+    candidate_facts: (Proposal & {
+      accepted_by: string | null;
+      accepted_at: string | null;
+      arrived_via: "immediate" | "queued";
+    })[];
+    rejected: Proposal[];
+    open: Proposal[];
+  }[];
+  referrals: {
+    referral_id: string;
+    typed_tag: string | null;
+    resolution: ReferralResolution;
+    resolved_asset_id: string | null;
+    flag_id: string | null;
+    captures: Capture[];
+    raised_by: string | null;
+    observed_at: string;
+    recorded_at: string;
+    work_proposal: { statement: string; raised_here: false };
+  }[];
+  redaction: { ran: false; statement: string };
+}
