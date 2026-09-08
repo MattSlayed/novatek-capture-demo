@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 01-08-PLAN.md
-last_updated: "2026-09-07T20:30:46.003Z"
-last_activity: 2026-09-07
+status: verifying
+stopped_at: Completed 01-09-PLAN.md — Phase 1 (Scaffold & conventions) complete, 9/9 plans
+last_updated: "2026-09-08T10:32:34.035Z"
+last_activity: 2026-09-08
 progress:
   total_phases: 9
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 9
-  completed_plans: 8
-  percent: 0
+  completed_plans: 9
+  percent: 11
 ---
 
 # Project State
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 Phase: 1 (Scaffold & conventions) — EXECUTING
 Plan: 9 of 9
-Status: Ready to execute
-Last activity: 2026-09-07
+Status: Phase complete — ready for verification
+Last activity: 2026-09-08
 
-Progress: [█████████░] 89%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -60,6 +60,7 @@ Progress: [█████████░] 89%
 | Phase 01 P06 | 19min | 2 tasks | 5 files |
 | Phase 1 P7 | 22 | 3 tasks | 5 files |
 | Phase 01 P08 | 25min | 3 tasks | 4 files |
+| Phase 01-scaffold-conventions P09 | multi-session | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -93,6 +94,10 @@ Recent decisions affecting current work:
 - [Phase 01]: check-structure.mjs's --build-output D-11 static-marker assertion now accepts the Partial Prerender glyph (◐) alongside the fully-static glyph (○), matching the shell's actual, already-implemented shape from plan 01-05
 - [Phase 01]: check-deployment.mjs is not added to verify.mjs's STEPS — it needs a live deployment, and D-20's gate is build-time only
 - [Phase 01]: README.md paraphrases rather than quotes the preview governed sentence's wording, keeping one-definition discipline even outside the claims audit's swept ROOTS
+- [Phase 01]: The Vercel Deployment Check was found and registered via the dashboard's Show All Checks path, not the default configured-checks flow, since that flow expects a vercel/repository-dispatch/actions/status@v1 step this project's verify.yml does not use
+- [Phase 01]: The red-job demonstration (D-22) is recorded with an honest scope note - a branch deployment is never aliased to production, so Task 2 shows the red job and unchanged production, not a held promotion on main in the strict sense
+- [Phase 01]: The D-22 Install Command falsification failed (no apt-get in Vercel's build container), resolving RESEARCH.md Assumptions Log A1 against the assumption and confirming the GitHub Actions / Vercel split for browser-dependent steps is required
+- [Phase 01]: scripts/lib/server.mjs now kills its spawned dev server by process group with a heartbeat-file liveness proof, not a bare pid probe, after two Rule 1 fixes (293fa89, 5335c56) surfaced by cross-environment teardown differences between GitHub Actions (reaping) and Vercel's build container (non-reaping)
 
 ### Pending Todos
 
@@ -126,6 +131,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-07T20:30:45.987Z
-Stopped at: Completed 01-08-PLAN.md
+Last session: 2026-09-08T10:32:34.016Z
+Stopped at: Completed 01-09-PLAN.md — Phase 1 (Scaffold & conventions) complete, 9/9 plans
 Resume file: None

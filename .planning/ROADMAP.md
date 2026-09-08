@@ -17,7 +17,7 @@ Nine phases, 1:1 with the seed's build order and PRD §6.1. The labels ship firs
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Scaffold & conventions** - Project configuration, deployment headers, tokens, the governed-sentence module, the ribbon and the one build-check command, so the first (production) deploy is already labelled
+- [x] **Phase 1: Scaffold & conventions** - Project configuration, deployment headers, tokens, the governed-sentence module, the ribbon and the one build-check command, so the first (production) deploy is already labelled (completed 2026-09-08)
 - [ ] **Phase 2: Fixtures & types** - The synthetic plant subset, artisans, orders and authored observations with cited records, closed by the human provenance check
 - [ ] **Phase 3: Server seam** - Session, the one authorisation accessor, memory store, the one mediating writer, the one responder, every route; proved by the curl suite A–H
 - [ ] **Phase 4: Shell, gate, orders, clock (online)** - Entry, persona choice, long-form disclosure, order list and detail, the clock, on the one client projection
@@ -74,7 +74,7 @@ Plans:
 
 **Wave 7** *(blocked on Wave 6 completion)*
 
-- [ ] 01-09-PLAN.md — Vercel settings, the Deployment Check, the production merge and the phone check (wave 7)
+- [x] 01-09-PLAN.md — Vercel settings, the Deployment Check, the production merge and the phone check (wave 7)
 
 **UI hint**: yes
 
@@ -222,7 +222,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Scaffold & conventions | 8/9 | In Progress|  |
+| 1. Scaffold & conventions | 9/9 | Complete   | 2026-09-08 |
 | 2. Fixtures & types | 0/TBD | Not started | - |
 | 3. Server seam | 0/TBD | Not started | - |
 | 4. Shell, gate, orders, clock (online) | 0/TBD | Not started | - |
