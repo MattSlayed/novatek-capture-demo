@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 2 context gathered
-last_updated: "2026-09-08T15:14:46.465Z"
-last_activity: 2026-09-08 -- Phase 2 planning complete
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-09-08T15:34:47.848Z"
+last_activity: 2026-09-08
 progress:
   total_phases: 9
   completed_phases: 1
   total_plans: 16
-  completed_plans: 9
+  completed_plans: 10
   percent: 11
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-04)
 
 **Core value:** The preview is real where it claims to be real — every enforced claim is enforced server-side and survives a hostile reviewer; every authored claim is labelled at the point it is met.
-**Current focus:** Phase 2 — fixtures & types
+**Current focus:** Phase 2 — Fixtures & types
 
 ## Current Position
 
-Phase: 2
-Plan: Not started
+Phase: 2 (Fixtures & types) — EXECUTING
+Plan: 2 of 7
 Status: Ready to execute
-Last activity: 2026-09-08 -- Phase 2 planning complete
+Last activity: 2026-09-08
 
-Progress: [██████████] 100%
+Progress: [██████░░░░] 63%
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Progress: [██████████] 100%
 | Phase 1 P7 | 22 | 3 tasks | 5 files |
 | Phase 01 P08 | 25min | 3 tasks | 4 files |
 | Phase 01-scaffold-conventions P09 | multi-session | 3 tasks | 5 files |
+| Phase 02 P01 | 15min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,8 @@ Recent decisions affecting current work:
 - [Phase 01]: The red-job demonstration (D-22) is recorded with an honest scope note - a branch deployment is never aliased to production, so Task 2 shows the red job and unchanged production, not a held promotion on main in the strict sense
 - [Phase 01]: The D-22 Install Command falsification failed (no apt-get in Vercel's build container), resolving RESEARCH.md Assumptions Log A1 against the assumption and confirming the GitHub Actions / Vercel split for browser-dependent steps is required
 - [Phase 01]: scripts/lib/server.mjs now kills its spawned dev server by process group with a heartbeat-file liveness proof, not a bare pid probe, after two Rule 1 fixes (293fa89, 5335c56) surfaced by cross-environment teardown differences between GitHub Actions (reaping) and Vercel's build container (non-reaping)
+- [Phase 02]: Copied only the sixteen D-18 sibling names plus their directly-attached JSDoc into lib/data/types.ts; skipped multi-declaration section banners — The sibling's organisational banners describe IPV's 3D scene/overlay and at least one mixes in an excluded name (Anchor); doc-comment fidelity was read as the attached-JSDoc convention
+- [Phase 02]: Split the 02-01 plan's single-file output into two atomic commits along the Task 1/Task 2 boundary — Wrote the full lib/data/types.ts once, then temporarily truncated to the Task 1 portion for the first commit before restoring Task 2 content, so each commit's diff matches its task scope
 
 ### Pending Todos
 
@@ -131,6 +134,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-08T13:12:09.358Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-fixtures-types/02-CONTEXT.md
+Last session: 2026-09-08T15:34:47.834Z
+Stopped at: Completed 02-01-PLAN.md
+Resume file: None

@@ -43,7 +43,7 @@ IDs keep the PRD's own numbering (`REQ-{PRD id}`). Each FR carries its verificat
 ### Proposals and the decision step (PRD §4.4)
 
 - [ ] **REQ-FR-20**: A verify-purpose capture returns proposals each carrying observation text, grade, the record drawn from, and whether that record is evidence for or context around the statement; every cited record resolves to a real fixture record; grade from the closed set {inferred, ambiguous}; no authored observation carries the grade meaning *the record states this*; a header states the count and that the proposals are authored. *[Verified by: test]*
-- [ ] **REQ-FR-21a**: Every authored observation passes a human provenance check before it ships: a person has read the record it cites and confirmed the wording is an inference that record supports or only situates it; the fixture file carries the cited record's own sentence in a comment beside each observation; the evidence-or-context relation records which was confirmed. Phase 2 does not close on referential integrity alone. *[Verified by: inspection]*
+- [x] **REQ-FR-21a**: Every authored observation passes a human provenance check before it ships: a person has read the record it cites and confirmed the wording is an inference that record supports or only situates it; the fixture file carries the cited record's own sentence in a comment beside each observation; the evidence-or-context relation records which was confirmed. Phase 2 does not close on referential integrity alone. *[Verified by: inspection]*
 - [ ] **REQ-FR-21**: A proposal identifier is derived by the server from the account, the capture and the observation; a client cannot construct a valid one; identifiers are not sequential; a decision against a fabricated id and against another account's id return the same unknown-proposal response; derivation documented as reproducible by any instance without shared state. *[Verified by: test + analysis]*
 - [ ] **REQ-FR-22**: An artisan can accept or reject one open proposal on an asset within their order, with an optional note; parity asserted in CI against the rendered card at 360 px (equal hit area, contrast, font size and weight; neither carries focus ring, autofocus or pre-selection; neither reachable by an interaction the other is not); neither is a default; no interaction accepts more than one proposal at a time. *[Verified by: test]*
 - [ ] **REQ-FR-23**: Every actor field on every record is the acting account derived from the session, produced by one named function; a build rule asserts no other module assigns one and no route schema contains one; negative set across session, clock segment, capture, verification, decision, referral: a body naming a different artisan yields a record naming the acting account and the submitted value appears nowhere. *[Verified by: analysis (primary) + enumerated negative test set]*
@@ -193,7 +193,7 @@ Addendum candidates adopted into prd.md (UI-01–08 as NFR-1–8, DEV-01 as NFR-
 | REQ-NFR-5 | Phase 1 | Complete |
 | REQ-NFR-9 | Phase 1 | Complete |
 | REQ-SM-5 | Phase 1 | Complete |
-| REQ-FR-21a | Phase 2 | Pending |
+| REQ-FR-21a | Phase 2 | Complete |
 | REQ-FR-1 | Phase 3 | Pending |
 | REQ-FR-2 | Phase 3 | Pending |
 | REQ-FR-3 | Phase 3 | Pending |

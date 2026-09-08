@@ -95,6 +95,16 @@ None - no external service configuration required.
 - The human provenance checkpoint (FR-21a's second half, D-01/D-02) is `02-02`'s concern, not this plan's — this plan only made the grade unconstructible in the type system
 - No blockers identified for `02-02`
 
+## Self-Check: PASSED
+
+- FOUND: `lib/data/types.ts` (712 lines)
+- FOUND: `.planning/phases/02-fixtures-types/02-01-SUMMARY.md`
+- FOUND: commit `5a1531e` (Task 1)
+- FOUND: commit `ce0fb07` (Task 2)
+- FOUND: commit `3f6abe2` (docs: summary)
+- Verified: `npx tsc --noEmit`, `npx eslint lib/data/types.ts`, `node scripts/check-governed.mjs`, `node scripts/claims-audit.mjs` all exit 0 against the committed file
+- Verified: `npm run verify` (all 15 steps, 164/164 tests) exits 0
+
 ---
 *Phase: 02-fixtures-types*
 *Completed: 2026-09-08*
