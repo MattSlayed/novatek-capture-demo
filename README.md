@@ -23,14 +23,14 @@ npm install
 npx playwright install chromium
 npm run dev
 npm run verify
-node --test scripts/**/*.test.mjs
+node --test "scripts/**/*.test.mjs"
 ```
 
 `npm run dev` runs the dev server directly. A production build — `npm run verify` or a
 bare `next build` — needs `CAPTURE_BUILD_ID` resolved (D-03): `npm run verify`
 resolves it from `git rev-parse --short HEAD` automatically when neither that variable
 nor a Vercel-supplied one is already set; running `next build` on its own without any
-of the three set fails on purpose. `node --test scripts/**/*.test.mjs` is the fast
+of the three set fails on purpose. `node --test "scripts/**/*.test.mjs"` is the fast
 fixture suite alone — every check script's own proof that it exits non-zero on a
 violation — for feedback during development, without the full build.
 

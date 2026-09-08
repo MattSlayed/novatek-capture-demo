@@ -94,7 +94,12 @@ describe("package.json — declared pins (D-01)", () => {
     // MODULE_NOT_FOUND on this Node 24.19.0 / Windows combination
     // (reproduced in a clean directory with no special characters);
     // the recursive glob form is the working equivalent (Rule 3 fix).
-    assert.equal(pkg.scripts.test, "node --test scripts/**/*.test.mjs");
+    // The glob is quoted so Node, not the parent shell, expands it:
+    // npm runs scripts through sh on Linux/macOS, where an unquoted
+    // `**` is a plain `*` and only scripts/lib/*.test.mjs would run;
+    // cmd.exe on Windows never expands globs, which is why the
+    // unquoted form passed locally.
+    assert.equal(pkg.scripts.test, 'node --test "scripts/**/*.test.mjs"');
     assert.equal(pkg.scripts.verify, "node scripts/verify.mjs");
   });
 });
