@@ -26,6 +26,9 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { repoRoot } from "./lib/fixtures.mjs";
 
 // .ts extension required — this is a .mjs file, the entry point of
 // the chain (Node 24 native TypeScript stripping). The modules' own
@@ -35,6 +38,7 @@ import {
   OBSERVATION_GRADES,
   OBSERVATION_RELATIONS,
   ARTISAN_TRADES,
+  RBAC_ORDER,
   PROPOSAL_STATES,
   RECONCILED_STATES,
   QUEUE_ITEM_STATES,
@@ -55,6 +59,9 @@ import {
   DOC_BY_CODE,
   SCENE_VERSION,
 } from "../lib/data/plant.ts";
+
+import { ARTISANS, ARTISAN_BY_ID, ORDER_IDS_BY_ARTISAN } from "../lib/data/artisans.ts";
+import { ORDERS, ORDER_BY_ID } from "../lib/data/orders.ts";
 
 /* ---------------------------------------------------------------
    Closed-set assertions (D-19) — one test per set, exact contents,
@@ -322,4 +329,190 @@ test("every code in every kept record's governing_docs[] resolves in DOC_BY_CODE
       );
     }
   }
+});
+
+/* ---------------------------------------------------------------
+   Accounts — the three doors (D-20).
+   --------------------------------------------------------------- */
+
+test("ARTISANS is the closed set of three doors, in order, with display-only rbac_tier (D-20)", () => {
+  assert.deepStrictEqual(
+    ARTISANS.map((a) => a.id),
+    ["acc-mabaso", "acc-naidoo", "acc-vanwyk"],
+    "ARTISANS' id order moved",
+  );
+  assert.deepStrictEqual(
+    ARTISANS.map((a) => a.rbac_tier),
+    ["field_technician", "site_supervisor", "field_technician"],
+    "ARTISANS' rbac_tier order moved — K. Naidoo alone must carry site_supervisor (D-20)",
+  );
+  for (const artisan of ARTISANS) {
+    assert.ok(
+      ARTISAN_TRADES.includes(artisan.trade),
+      `${artisan.id}'s trade (${artisan.trade}) is not a member of ARTISAN_TRADES`,
+    );
+    assert.ok(
+      RBAC_ORDER.includes(artisan.rbac_tier),
+      `${artisan.id}'s rbac_tier (${artisan.rbac_tier}) is not a member of RBAC_ORDER`,
+    );
+  }
+  const mabaso = ARTISAN_BY_ID.get("acc-mabaso");
+  assert.ok(mabaso, "ARTISAN_BY_ID is missing acc-mabaso");
+  assert.equal(
+    mabaso.name,
+    PEOPLE.millwright.name,
+    "acc-mabaso's name has drifted from PEOPLE.millwright — the account and the plant record must agree",
+  );
+  assert.equal(
+    mabaso.competency,
+    PEOPLE.millwright.competency,
+    "acc-mabaso's competency has drifted from PEOPLE.millwright — the account and the plant record must agree",
+  );
+});
+
+/* ---------------------------------------------------------------
+   Orders — the five work orders, id and number as two fields
+   (D-CONV).
+   --------------------------------------------------------------- */
+
+test("ORDERS is the closed set of five, in order, with id and number as two distinct fields (D-CONV)", () => {
+  assert.deepStrictEqual(
+    ORDERS.map((o) => o.id),
+    ["wo-0142", "wo-0151", "wo-0137", "wo-0129", "wo-0133"],
+    "ORDERS' id order moved",
+  );
+  assert.deepStrictEqual(
+    ORDERS.map((o) => o.number),
+    ["WO-2026-0142", "WO-2026-0151", "WO-2026-0137", "WO-2026-0129", "WO-2026-0133"],
+    "ORDERS' number order moved",
+  );
+  for (const order of ORDERS) {
+    assert.notEqual(
+      order.id,
+      order.number,
+      `${order.id}'s id equals its own number — the two-field discipline (D-CONV) has collapsed`,
+    );
+    assert.ok(
+      !ORDER_BY_ID.has(order.number),
+      `${order.number} is a key of ORDER_BY_ID — the display number must never be usable as the internal id`,
+    );
+    assert.equal(order.status, "assigned", `${order.id}'s status is not "assigned"`);
+    assert.equal(
+      order.provenance.system_of_record,
+      "ERP",
+      `${order.id}'s provenance.system_of_record is not "ERP" — a work order is a record the ERP states`,
+    );
+  }
+});
+
+/* ---------------------------------------------------------------
+   Referential integrity — every order resolves to real accounts,
+   zones, assets and documents.
+   --------------------------------------------------------------- */
+
+test("every order's assigned_to, zone_id, asset_ids and governing_docs resolve in the fixture set", () => {
+  for (const order of ORDERS) {
+    assert.ok(
+      ARTISAN_BY_ID.has(order.assigned_to),
+      `${order.id}'s assigned_to (${order.assigned_to}) does not resolve in ARTISAN_BY_ID`,
+    );
+    assert.ok(
+      ZONE_BY_ID.has(order.zone_id),
+      `${order.id}'s zone_id (${order.zone_id}) does not resolve in ZONE_BY_ID`,
+    );
+    for (const assetId of order.asset_ids) {
+      assert.ok(
+        MACHINERY_BY_ID.has(assetId),
+        `${order.id}'s asset_ids entry (${assetId}) does not resolve in MACHINERY_BY_ID`,
+      );
+    }
+    for (const code of order.governing_docs) {
+      assert.ok(
+        DOC_BY_CODE.has(code),
+        `${order.id}'s governing_docs entry (${code}) does not resolve in DOC_BY_CODE`,
+      );
+    }
+  }
+});
+
+test("the union of all five orders' asset_ids is exactly the ten assigned assets, and the referral target is on none of them", () => {
+  const union = new Set(ORDERS.flatMap((o) => o.asset_ids));
+  assert.deepStrictEqual(
+    [...union].sort(),
+    [
+      "m-aa101",
+      "m-aa102",
+      "m-aa601",
+      "m-aa602",
+      "m-ac001",
+      "m-an001",
+      "m-ap003",
+      "m-as001",
+      "m-bb001",
+      "m-gs001",
+    ],
+    "the union of every order's asset_ids moved",
+  );
+  assert.ok(MACHINERY_BY_ID.has("m-aa605"), "m-aa605 must be present in MACHINERY_BY_ID");
+  assert.ok(
+    !union.has("m-aa605"),
+    "m-aa605 must appear in no order's asset_ids — it is the referral fixture's own target, on nobody's order",
+  );
+});
+
+/* ---------------------------------------------------------------
+   Assignment symmetry — ORDER_IDS_BY_ARTISAN and each order's own
+   assigned_to must agree.
+   --------------------------------------------------------------- */
+
+test("ORDER_IDS_BY_ARTISAN agrees with each order's own assigned_to", () => {
+  for (const artisan of ARTISANS) {
+    const fromOrders = ORDERS.filter((o) => o.assigned_to === artisan.id)
+      .map((o) => o.id)
+      .sort();
+    const fromMap = [...(ORDER_IDS_BY_ARTISAN[artisan.id] ?? [])].sort();
+    assert.deepStrictEqual(
+      fromMap,
+      fromOrders,
+      `${artisan.id}'s ORDER_IDS_BY_ARTISAN entry disagrees with ORDERS' own assigned_to`,
+    );
+  }
+});
+
+/* ---------------------------------------------------------------
+   Display-only tier — rbac_tier is read by nothing under lib/data
+   (D-20, AD-2, FR-57), proved from source text with comments
+   stripped so the warning comment above ARTISANS cannot satisfy its
+   own assertion.
+   --------------------------------------------------------------- */
+
+function stripComments(source) {
+  return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+}
+
+test("rbac_tier is carried only as a record field in artisans.ts, and is absent entirely from orders.ts (display-only tier)", async () => {
+  const root = repoRoot();
+  const artisansSource = stripComments(
+    await readFile(path.join(root, "lib/data/artisans.ts"), "utf8"),
+  );
+  const ordersSource = stripComments(
+    await readFile(path.join(root, "lib/data/orders.ts"), "utf8"),
+  );
+
+  const artisansMatches = artisansSource.match(/rbac_tier/g) ?? [];
+  assert.equal(
+    artisansMatches.length,
+    3,
+    "artisans.ts should mention rbac_tier exactly three times with comments stripped — once per record field — not as part of any function",
+  );
+  assert.ok(
+    !/function[^{]*\{[^}]*rbac_tier/.test(artisansSource) &&
+      !/=>\s*\{[^}]*rbac_tier/.test(artisansSource),
+    "a function or arrow-function body in artisans.ts appears to read rbac_tier — the field must be carried, never read (D-20, AD-2, FR-57)",
+  );
+
+  assert.ok(
+    !ordersSource.includes("rbac_tier"),
+    "orders.ts must not mention rbac_tier at all — the assignment plane never carries the display-only tier",
+  );
 });
