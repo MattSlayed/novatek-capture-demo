@@ -362,6 +362,48 @@ test("modelled savings as cash (pattern two): trips on 'saves R 40 000'", async 
   );
 });
 
+test("modelled savings as cash (pattern one): trips on a dollar figure followed by 'saved'", async () => {
+  await withFixture(
+    { "lib/fixture.md": "About $5 million saved on downtime last year." },
+    async (dir) => {
+      const { code } = await runCheck("scripts/claims-audit.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+    },
+  );
+});
+
+test("modelled savings as cash (pattern one): trips on 'USD 1.2m saved'", async () => {
+  await withFixture(
+    { "lib/fixture.md": "USD 1.2m saved across the fleet." },
+    async (dir) => {
+      const { code } = await runCheck("scripts/claims-audit.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+    },
+  );
+});
+
+test("modelled savings as cash (pattern two): trips on 'saves' followed by a dollar figure", async () => {
+  await withFixture(
+    { "lib/fixture.md": "Capture saves $40 000 a month." },
+    async (dir) => {
+      const { code } = await runCheck("scripts/claims-audit.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+    },
+  );
+});
+
+test("modelled savings as cash: passes a dollar figure with no saving verb nearby", async () => {
+  await withFixture(
+    { "lib/fixture.md": "Invoice $ 1024 is open." },
+    async (dir) => {
+      const { code, stdout, stderr } = await runCheck("scripts/claims-audit.mjs", {
+        cwd: dir,
+      });
+      assert.equal(code, 0, stdout + stderr);
+    },
+  );
+});
+
 test("modelled savings as cash: passes a work-order identifier with no saving verb nearby", async () => {
   await withFixture(
     { "lib/fixture.md": "Work order R 1024 is open." },

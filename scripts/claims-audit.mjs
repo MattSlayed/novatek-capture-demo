@@ -182,13 +182,17 @@ const PROHIBITED = [
   },
   {
     kind: "figure",
+    // The word boundary guards only the letter currencies: `\b\$` can
+    // never match in prose (a dollar sign is a non-word character and
+    // is almost always preceded by a space), which had left every
+    // $-denominated saving claim unaudited.
     pattern:
-      /\b(R|ZAR|\$|USD)\s?\d[\d ,.]*\s*(k|m|bn|million|billion)?\b.{0,40}\b(saved|saving|savings|avoided)\b/i,
+      /(?:\b(?:R|ZAR|USD)|\$)\s?\d[\d ,.]*\s*(k|m|bn|million|billion)?\b.{0,40}\b(saved|saving|savings|avoided)\b/i,
     note: "No modelled saving may be presented as cash (REQ-FR-50).",
   },
   {
     kind: "figure",
-    pattern: /\b(saves?|saving|savings)\b.{0,30}\b(R|ZAR|\$|USD)\s?\d/i,
+    pattern: /\b(saves?|saving|savings)\b.{0,30}(?:\b(?:R|ZAR|USD)|\$)\s?\d/i,
     note: "No modelled saving may be presented as cash (REQ-FR-50).",
   },
   {
