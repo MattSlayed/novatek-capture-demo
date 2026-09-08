@@ -137,14 +137,47 @@ function extractTopLevelEntries(innerText) {
   return entries;
 }
 
+/**
+ * The field's value when it is one double-quoted string literal that
+ * is the whole value (followed by `,` or `}`), else null. A single-
+ * quoted string, a template literal or a concatenation (`"a" + "b"`)
+ * all return null — and null is reported as a defect below, never
+ * treated as an empty sentence, because a sentence that cannot be
+ * extracted has silently left the duplicate sweep (D-09).
+ */
 function extractField(block, field) {
-  const re = new RegExp(`${field}\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"`);
+  const re = new RegExp(`${field}\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"\\s*[,}]`);
   const m = re.exec(block);
   return m ? m[1] : null;
 }
 
 function normalise(text) {
   return text.replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Turn one parsed { before, strong, after } into a needle, or record
+ * why it cannot be one: a field that is not a double-quoted literal
+ * (null) or a sentence with no text at all. Both are defects — the
+ * check must never print "defined once" for a sentence it could not
+ * read.
+ */
+function needleFor(key, fields) {
+  const unquoted = ["before", "strong", "after"].filter((f) => fields[f] === null);
+  if (unquoted.length) {
+    problems.push(
+      `${GOVERNED_PATH} entry "${key}" has no extractable ${unquoted.join("/")} — every field must be one double-quoted string literal, or the sentence silently drops out of the duplicate sweep (D-09)`,
+    );
+    return null;
+  }
+  const sentence = normalise(`${fields.before}${fields.strong}${fields.after}`);
+  if (sentence.length === 0) {
+    problems.push(
+      `${GOVERNED_PATH} entry "${key}" is empty — a governed sentence must carry text (D-09)`,
+    );
+    return null;
+  }
+  return { key, sentence };
 }
 
 /**
@@ -166,9 +199,9 @@ function parseGovernedModule(source) {
         const inner = source.slice(block.start + 1, block.end);
         result.entries = extractTopLevelEntries(inner).map(({ key, block: b }) => ({
           key,
-          before: extractField(b, "before") ?? "",
-          strong: extractField(b, "strong") ?? "",
-          after: extractField(b, "after") ?? "",
+          before: extractField(b, "before"),
+          strong: extractField(b, "strong"),
+          after: extractField(b, "after"),
         }));
       }
     }
@@ -192,9 +225,9 @@ function parseGovernedModule(source) {
       /\bafter\s*:/.test(block);
     if (!hasShape) continue;
     const sentence = {
-      before: extractField(block, "before") ?? "",
-      strong: extractField(block, "strong") ?? "",
-      after: extractField(block, "after") ?? "",
+      before: extractField(block, "before"),
+      strong: extractField(block, "strong"),
+      after: extractField(block, "after"),
     };
     if (name === "PLATFORM_413") {
       result.platform413 = sentence;
@@ -236,10 +269,8 @@ if (governedSource !== null) {
       );
     }
     for (const entry of parsed.entries) {
-      const sentence = normalise(`${entry.before}${entry.strong}${entry.after}`);
-      if (sentence.length > 0) {
-        needles.push({ key: entry.key, sentence });
-      }
+      const needle = needleFor(entry.key, entry);
+      if (needle) needles.push(needle);
     }
   }
 
@@ -252,12 +283,8 @@ if (governedSource !== null) {
   }
 
   if (parsed.platform413) {
-    const sentence = normalise(
-      `${parsed.platform413.before}${parsed.platform413.strong}${parsed.platform413.after}`,
-    );
-    if (sentence.length > 0) {
-      needles.push({ key: "PLATFORM_413", sentence });
-    }
+    const needle = needleFor("PLATFORM_413", parsed.platform413);
+    if (needle) needles.push(needle);
   }
 }
 

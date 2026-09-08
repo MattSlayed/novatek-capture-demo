@@ -135,6 +135,73 @@ test("a module exporting a ninth GovernedSentence-shaped binding exits non-zero"
   );
 });
 
+/* ---------------------------------------------------------------
+   a governed field that is not one double-quoted literal must be a
+   defect, never an empty sentence that silently leaves the sweep
+   --------------------------------------------------------------- */
+
+const DOUBLE_QUOTED_STRONG = 'strong: "Fixture clause for noRedaction.",';
+
+test("a governed field written with single quotes exits non-zero", async () => {
+  const src = governedModuleSource().replace(
+    DOUBLE_QUOTED_STRONG,
+    "strong: 'Fixture clause for noRedaction.',",
+  );
+  assert.notEqual(src, governedModuleSource(), "the fixture must actually change the field");
+  await withFixture({ "lib/copy/governed.ts": src }, async (dir) => {
+    const { code, stdout } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
+    assert.notEqual(code, 0);
+    assert.match(stdout, /no extractable strong/);
+  });
+});
+
+test("a governed field written as a template literal exits non-zero", async () => {
+  const src = governedModuleSource().replace(
+    DOUBLE_QUOTED_STRONG,
+    "strong: `Fixture clause for noRedaction.`,",
+  );
+  await withFixture({ "lib/copy/governed.ts": src }, async (dir) => {
+    const { code, stdout } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
+    assert.notEqual(code, 0);
+    assert.match(stdout, /no extractable strong/);
+  });
+});
+
+test("a governed field written as a concatenation exits non-zero", async () => {
+  const src = governedModuleSource().replace(
+    DOUBLE_QUOTED_STRONG,
+    'strong: "Fixture clause " + "for noRedaction.",',
+  );
+  await withFixture({ "lib/copy/governed.ts": src }, async (dir) => {
+    const { code, stdout } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
+    assert.notEqual(code, 0);
+    assert.match(stdout, /no extractable strong/);
+  });
+});
+
+test("PLATFORM_413 written with single quotes exits non-zero", async () => {
+  const src = governedModuleSource().replace(
+    'before: "Fixture 413 sentence.",',
+    "before: 'Fixture 413 sentence.',",
+  );
+  await withFixture({ "lib/copy/governed.ts": src }, async (dir) => {
+    const { code, stdout } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
+    assert.notEqual(code, 0);
+    assert.match(stdout, /"PLATFORM_413" has no extractable before/);
+  });
+});
+
+test("a governed entry whose three fields are all empty exits non-zero", async () => {
+  const src = governedModuleSource()
+    .replace(DOUBLE_QUOTED_STRONG, 'strong: "",')
+    .replace('after: " Fixture tail for noRedaction.",', 'after: "",');
+  await withFixture({ "lib/copy/governed.ts": src }, async (dir) => {
+    const { code, stdout } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
+    assert.notEqual(code, 0);
+    assert.match(stdout, /"noRedaction" is empty/);
+  });
+});
+
 test("a module that reorders two keys exits non-zero", async () => {
   const reordered = [...BASE_KEYS];
   [reordered[0], reordered[1]] = [reordered[1], reordered[0]];
