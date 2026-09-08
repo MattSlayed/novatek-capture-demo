@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 01-09-PLAN.md — Phase 1 (Scaffold & conventions) complete, 9/9 plans
-last_updated: "2026-09-08T10:32:34.035Z"
+status: ready_to_plan
+stopped_at: Phase 1 complete (9/9) — ready to discuss Phase 2
+last_updated: 2026-09-08T10:47:19.820Z
 last_activity: 2026-09-08
 progress:
   total_phases: 9
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-04)
 
 **Core value:** The preview is real where it claims to be real — every enforced claim is enforced server-side and survives a hostile reviewer; every authored claim is labelled at the point it is met.
-**Current focus:** Phase 1 — Scaffold & conventions
+**Current focus:** Phase 2 — fixtures & types
 
 ## Current Position
 
-Phase: 1 (Scaffold & conventions) — EXECUTING
-Plan: 9 of 9
-Status: Phase complete — ready for verification
+Phase: 2
+Plan: Not started
+Status: Ready to plan
 Last activity: 2026-09-08
 
 Progress: [██████████] 100%
@@ -36,7 +36,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 0
+- Total plans completed: 9
 - Average duration: -
 - Total execution time: 0.0 hours
 
@@ -44,7 +44,7 @@ Progress: [██████████] 100%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 1 | 9 | - | - |
 
 **Recent Trend:**
 
