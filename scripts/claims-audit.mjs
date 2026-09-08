@@ -191,6 +191,18 @@ const PROHIBITED = [
     pattern: /\b(saves?|saving|savings)\b.{0,30}\b(R|ZAR|\$|USD)\s?\d/i,
     note: "No modelled saving may be presented as cash (REQ-FR-50).",
   },
+  {
+    kind: "never",
+    // D-18 extension of the inherited prohibited-word entry above
+    // (carried verbatim, not edited): that pattern's trailing \b leaves
+    // the plural noun (stem + "ions") and the agent noun (stem + "or",
+    // "ors") unmatched. This entry catches every remaining form of the
+    // stem and excludes exactly the suffixes the inherited entry already
+    // covers, so one occurrence is still reported exactly once.
+    pattern: /\bsimulat(?!(?:e|es|ed|ion|ing)\b)/i,
+    note: "Prohibited word, in every remaining grammatical form of the stem — plural and agent nouns included (D-18; extends the inherited entry).",
+    allowQuoted: true,
+  },
 ];
 
 /** Marks prose that is quoting a claim in order to retire or deny it. */

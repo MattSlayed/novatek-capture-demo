@@ -407,6 +407,77 @@ test("inherited 'simulation' entry: excused when quoted to retire it", async () 
   );
 });
 
+/* ---------------------------------------------------------------
+   D-18 extension of the inherited prohibited-word entry: the forms
+   its trailing word boundary leaves uncovered. The stem is assembled
+   at runtime so this file never spells the word itself.
+   --------------------------------------------------------------- */
+
+const STEM = ["simu", "lat"].join("");
+
+test("stem extension: trips on the plural noun form, caught exactly once", async () => {
+  await withFixture(
+    { "lib/fixture.md": `The training module runs ${STEM}ions of the plant.` },
+    async (dir) => {
+      const { code, stdout } = await runCheck("scripts/claims-audit.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+      assert.equal(hitsCount(stdout), 1, stdout);
+    },
+  );
+});
+
+test("stem extension: trips on the agent-noun form, caught exactly once", async () => {
+  await withFixture(
+    { "lib/fixture.md": `The plant ${STEM}or runs on a separate workstation.` },
+    async (dir) => {
+      const { code, stdout } = await runCheck("scripts/claims-audit.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+      assert.equal(hitsCount(stdout), 1, stdout);
+    },
+  );
+});
+
+test("stem extension: the singular noun is still caught exactly once (no double count with the inherited entry)", async () => {
+  await withFixture(
+    { "lib/fixture.md": `The training module runs a ${STEM}ion of the plant.` },
+    async (dir) => {
+      const { code, stdout } = await runCheck("scripts/claims-audit.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+      assert.equal(hitsCount(stdout), 1, stdout);
+    },
+  );
+});
+
+test("stem extension: passes a look-alike that does not contain the stem", async () => {
+  await withFixture(
+    { "lib/fixture.md": "A stimulating talk on plant safety." },
+    async (dir) => {
+      const { code, stdout, stderr } = await runCheck("scripts/claims-audit.mjs", { cwd: dir });
+      assert.equal(code, 0, stdout + stderr);
+    },
+  );
+});
+
+test("stem extension: passes a word that merely contains the stem past a word boundary", async () => {
+  await withFixture(
+    { "lib/fixture.md": `The report notes the dis${STEM}ion in the vendor claim.` },
+    async (dir) => {
+      const { code, stdout, stderr } = await runCheck("scripts/claims-audit.mjs", { cwd: dir });
+      assert.equal(code, 0, stdout + stderr);
+    },
+  );
+});
+
+test("stem extension: excused when quoted to retire it", async () => {
+  await withFixture(
+    { "lib/fixture.md": `${STEM}ors is a prohibited word; never restate it in this preview.` },
+    async (dir) => {
+      const { code, stdout, stderr } = await runCheck("scripts/claims-audit.mjs", { cwd: dir });
+      assert.equal(code, 0, stdout + stderr);
+    },
+  );
+});
+
 test("inherited 'records never cross the border' entry: caught exactly once, not twice", async () => {
   await withFixture(
     { "lib/fixture.md": "Records never cross the border in this system." },
