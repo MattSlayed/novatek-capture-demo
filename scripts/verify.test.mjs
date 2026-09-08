@@ -17,7 +17,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { STEPS, resolveSteps, runSteps } from "./verify.mjs";
+import { STEPS, resolveSteps, runSteps, spawnStep } from "./verify.mjs";
 
 /* ---------------------------------------------------------------
    order assertions (D-20)
@@ -110,6 +110,64 @@ test("runSteps stops at the first non-zero exit rather than the highest", async 
   });
   assert.equal(code, 1);
   assert.deepEqual(invoked, ["a"]);
+});
+
+/* ---------------------------------------------------------------
+   signal-termination assertions — a step the runner kills by signal
+   reports code === null and must resolve as a failure, never a pass
+   --------------------------------------------------------------- */
+
+/** Run `fn` with process.stderr.write captured, returning what it wrote. */
+async function captureStderr(fn) {
+  const originalWrite = process.stderr.write;
+  const written = [];
+  process.stderr.write = (chunk) => {
+    written.push(String(chunk));
+    return true;
+  };
+  try {
+    return { result: await fn(), written };
+  } finally {
+    process.stderr.write = originalWrite;
+  }
+}
+
+test("spawnStep resolves non-zero and names the signal when the child is terminated by SIGTERM (code === null)", async () => {
+  const step = {
+    id: "signal-fixture",
+    command: process.execPath,
+    args: ["-e", "setInterval(() => {}, 1000)"],
+  };
+  const { result: code, written } = await captureStderr(() =>
+    spawnStep(step, (child) => child.kill("SIGTERM")),
+  );
+  assert.notEqual(code, 0, "a signal-terminated step must never resolve as 0");
+  assert.ok(
+    written.some((w) => w.includes('"signal-fixture"') && w.includes("SIGTERM")),
+    `expected a stderr line naming the step and the signal, got: ${JSON.stringify(written)}`,
+  );
+});
+
+test("spawnStep resolves non-zero when the child kills itself with SIGTERM", async () => {
+  const step = {
+    id: "self-kill-fixture",
+    command: process.execPath,
+    args: ["-e", 'process.kill(process.pid, "SIGTERM")'],
+  };
+  const { result: code } = await captureStderr(() => spawnStep(step));
+  assert.notEqual(code, 0);
+});
+
+test("spawnStep resolves the child's own non-zero exit code unchanged", async () => {
+  const step = { id: "exit-seven", command: process.execPath, args: ["-e", "process.exit(7)"] };
+  const code = await spawnStep(step);
+  assert.equal(code, 7);
+});
+
+test("spawnStep resolves 0 for a child that exits 0", async () => {
+  const step = { id: "exit-zero", command: process.execPath, args: ["-e", "process.exit(0)"] };
+  const code = await spawnStep(step);
+  assert.equal(code, 0);
 });
 
 /* ---------------------------------------------------------------

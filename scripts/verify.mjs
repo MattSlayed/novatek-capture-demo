@@ -162,13 +162,17 @@ export async function runSteps(steps, run) {
    output to that path once the child closes.
    --------------------------------------------------------------- */
 
-function spawnStep(step) {
+export function spawnStep(step, onSpawn) {
   return new Promise((resolveSpawn) => {
     const child = spawn(step.command, step.args, {
       cwd: process.cwd(),
       env: { ...process.env, ...(step.env ?? {}) },
       shell: step.shell === true,
     });
+    /* `onSpawn` exists for scripts/verify.test.mjs alone, so a fixture
+       can terminate the child by signal and prove the code === null
+       branch below; the gate itself never passes one. */
+    if (typeof onSpawn === "function") onSpawn(child);
     let combined = "";
     child.stdout?.on("data", (chunk) => {
       process.stdout.write(chunk);
@@ -178,7 +182,7 @@ function spawnStep(step) {
       process.stderr.write(chunk);
       if (step.capture) combined += chunk;
     });
-    child.on("close", async (code) => {
+    child.on("close", async (code, signal) => {
       if (step.capture) {
         try {
           await mkdir(path.dirname(step.capture), { recursive: true });
@@ -187,7 +191,17 @@ function spawnStep(step) {
           process.stderr.write(`could not write ${step.capture}: ${e.message}\n`);
         }
       }
-      resolveSpawn(code ?? 0);
+      /* A signal-terminated child (an OOM SIGKILL, a runner's SIGTERM,
+         a crash surfacing as a signal) reports code === null. The step
+         reached no verdict, so that is a failure — never a pass. */
+      if (code === null) {
+        process.stderr.write(
+          `\n✖ step "${step.id}" was terminated by ${signal ?? "an unknown signal"} — treated as a failure\n`,
+        );
+        resolveSpawn(1);
+        return;
+      }
+      resolveSpawn(code);
     });
   });
 }
