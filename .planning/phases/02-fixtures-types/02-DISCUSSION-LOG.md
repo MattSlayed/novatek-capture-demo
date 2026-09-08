@@ -201,3 +201,7 @@
 - AD-9's `already_open` / `not_open` — P4.
 - SHEQ manager counter-signature — not requested.
 - Observations for `m-aa101`, `m-aa102`, `m-aa602` — declined.
+
+---
+
+**Correction (2026-09-08, after planning):** the questions above say "thirteen" observations; the seed's Fixtures table enumerates twelve (ap003 three, as001 one, gs001 two, an001 one, aa601 three, ac001 one, bb001 one). The count was the orchestrator's miscount, not a decision; CONTEXT.md D-06 and D-08 now say twelve. The user's choice (exactly the seed's set, none invented) is unchanged.
