@@ -46,9 +46,19 @@
    ================================================================ */
 
 import { execSync, spawn } from "node:child_process";
+import { createRequire } from "node:module";
 import axe from "axe-core";
 import { AxeBuilder } from "@axe-core/playwright";
 import { launch, openMobilePage } from "./lib/harness.mjs";
+import { startServer, stopServer } from "./lib/server.mjs";
+
+const require = createRequire(import.meta.url);
+/* Next's own bin, resolved through node_modules rather than a
+   hard-coded path, so the production server can be started directly
+   by `process.execPath` with no intermediate shell (see
+   scripts/lib/server.mjs for why a shell-wrapped server is the bug
+   this file used to carry). */
+const NEXT_BIN = require.resolve("next/dist/bin/next");
 
 const PORT = 4311;
 const BASE_URL = `http://127.0.0.1:${PORT}`;
@@ -256,10 +266,9 @@ if (build.code !== 0) {
   let browser = null;
   try {
     console.log(`Starting the production server on port ${PORT} (next start)...`);
-    serverProcess = spawn("npx", ["next", "start", "-p", String(PORT)], {
+    serverProcess = startServer(process.execPath, [NEXT_BIN, "start", "-p", String(PORT)], {
       cwd: process.cwd(),
       env: childEnv,
-      shell: true,
     });
     /* drain stdio so the child never blocks on a full pipe buffer */
     serverProcess.stdout?.on("data", () => {});
@@ -293,21 +302,12 @@ if (build.code !== 0) {
     if (browser) {
       await browser.close();
     }
-    if (serverProcess && serverProcess.pid) {
-      if (process.platform === "win32") {
-        try {
-          execSync(`taskkill /pid ${serverProcess.pid} /T /F`, { stdio: "ignore" });
-        } catch {
-          /* already exited */
-        }
-      } else {
-        try {
-          process.kill(serverProcess.pid);
-        } catch {
-          /* already exited */
-        }
-      }
-    }
+    /* Ends the server's whole process group (POSIX) or process tree
+       (win32) and waits, bounded, for it to actually exit — see
+       scripts/lib/server.mjs. Never a bare process.kill(pid) on
+       POSIX: with the old shell-wrapped spawn that pid was the shell,
+       not next start, and the real server survived as an orphan. */
+    await stopServer(serverProcess);
   }
 }
 
@@ -320,9 +320,13 @@ console.log(`\nProblems: ${problems.length}`);
 if (problems.length) {
   console.log("\nDEFECTS — the production build does not meet its A/AA or ribbon contract:");
   for (const p of problems) console.log(`  !  ${p}`);
-  process.exit(1);
+} else {
+  console.log(
+    "\nZero A/AA violations on both surfaces; the ribbon is present once, never aria-hidden, position: static, max-height: none, with a >=44px named link and no dismiss-shaped control.",
+  );
 }
 
-console.log(
-  "\nZero A/AA violations on both surfaces; the ribbon is present once, never aria-hidden, position: static, max-height: none, with a >=44px named link and no dismiss-shaped control.",
-);
+/* Explicit exit, rather than falling off the end of the script — no
+   lingering handle (a pipe from an orphaned server, or anything else)
+   can keep the event loop alive past this line. */
+process.exit(problems.length > 0 ? 1 : 0);
