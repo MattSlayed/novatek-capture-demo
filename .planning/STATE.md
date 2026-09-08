@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-03-PLAN.md
-last_updated: "2026-09-08T17:32:35.653Z"
+stopped_at: Completed 02-04-PLAN.md
+last_updated: "2026-09-08T17:55:54.721Z"
 last_activity: 2026-09-08
 progress:
   total_phases: 9
   completed_phases: 1
   total_plans: 16
-  completed_plans: 12
+  completed_plans: 13
   percent: 11
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 2 (Fixtures & types) — EXECUTING
-Plan: 4 of 7
+Plan: 5 of 7
 Status: Ready to execute
 Last activity: 2026-09-08
 
-Progress: [████████░░] 75%
+Progress: [████████░░] 81%
 
 ## Performance Metrics
 
@@ -64,6 +64,7 @@ Progress: [████████░░] 75%
 | Phase 02 P01 | 15min | 2 tasks | 1 files |
 | Phase 02 P02 | 35min | 2 tasks | 2 files |
 | Phase 02 P03 | 25min | 2 tasks | 3 files |
+| Phase 02 P04 | 20min | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -109,6 +110,7 @@ Recent decisions affecting current work:
 - [Phase 02]: Reworded orders.ts's own header comment to describe the referral-only asset in prose rather than its literal id — Task 1's own acceptance criterion greps orders.ts for that literal id and expects zero matches
 - [Phase 02]: Each order's governing_docs is computed as the deduplicated sorted union of its own assets' governing_docs codes read from plant.ts — Verified every resulting code resolves in DOC_BY_CODE's six entries before writing the literal arrays; no code was invented
 - [Phase 02]: Used a literal stable extractor_hash string per order's provenance rather than calling plant.ts's prov() — prov() is module-private to plant.ts and the plan explicitly forbids calling it from orders.ts
+- [Phase 02]: tsconfig.json: added allowImportingTsExtensions so register.ts's runtime import of plant.ts's MACHINERY resolves under Node's native type-stripping loader — This project's prior lib/data internal imports were all import type (erased before resolution); register.ts is the first genuine value import between two .ts fixture modules, which requires the literal .ts extension at runtime and this compiler flag to satisfy tsc
 
 ### Pending Todos
 
@@ -142,6 +144,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-08T17:32:35.636Z
-Stopped at: Completed 02-03-PLAN.md
+Last session: 2026-09-08T17:55:54.707Z
+Stopped at: Completed 02-04-PLAN.md
 Resume file: None

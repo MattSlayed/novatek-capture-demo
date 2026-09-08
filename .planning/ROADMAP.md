@@ -105,7 +105,7 @@ Plans:
 **Wave 3** *(blocked on Wave 2 completion)*
 
 - [x] 02-03-PLAN.md — The three artisan accounts, the five work orders and their integrity assertions (wave 3)
-- [ ] 02-04-PLAN.md — The server-only register and the two-layer register-isolation rule wired into verify (wave 3)
+- [x] 02-04-PLAN.md — The server-only register and the two-layer register-isolation rule wired into verify (wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -249,7 +249,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Scaffold & conventions | 9/9 | Complete    | 2026-09-08 |
-| 2. Fixtures & types | 3/7 | In Progress|  |
+| 2. Fixtures & types | 4/7 | In Progress|  |
 | 3. Server seam | 0/TBD | Not started | - |
 | 4. Shell, gate, orders, clock (online) | 0/TBD | Not started | - |
 | 5. Camera → verify → capture → proposals → decisions (online) | 0/TBD | Not started | - |
