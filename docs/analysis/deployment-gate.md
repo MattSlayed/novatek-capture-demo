@@ -159,10 +159,14 @@ Recorded as not confirmed.
 
 ## Open items
 
-- The throwaway branch `throwaway/red-check-demo` (commit `9884a9a`) is
-  still present on GitHub as of this writing. It was never merged, but it
-  has not been deleted. This acceptance criterion of Task 2 is not closed by
-  this artefact; the developer should delete the branch.
+- ~~The throwaway branch `throwaway/red-check-demo` (commit `9884a9a`) is
+  still present on GitHub as of this writing.~~ Resolved 2026-09-08: the
+  branch is deleted, confirmed both on GitHub (`gh api
+  repos/MattSlayed/novatek-capture-demo/branches/throwaway%2Fred-check-demo`
+  now returns 404) and locally (no matching refs). It was never merged —
+  its one commit's parent (`5335c56`) never appears in `origin/dev`'s or
+  `origin/main`'s history. Task 2's acceptance criterion on branch deletion
+  is closed.
 
 ---
 
