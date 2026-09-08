@@ -57,18 +57,38 @@ const EXPECTED_BLOCKS = [
 ];
 
 let raw = "";
+let readOk = false;
 try {
   raw = await readFile(VERCEL_JSON, "utf8");
+  readOk = true;
 } catch (e) {
   problems.push(`could not read ${VERCEL_JSON}: ${e.message}`);
 }
 
+/* Parsed whenever the read succeeded, never only when the text is
+   truthy: an empty vercel.json is not "nothing to check", it is a
+   config that declares no region, no build command and no headers,
+   and must fail exactly like one. A parse that yields anything other
+   than a JSON object (null, an array, a bare string) is the same
+   defect. */
 let config = null;
-if (raw) {
+if (readOk) {
+  let parsed;
+  let parseOk = false;
   try {
-    config = JSON.parse(raw);
+    parsed = JSON.parse(raw);
+    parseOk = true;
   } catch (e) {
     problems.push(`${VERCEL_JSON} does not parse as JSON: ${e.message}`);
+  }
+  if (parseOk) {
+    if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+      problems.push(
+        `${VERCEL_JSON} is not a JSON object (got ${JSON.stringify(parsed)}) — it declares no region, build command or headers (D-04)`,
+      );
+    } else {
+      config = parsed;
+    }
   }
 }
 

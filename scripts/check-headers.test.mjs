@@ -58,6 +58,30 @@ test("the real repository vercel.json exits 0", async () => {
   assert.equal(code, 0, stdout + stderr);
 });
 
+test("an empty vercel.json exits non-zero", async () => {
+  await withFixture({ "vercel.json": "" }, async (dir) => {
+    const { code, stdout } = await runCheck("scripts/check-headers.mjs", { cwd: dir });
+    assert.notEqual(code, 0, "an empty config declares nothing and must not pass");
+    assert.match(stdout, /does not parse as JSON/);
+  });
+});
+
+test("a vercel.json containing only null exits non-zero", async () => {
+  await withFixture({ "vercel.json": "null\n" }, async (dir) => {
+    const { code, stdout } = await runCheck("scripts/check-headers.mjs", { cwd: dir });
+    assert.notEqual(code, 0);
+    assert.match(stdout, /is not a JSON object/);
+  });
+});
+
+test("a vercel.json that is a JSON array exits non-zero", async () => {
+  await withFixture({ "vercel.json": "[]\n" }, async (dir) => {
+    const { code, stdout } = await runCheck("scripts/check-headers.mjs", { cwd: dir });
+    assert.notEqual(code, 0);
+    assert.match(stdout, /is not a JSON object/);
+  });
+});
+
 test("regions set to cdg1 exits non-zero", async () => {
   const fixture = clone();
   fixture.regions = ["cdg1"];
