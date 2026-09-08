@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-09-08T17:16:49.548Z"
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-09-08T17:32:35.653Z"
 last_activity: 2026-09-08
 progress:
   total_phases: 9
   completed_phases: 1
   total_plans: 16
-  completed_plans: 11
+  completed_plans: 12
   percent: 11
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 2 (Fixtures & types) — EXECUTING
-Plan: 3 of 7
+Plan: 4 of 7
 Status: Ready to execute
 Last activity: 2026-09-08
 
-Progress: [███████░░░] 69%
+Progress: [████████░░] 75%
 
 ## Performance Metrics
 
@@ -63,6 +63,7 @@ Progress: [███████░░░] 69%
 | Phase 01-scaffold-conventions P09 | multi-session | 3 tasks | 5 files |
 | Phase 02 P01 | 15min | 2 tasks | 1 files |
 | Phase 02 P02 | 35min | 2 tasks | 2 files |
+| Phase 02 P03 | 25min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,9 @@ Recent decisions affecting current work:
 - [Phase 02]: Left plant.ts's zone-section banner comments untouched during the 02-02 trim; the plan's deletion list did not name them and editing them would exceed whole-record deletion
 - [Phase 02]: Reworded plant.ts's own header comment to avoid the literal excluded-identifier tokens, since the plan's Task 1 acceptance-criteria grep for those tokens matched the header's own prose
 - [Phase 02]: check-fixture-shape.test.mjs asserts MACHINERY_BY_ID's real Array.prototype.sort() order rather than the id sequence quoted in the plan's prose, which was not standard lexicographic order
+- [Phase 02]: Reworded orders.ts's own header comment to describe the referral-only asset in prose rather than its literal id — Task 1's own acceptance criterion greps orders.ts for that literal id and expects zero matches
+- [Phase 02]: Each order's governing_docs is computed as the deduplicated sorted union of its own assets' governing_docs codes read from plant.ts — Verified every resulting code resolves in DOC_BY_CODE's six entries before writing the literal arrays; no code was invented
+- [Phase 02]: Used a literal stable extractor_hash string per order's provenance rather than calling plant.ts's prov() — prov() is module-private to plant.ts and the plan explicitly forbids calling it from orders.ts
 
 ### Pending Todos
 
@@ -138,6 +142,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-08T17:16:49.532Z
-Stopped at: Completed 02-02-PLAN.md
+Last session: 2026-09-08T17:32:35.636Z
+Stopped at: Completed 02-03-PLAN.md
 Resume file: None
