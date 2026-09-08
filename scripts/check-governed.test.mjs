@@ -149,9 +149,9 @@ test("a governed field written with single quotes exits non-zero", async () => {
   );
   assert.notEqual(src, governedModuleSource(), "the fixture must actually change the field");
   await withFixture({ "lib/copy/governed.ts": src }, async (dir) => {
-    const { code, stdout } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
+    const { code, stdout, stderr } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
     assert.notEqual(code, 0);
-    assert.match(stdout, /no extractable strong/);
+    assert.match(stdout, /no extractable strong/, stdout + stderr);
   });
 });
 
@@ -161,9 +161,9 @@ test("a governed field written as a template literal exits non-zero", async () =
     "strong: `Fixture clause for noRedaction.`,",
   );
   await withFixture({ "lib/copy/governed.ts": src }, async (dir) => {
-    const { code, stdout } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
+    const { code, stdout, stderr } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
     assert.notEqual(code, 0);
-    assert.match(stdout, /no extractable strong/);
+    assert.match(stdout, /no extractable strong/, stdout + stderr);
   });
 });
 
@@ -173,9 +173,9 @@ test("a governed field written as a concatenation exits non-zero", async () => {
     'strong: "Fixture clause " + "for noRedaction.",',
   );
   await withFixture({ "lib/copy/governed.ts": src }, async (dir) => {
-    const { code, stdout } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
+    const { code, stdout, stderr } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
     assert.notEqual(code, 0);
-    assert.match(stdout, /no extractable strong/);
+    assert.match(stdout, /no extractable strong/, stdout + stderr);
   });
 });
 
@@ -185,9 +185,9 @@ test("PLATFORM_413 written with single quotes exits non-zero", async () => {
     "before: 'Fixture 413 sentence.',",
   );
   await withFixture({ "lib/copy/governed.ts": src }, async (dir) => {
-    const { code, stdout } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
+    const { code, stdout, stderr } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
     assert.notEqual(code, 0);
-    assert.match(stdout, /"PLATFORM_413" has no extractable before/);
+    assert.match(stdout, /"PLATFORM_413" has no extractable before/, stdout + stderr);
   });
 });
 
@@ -196,9 +196,9 @@ test("a governed entry whose three fields are all empty exits non-zero", async (
     .replace(DOUBLE_QUOTED_STRONG, 'strong: "",')
     .replace('after: " Fixture tail for noRedaction.",', 'after: "",');
   await withFixture({ "lib/copy/governed.ts": src }, async (dir) => {
-    const { code, stdout } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
+    const { code, stdout, stderr } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
     assert.notEqual(code, 0);
-    assert.match(stdout, /"noRedaction" is empty/);
+    assert.match(stdout, /"noRedaction" is empty/, stdout + stderr);
   });
 });
 
@@ -216,9 +216,9 @@ test("a GovernedSentence-shaped object in a second module under lib/ exits non-z
       "lib/copy/more.ts": `export const NINTH = ${NINTH_SHAPE};\n`,
     },
     async (dir) => {
-      const { code, stdout } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
+      const { code, stdout, stderr } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
       assert.notEqual(code, 0);
-      assert.match(stdout, /more\.ts:2 declares a before\/strong\/after-shaped object/);
+      assert.match(stdout, /more\.ts:2 declares a before\/strong\/after-shaped object/, stdout + stderr);
     },
   );
 });
@@ -229,9 +229,9 @@ test("a non-exported GovernedSentence-shaped const inside lib/copy/governed.ts e
       "lib/copy/governed.ts": governedModuleSource() + `\nconst NINTH = ${NINTH_SHAPE};\n`,
     },
     async (dir) => {
-      const { code, stdout } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
+      const { code, stdout, stderr } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
       assert.notEqual(code, 0);
-      assert.match(stdout, /governed\.ts:\d+ declares a before\/strong\/after-shaped object outside GOVERNED and PLATFORM_413/);
+      assert.match(stdout, /governed\.ts:\d+ declares a before\/strong\/after-shaped object outside GOVERNED and PLATFORM_413/, stdout + stderr);
     },
   );
 });
@@ -243,9 +243,9 @@ test("a frozen GovernedSentence-shaped export inside lib/copy/governed.ts exits 
         governedModuleSource() + `\nexport const NINTH = Object.freeze(${NINTH_SHAPE});\n`,
     },
     async (dir) => {
-      const { code, stdout } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
+      const { code, stdout, stderr } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
       assert.notEqual(code, 0);
-      assert.match(stdout, /governed\.ts:\d+ declares a before\/strong\/after-shaped object/);
+      assert.match(stdout, /governed\.ts:\d+ declares a before\/strong\/after-shaped object/, stdout + stderr);
     },
   );
 });
@@ -259,9 +259,9 @@ test("a GovernedSentence-shaped object inside a component under components/ exit
         `export function Extra() {\n  return <p>{extra.strong}</p>;\n}\n`,
     },
     async (dir) => {
-      const { code, stdout } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
+      const { code, stdout, stderr } = await runCheck("scripts/check-governed.mjs", { cwd: dir });
       assert.notEqual(code, 0);
-      assert.match(stdout, /Extra\.tsx:2 declares a before\/strong\/after-shaped object/);
+      assert.match(stdout, /Extra\.tsx:2 declares a before\/strong\/after-shaped object/, stdout + stderr);
     },
   );
 });
