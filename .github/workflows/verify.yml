@@ -8,6 +8,13 @@ on: push
 jobs:
   verify:
     runs-on: ubuntu-latest
+    # A healthy run is a few minutes: npm ci, a Chromium install, then
+    # the gate itself (about a minute). Without a bound, a hang — the
+    # 46-minute orphan server recorded in docs/analysis/deployment-gate.md,
+    # an unanswered fetch loop, a browser that never closes — holds
+    # production aliasing for GitHub's default six hours. Twenty minutes
+    # is several times a healthy run and well short of any hang.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

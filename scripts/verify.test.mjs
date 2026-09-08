@@ -393,6 +393,14 @@ test(".github/workflows/verify.yml declares the verify job on every push", async
   assert.ok(!src.includes("matrix"), "no matrix strategy");
 });
 
+test(".github/workflows/verify.yml bounds the verify job with timeout-minutes so a hang cannot hold production aliasing for hours", async () => {
+  const src = await readFile(".github/workflows/verify.yml", "utf8");
+  const m = src.match(/^\s+timeout-minutes:\s*(\d+)\s*$/m);
+  assert.ok(m, "the verify job must declare timeout-minutes");
+  const minutes = Number(m[1]);
+  assert.ok(minutes >= 10 && minutes <= 30, `timeout-minutes must leave margin over a healthy run yet stop a hang early, got ${minutes}`);
+});
+
 test(".github/workflows/verify.yml's job id is exactly verify (the Vercel Deployment Check name)", async () => {
   const src = await readFile(".github/workflows/verify.yml", "utf8");
   const jobsBlock = src.slice(src.indexOf("jobs:"));
