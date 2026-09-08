@@ -159,6 +159,40 @@ test("a decorative-exemption register whose second entry has no measured_ratio e
   );
 });
 
+test("a decorative-exemption register containing only null exits non-zero", async () => {
+  const inherited = await realInherited();
+  const capture = await realCapture();
+  await withFixture(
+    {
+      "app/styles/tokens.inherited.css": inherited,
+      "app/styles/tokens.capture.css": capture,
+      "docs/design/decorative-exemptions.json": "null\n",
+    },
+    async (dir) => {
+      const { code, stdout } = await runCheck("scripts/check-tokens.mjs", { cwd: dir });
+      assert.notEqual(code, 0, "a null register has no four entries and must not pass");
+      assert.match(stdout, /is not an array/);
+    },
+  );
+});
+
+test("a decorative-exemption register that is a JSON object rather than an array exits non-zero", async () => {
+  const inherited = await realInherited();
+  const capture = await realCapture();
+  await withFixture(
+    {
+      "app/styles/tokens.inherited.css": inherited,
+      "app/styles/tokens.capture.css": capture,
+      "docs/design/decorative-exemptions.json": "{}\n",
+    },
+    async (dir) => {
+      const { code, stdout } = await runCheck("scripts/check-tokens.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+      assert.match(stdout, /is not an array/);
+    },
+  );
+});
+
 test("a decorative-exemption register that is not valid JSON exits non-zero", async () => {
   const inherited = await realInherited();
   const capture = await realCapture();

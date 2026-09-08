@@ -201,14 +201,19 @@ try {
 }
 
 if (exemptionsRaw !== null) {
-  let exemptions = null;
+  /* `parsed` is the sentinel, not the value: JSON.parse("null") yields
+     null, which must reach the array assertion below and fail it
+     rather than read as "parse failed, already reported". */
+  let exemptions;
+  let parsed = false;
   try {
     exemptions = JSON.parse(exemptionsRaw);
+    parsed = true;
   } catch (e) {
     problems.push(`${EXEMPTIONS_PATH} does not parse as JSON: ${e.message}`);
   }
 
-  if (exemptions !== null) {
+  if (parsed) {
     if (!Array.isArray(exemptions)) {
       problems.push(`${EXEMPTIONS_PATH} is not an array`);
     } else {
