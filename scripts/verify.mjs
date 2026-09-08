@@ -183,21 +183,26 @@ export async function spawnStep(step, onSpawn) {
        can terminate the child by signal and prove the code === null
        branch below; the gate itself never passes one. */
     if (typeof onSpawn === "function") onSpawn(child);
-    let combined = "";
+    /* Raw Buffer chunks, decoded once at close. The route glyphs that
+       check-structure --build-output parses (┌ ├ └ ○ ◐) are three-byte
+       UTF-8 sequences; decoding chunk by chunk would turn one split
+       across a chunk boundary into U+FFFD and fail the gate for a
+       reason unrelated to the build. */
+    const chunks = [];
     child.stdout?.on("data", (chunk) => {
       process.stdout.write(chunk);
-      if (step.capture) combined += chunk;
+      if (step.capture) chunks.push(chunk);
     });
     child.stderr?.on("data", (chunk) => {
       process.stderr.write(chunk);
-      if (step.capture) combined += chunk;
+      if (step.capture) chunks.push(chunk);
     });
     child.on("close", async (code, signal) => {
       let captureWritten = true;
       if (step.capture) {
         try {
           await mkdir(path.dirname(step.capture), { recursive: true });
-          await writeFile(step.capture, combined, "utf8");
+          await writeFile(step.capture, Buffer.concat(chunks).toString("utf8"), "utf8");
         } catch (e) {
           captureWritten = false;
           process.stderr.write(

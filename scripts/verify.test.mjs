@@ -229,6 +229,31 @@ test("spawnStep removes a stale capture file even when the child is terminated b
   });
 });
 
+test("spawnStep captures a multibyte route glyph intact when a chunk boundary splits it", async () => {
+  await withFixture({}, async (dir) => {
+    const capture = path.join(dir, "build.log");
+    /* "┌ ○ /\n" as raw bytes: the first byte of the three-byte "┌" is
+       written alone, the rest after a pause, so the two arrive as
+       separate chunks — the shape a chunk boundary inside a glyph
+       takes. Decoding per chunk yields U+FFFD; decoding once does not. */
+    const script = [
+      "const b = Buffer.from([0xe2, 0x94, 0x8c, 0x20, 0xe2, 0x97, 0x8b, 0x20, 0x2f, 0x0a]);",
+      "process.stdout.write(b.subarray(0, 1));",
+      "setTimeout(() => process.stdout.write(b.subarray(1)), 200);",
+    ].join(" ");
+    const code = await spawnStep({
+      id: "glyph-split",
+      command: process.execPath,
+      args: ["-e", script],
+      capture,
+    });
+    assert.equal(code, 0);
+    const log = await readFile(capture, "utf8");
+    assert.ok(log.includes("┌ ○ /"), `expected the intact route row, got ${JSON.stringify(log)}`);
+    assert.ok(!log.includes("�"), "no replacement character may appear in the captured log");
+  });
+});
+
 /* ---------------------------------------------------------------
    exclusion assertions (D-22) — resolveSteps reads only env.VERCEL
    --------------------------------------------------------------- */
