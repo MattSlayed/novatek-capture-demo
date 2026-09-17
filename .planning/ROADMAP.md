@@ -113,7 +113,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 02-06-PLAN.md — The human provenance check: the review sheet, the blocking checkpoint and the signed provenance-check.md (wave 5, not autonomous)
+- [x] 02-06-PLAN.md — The human provenance check: the review sheet, the blocking checkpoint and the signed provenance-check.md (wave 5, not autonomous)
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
@@ -249,7 +249,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Scaffold & conventions | 9/9 | Complete    | 2026-09-08 |
-| 2. Fixtures & types | 5/7 | In Progress|  |
+| 2. Fixtures & types | 6/7 | In Progress|  |
 | 3. Server seam | 0/TBD | Not started | - |
 | 4. Shell, gate, orders, clock (online) | 0/TBD | Not started | - |
 | 5. Camera → verify → capture → proposals → decisions (online) | 0/TBD | Not started | - |
