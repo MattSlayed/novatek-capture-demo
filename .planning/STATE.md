@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-08-PLAN.md
-last_updated: "2026-09-17T22:12:28.171Z"
+stopped_at: Completed 03-09-PLAN.md
+last_updated: "2026-09-17T22:46:05.268Z"
 last_activity: 2026-09-17
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 32
-  completed_plans: 24
+  completed_plans: 25
   percent: 22
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 03 (server-seam) — EXECUTING
-Plan: 9 of 16
+Plan: 10 of 16
 Status: Ready to execute
 Last activity: 2026-09-17
 
-Progress: [████████░░] 75%
+Progress: [████████░░] 78%
 
 ## Performance Metrics
 
@@ -77,6 +77,7 @@ Progress: [████████░░] 75%
 | Phase 03-server-seam P06 | 21min | 2 tasks | 6 files |
 | Phase 03-server-seam P07 | 28min | 2 tasks | 4 files |
 | Phase 03-server-seam P08 | 20min | 2 tasks | 3 files |
+| Phase 03-server-seam P09 | 26min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -153,6 +154,10 @@ Recent decisions affecting current work:
 - [Phase 03-server-seam]: [Phase 03-08] Guarded the open/close POST bodies against a parsed-but-non-object JSON value (array, string, number, null) before calling pick() — Mirrors the identical Rule 1 fix 03-07 already made for POST /api/session -- pick()'s Object.prototype.hasOwnProperty.call would throw on a null body otherwise, and the plan's own read_first pointed at that exact route as this phase's own established analog
 - [Phase 03-server-seam]: [Phase 03-08] A recorded/duplicate outcome's result.server clock is read with the same empty-clock fallback shape app/api/orders/[id]/route.ts's GET handler already uses, rather than a non-null assertion — applyByKind always attaches a clock to a recorded or duplicate order_open/order_close result in practice (it reads the clock back immediately after writing it), so the fallback is unreachable but keeps both routes provably total under strict null checks
 - [Phase 03-server-seam]: [Phase 03-08] outcome.code === null is narrowed with an explicit early return before the final fail() call in the open/close routes, rather than a non-null assertion — ApplyOutcome's own type allows null only for the recorded/duplicate branch already handled above, so this is a type-safety accommodation, not a reachable path for an order_open or order_close item
+- [Phase 03-server-seam]: Dispatched applyItem's duplicate outcome through the same success branch as recorded in verify, captures and decisions routes (03-09) — A duplicate outcome's code is null, and the plan's literal anything-else-fails text would crash fail()'s STATUS_BY_CODE/detailFor lookups; AD-9 promises the identical response on a retried client_id, matching 03-08's precedent
+- [Phase 03-server-seam]: Reconstructed the capture object for verify/captures success bodies by reading it back from lib/store/memory.ts's readCaptures() rather than from result.server (03-09) — SyncItemResult.server carries no capture field at all; reading it back by item.client_id (AD-16) is also the only way to get a byte-exact recorded_at on a duplicate replay, mirroring 03-07's precedent for verifications
+- [Phase 03-server-seam]: Derived X-CAP-Decision-State from the decision's own outcome when no local proposal copy exists to read a state from (03-09) — lib/reconcile/apply.ts's own documented case of a decision reaching an instance that never issued the proposal leaves result.server.proposals absent, so a bare index-and-property read would be undefined there
+- [Phase 03-server-seam]: Wrote every module/function-absence comment in the three new routes without the literal banned identifier its own acceptance criteria check for (03-09) — The plan's own literal comment wording would self-trip the acceptance criteria checking for the absence of specific banned identifiers, same class of issue STATE.md already logs for lib/attribution and lib/access
 
 ### Pending Todos
 
@@ -189,6 +194,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-17T22:12:28.126Z
-Stopped at: Completed 03-08-PLAN.md
+Last session: 2026-09-17T22:46:05.238Z
+Stopped at: Completed 03-09-PLAN.md
 Resume file: None
