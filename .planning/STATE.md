@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-07-PLAN.md
-last_updated: "2026-09-17T21:45:11.666Z"
+stopped_at: Completed 03-08-PLAN.md
+last_updated: "2026-09-17T22:12:28.171Z"
 last_activity: 2026-09-17
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 32
-  completed_plans: 23
+  completed_plans: 24
   percent: 22
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 03 (server-seam) — EXECUTING
-Plan: 8 of 16
+Plan: 9 of 16
 Status: Ready to execute
 Last activity: 2026-09-17
 
-Progress: [███████░░░] 72%
+Progress: [████████░░] 75%
 
 ## Performance Metrics
 
@@ -76,6 +76,7 @@ Progress: [███████░░░] 72%
 | Phase 03 P05 | 49min | 3 tasks | 5 files |
 | Phase 03-server-seam P06 | 21min | 2 tasks | 6 files |
 | Phase 03-server-seam P07 | 28min | 2 tasks | 4 files |
+| Phase 03-server-seam P08 | 20min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -149,6 +150,9 @@ Recent decisions affecting current work:
 - [Phase 03-server-seam]: [Phase 03-07] Reconstructed order-detail verifications from stored verify-purpose Captures via authoredMatch() rather than a store read — lib/store/memory.ts persists no VerificationResult and AD-8 makes one unnecessary (a pure function of assetId+fixtureSet)
 - [Phase 03-server-seam]: [Phase 03-07] app/api/session/route.ts treats a parsed-but-non-object JSON body as an empty object before pick() — request.json() can resolve to null/array/string/number without throwing, and a bare hasOwnProperty.call on a non-object body would crash (Rule 1 fix)
 - [Phase 03-server-seam]: [Phase 03-07] X-CAP-Account is stamped on GET /api/session, GET /api/orders and GET /api/orders/[id], not only POST /api/session — per this plan's own literal instruction; lib/http/contract.ts's HEADER_TABLE routes metadata for that header still names only POST /api/session and was left unchanged (outside this plan's file scope)
+- [Phase 03-server-seam]: [Phase 03-08] Guarded the open/close POST bodies against a parsed-but-non-object JSON value (array, string, number, null) before calling pick() — Mirrors the identical Rule 1 fix 03-07 already made for POST /api/session -- pick()'s Object.prototype.hasOwnProperty.call would throw on a null body otherwise, and the plan's own read_first pointed at that exact route as this phase's own established analog
+- [Phase 03-server-seam]: [Phase 03-08] A recorded/duplicate outcome's result.server clock is read with the same empty-clock fallback shape app/api/orders/[id]/route.ts's GET handler already uses, rather than a non-null assertion — applyByKind always attaches a clock to a recorded or duplicate order_open/order_close result in practice (it reads the clock back immediately after writing it), so the fallback is unreachable but keeps both routes provably total under strict null checks
+- [Phase 03-server-seam]: [Phase 03-08] outcome.code === null is narrowed with an explicit early return before the final fail() call in the open/close routes, rather than a non-null assertion — ApplyOutcome's own type allows null only for the recorded/duplicate branch already handled above, so this is a type-safety accommodation, not a reachable path for an order_open or order_close item
 
 ### Pending Todos
 
@@ -185,6 +189,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-17T21:45:11.627Z
-Stopped at: Completed 03-07-PLAN.md
+Last session: 2026-09-17T22:12:28.126Z
+Stopped at: Completed 03-08-PLAN.md
 Resume file: None
