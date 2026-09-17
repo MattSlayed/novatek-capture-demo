@@ -20,9 +20,9 @@ IDs keep the PRD's own numbering (`REQ-{PRD id}`). Each FR carries its verificat
 
 ### The clock (PRD §4.2)
 
-- [ ] **REQ-FR-7**: Opening an assigned work order starts a server-stamped clock segment; opening an already-open order is idempotent and creates no second segment. *[Verified by: test]*
+- [x] **REQ-FR-7**: Opening an assigned work order starts a server-stamped clock segment; opening an already-open order is idempotent and creates no second segment. *[Verified by: test]*
 - [x] **REQ-FR-8**: Closing an open order ends the current segment; closing a closed or unopened order returns a stated conflict. *[Verified by: test]*
-- [ ] **REQ-FR-9**: Reopening a closed order appends a new segment; prior segments are retained. *[Verified by: test]*
+- [x] **REQ-FR-9**: Reopening a closed order appends a new segment; prior segments are retained. *[Verified by: test]*
 - [ ] **REQ-FR-10**: Accrued hours are computed server-side from segments; the hours route accepts reads only (write → 405); every write route is enumerated against its accepted fields and none accepts an artisan-supplied duration or hour value. *[Verified by: test + inspection]*
 - [x] **REQ-FR-11**: A segment opened without signal records the device-claimed start, clamped no earlier than the session's issue time and the device's last server contact, marked device-reconciled rather than server-stamped; both the device-claimed time and the server-measured offset are retained; neither silently replaces the other. *[Verified by: test]*
 - [ ] **REQ-FR-58**: An artisan can read their own accrued record in full — every segment, its source, any measured offset; nothing withheld. Stated limitation: no route to contest a segment. *[Verified by: demonstration]*
@@ -32,8 +32,8 @@ IDs keep the PRD's own numbering (`REQ-{PRD id}`). Each FR carries its verificat
 - [ ] **REQ-FR-12**: Photograph an asset with the camera: rear camera by preference; live video dimensions read at shutter time; the stored image re-encoded, bounded on its long edge, carrying no EXIF. *[Verified by: test + demonstration]*
 - [ ] **REQ-FR-13**: Where the camera stream is unavailable or refused, capture through the platform file input with environment capture; the resulting flow is identical. *[Verified by: test + demonstration]*
 - [ ] **REQ-FR-14**: Record a spoken note up to a bounded duration; container and codec negotiated at runtime by capability probe, no hardcoded format, format read back from the constructed recorder; duration by wall clock; where construction fails the artisan is told plainly that voice notes are unavailable in this browser. *[Verified by: test + demonstration]*
-- [ ] **REQ-FR-15**: For a photograph only a hash of the full image, its size, its type and a bounded thumbnail leave the device; the request body contains no full-resolution image field; the thumbnail bound is enforced client- and server-side in encoded bytes. *[Verified by: test + inspection]*
-- [ ] **REQ-FR-16**: A spoken note's request carries a hash, a size, a type and a duration and no audio — exactly the four declared fields; the governed sentence states exactly this and no more. *[Verified by: test + inspection]*
+- [x] **REQ-FR-15**: For a photograph only a hash of the full image, its size, its type and a bounded thumbnail leave the device; the request body contains no full-resolution image field; the thumbnail bound is enforced client- and server-side in encoded bytes. *[Verified by: test + inspection]*
+- [x] **REQ-FR-16**: A spoken note's request carries a hash, a size, a type and a duration and no audio — exactly the four declared fields; the governed sentence states exactly this and no more. *[Verified by: test + inspection]*
 - [x] **REQ-FR-17**: A verify-purpose capture returns a match drawn from the asset record, labelled authored / no model ran; one named module declares inputs `(assetId, fixtureSet)` and a build rule asserts the capture payload is neither a parameter nor reachable; negative set: differing images, no thumbnail, solid-colour thumbnail → byte-identical results; the dependency manifest contains no image-analysis, vision, OCR or inference library; a response header states the verification is authored; null confidence, authored extractor, no code path sets a confidence. *[Verified by: analysis (primary) + enumerated negative test set + inspection]*
 - [x] **REQ-FR-18**: A capture against an asset not on the artisan's order is refused with a stated reason; a referral is a different object, not a bypass. *[Verified by: test]*
 - [x] **REQ-FR-19**: Oversized media is refused with a stated reason and a sentence the artisan can act on. *[Verified by: test]*
@@ -49,8 +49,8 @@ IDs keep the PRD's own numbering (`REQ-{PRD id}`). Each FR carries its verificat
 - [x] **REQ-FR-23**: Every actor field on every record is the acting account derived from the session, produced by one named function; a build rule asserts no other module assigns one and no route schema contains one; negative set across session, clock segment, capture, verification, decision, referral: a body naming a different artisan yields a record naming the acting account and the submitted value appears nowhere. *[Verified by: analysis (primary) + enumerated negative test set]*
 - [ ] **REQ-FR-59**: Recording a decision persists the decision context (proposal text as rendered, grade, cited record, evidence-or-context relation, fixture version in force) bound before the decision is recorded; retrievable with the decision, in the record handed onward, surviving later fixture changes. *[Verified by: test]*
 - [ ] **REQ-FR-60**: Every act on a proposal or referral — create, decide, refuse, conflict, reject, success and failure alike — produces a server-generated, time-stamped entry naming the acting account, event type and outcome; retained for the store's stated window; surfaced in the record handed onward; never obscures an earlier entry. *[Verified by: test]*
-- [ ] **REQ-FR-61**: No route accepts client-supplied observation text, grade or provenance that becomes a proposal; every write route enumerated against accepted fields. *[Verified by: inspection]*
-- [ ] **REQ-FR-24**: Every write to the record store passes through a single reconciliation module with no operation creating a finding; a build rule asserts nothing else writes; the non-bypassability analysis enumerates every interface and every configuration value (env vars, feature flags, build modes, fixture selection); for every write route the resulting state is from {open, accepted, rejected, superseded}. *[Verified by: analysis (primary) + enumerated negative test set]*
+- [x] **REQ-FR-61**: No route accepts client-supplied observation text, grade or provenance that becomes a proposal; every write route enumerated against accepted fields. *[Verified by: inspection]*
+- [x] **REQ-FR-24**: Every write to the record store passes through a single reconciliation module with no operation creating a finding; a build rule asserts nothing else writes; the non-bypassability analysis enumerates every interface and every configuration value (env vars, feature flags, build modes, fixture selection); for every write route the resulting state is from {open, accepted, rejected, superseded}. *[Verified by: analysis (primary) + enumerated negative test set]*
 - [ ] **REQ-FR-25**: A rejected proposal is retained with its decision, decider and time, surfaced in the record handed onward; no operation deletes a rejection. *[Verified by: test]*
 - [ ] **REQ-FR-26**: A superseded proposal remains retrievable with its prior state, the replacing state and the time of change, and appears in the record handed onward. *[Verified by: test]*
 - [x] **REQ-FR-27**: For a decision on a proposal that is unknown or not the artisan's, the response is identical and produced before any state comparison; no conflict response distinguishes another account's proposal from a nonexistent one. *[Verified by: test]*
@@ -200,22 +200,22 @@ Addendum candidates adopted into prd.md (UI-01–08 as NFR-1–8, DEV-01 as NFR-
 | REQ-FR-4 | Phase 3 | Complete |
 | REQ-FR-5 | Phase 3 | Pending |
 | REQ-FR-6 | Phase 3 | Complete |
-| REQ-FR-7 | Phase 3 | Pending |
+| REQ-FR-7 | Phase 3 | Complete |
 | REQ-FR-8 | Phase 3 | Complete |
-| REQ-FR-9 | Phase 3 | Pending |
+| REQ-FR-9 | Phase 3 | Complete |
 | REQ-FR-10 | Phase 3 | Pending |
 | REQ-FR-11 | Phase 3 | Complete |
-| REQ-FR-15 | Phase 3 | Pending |
-| REQ-FR-16 | Phase 3 | Pending |
+| REQ-FR-15 | Phase 3 | Complete |
+| REQ-FR-16 | Phase 3 | Complete |
 | REQ-FR-17 | Phase 3 | Complete |
 | REQ-FR-18 | Phase 3 | Complete |
 | REQ-FR-19 | Phase 3 | Complete |
 | REQ-FR-21 | Phase 3 | Complete |
 | REQ-FR-23 | Phase 3 | Complete |
-| REQ-FR-24 | Phase 3 | Pending |
+| REQ-FR-24 | Phase 3 | Complete |
 | REQ-FR-27 | Phase 3 | Complete |
 | REQ-FR-57 | Phase 3 | Complete |
-| REQ-FR-61 | Phase 3 | Pending |
+| REQ-FR-61 | Phase 3 | Complete |
 | REQ-NFR-F1 | Phase 3 | Complete |
 | REQ-FR-48a | Phase 4 | Pending |
 | REQ-FR-58 | Phase 4 | Pending |

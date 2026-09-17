@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-04-PLAN.md
-last_updated: "2026-09-17T19:40:03.837Z"
+stopped_at: Completed 03-05-PLAN.md
+last_updated: "2026-09-17T20:41:19.365Z"
 last_activity: 2026-09-17
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 32
-  completed_plans: 20
+  completed_plans: 21
   percent: 22
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 03 (server-seam) — EXECUTING
-Plan: 5 of 16
+Plan: 6 of 16
 Status: Ready to execute
 Last activity: 2026-09-17
 
-Progress: [██████░░░░] 59%
+Progress: [███████░░░] 66%
 
 ## Performance Metrics
 
@@ -73,6 +73,7 @@ Progress: [██████░░░░] 59%
 | Phase 03 P02 | 38min | 3 tasks | 5 files |
 | Phase 03-server-seam P03 | 26min | 3 tasks | 6 files |
 | Phase 03-server-seam P04 | 25min | 2 tasks | 4 files |
+| Phase 03 P05 | 49min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -138,6 +139,9 @@ Recent decisions affecting current work:
 - [Phase 03-server-seam]: [Phase 03-server-seam P04]: Excluded "capture" from lib/verify/authored.test.mjs's banned-substring sweep and "sha256" from lib/proposals/derive.test.mjs's — both are unavoidable substrings inside plan-mandated literal code (Omit's "capture_id" type argument; createHmac's "sha256" algorithm name) — The plan's own acceptance-criteria grep for lib/verify/authored.ts bans "sha256|thumb|duration_ms|payload" (satisfiable) while its action text additionally lists "bytes, mime, capture" for the unit test to sweep; the plan also mandates the literal type Omit<VerificationResult, "capture_id" | "verified_at"> verbatim, which contains "capture" and cannot be reworded without breaking the Omit. Symmetrically, lib/proposals/derive.ts's plan text mandates createHmac("sha256", signingKey()) verbatim (RESEARCH.md Pattern 3) while also asking the unit test to assert the source contains no "sha256". Both are satisfied by keeping the mandated code exactly as specified and narrowing each test's banned-word list to what is actually achievable, documented inline in each test file.
 - [Phase 03-server-seam]: [Phase 03-server-seam P04]: lib/proposals/derive.ts's resolveCitedRecord scopes CitedFact resolution to the observation's own asset, not a search across every asset's facts — Verified directly against lib/data/plant.ts before writing the resolver: every fact-cited observation in the twelve shipped rows cites a CitedFact that lives on its own asset's own facts array (e.g. obs-ap003-disc's f-ap003-vib is on m-ap003 itself). This matches the plan's literal instruction and is simpler than scripts/check-observations.mjs's build-time checker, which searches every machine's facts because it has no asset_id context of its own to scope by.
 - [Phase 03-server-seam]: [Phase 03-server-seam P04]: Fixed 3 raw NUL control bytes that a Write tool call embedded in lib/proposals/derive.ts's first draft, in place of the intended six-character escape-sequence text for a NUL byte separator, before running any test against the file — A prior MEMORY.md note on this exact project already flags that subagent-written files can carry NUL bytes when the six-character JavaScript escape-sequence text for a NUL byte is typed directly into Write or Edit tool content: an intermediate JSON layer decodes it into a real control character instead of leaving it as literal source text. Diagnosed with a Node script that reads the file as a raw Buffer and counts 0x00 bytes (found 3, at the exact 3 places the escape sequence was intended); repaired with a second Node script that rebuilds the replacement text from String.fromCharCode(92) concatenated with the plain string "u0000", so the fix script itself never contains a literal backslash-u sequence that could be reinterpreted the same way. Re-verified zero NUL bytes and three correct literal occurrences of the escape sequence before writing or running the test file.
+- [Phase 03]: Added lib/store/memory.ts's readUnattributedAttempts() export (Rule 2) — No export exposed the no-session refusal ring; this plan's own test needed to read it back to prove FR-60's retained-and-readable guarantee
+- [Phase 03]: apply.ts builds every written record by explicit named-field assignment, never spreading a payload — Makes AD-20's drop-at-parse guarantee hold at the writer regardless of caller behaviour; pick() stays exported from validate.ts for a later route layer's own body parsing
+- [Phase 03]: A decision reaching an instance that never issued the proposal is recorded outright, bypassing proposal_superseded/order_closed/clock_skew — None of those checks has local state to compare against; EXPERIENCE.md's own stated behaviour for this case is unconditional recording, never a server-restarted sentence
 
 ### Pending Todos
 
@@ -174,6 +178,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-17T19:30:34.259Z
-Stopped at: Completed 03-04-PLAN.md
+Last session: 2026-09-17T20:41:19.334Z
+Stopped at: Completed 03-05-PLAN.md
 Resume file: None
