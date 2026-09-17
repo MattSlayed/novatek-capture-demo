@@ -10,10 +10,10 @@ IDs keep the PRD's own numbering (`REQ-{PRD id}`). Each FR carries its verificat
 ### Identity and work-order access — the seam (PRD §4.1)
 
 - [x] **REQ-FR-1**: An unauthenticated visitor chooses one of three artisan personas at the gate and receives a session bound to that account: HttpOnly, SameSite=Lax cookie (Secure in production); unknown persona returns 404 with a stated reason; no identity value from the body is persisted. *[Verified by: test]*
-- [ ] **REQ-FR-2**: A client can ask the server which account it is acting as and receives the account or 401. *[Verified by: test]*
-- [ ] **REQ-FR-3**: An artisan can end the session; the cookie is cleared. Stated limitation (Limits screen + handover): the credential is stateless, so a copied credential remains valid until expiry; no revocation is claimed. *[Verified by: test]*
+- [x] **REQ-FR-2**: A client can ask the server which account it is acting as and receives the account or 401. *[Verified by: test]*
+- [x] **REQ-FR-3**: An artisan can end the session; the cookie is cleared. Stated limitation (Limits screen + handover): the credential is stateless, so a copied credential remains valid until expiry; no revocation is claimed. *[Verified by: test]*
 - [x] **REQ-FR-4**: An artisan sees the work orders assigned to their account and no others, read through one named accessor taking the session-derived account as a non-optional argument; a build rule asserts no other module reads the order store. Negative set: B's and C's ids directly, `account` query parameter, `account` in body, `X-Account` header — no response contains an order not assigned to A; unauthenticated → 401; response carries the acting account in a header. *[Verified by: analysis (primary) + enumerated negative test set]*
-- [ ] **REQ-FR-5**: An artisan can open a work order assigned to them and receive the order, its assets, its clock, and any verifications, proposals and decisions already recorded; server-only fields stripped. *[Verified by: test]*
+- [x] **REQ-FR-5**: An artisan can open a work order assigned to them and receive the order, its assets, its clock, and any verifications, proposals and decisions already recorded; server-only fields stripped. *[Verified by: test]*
 - [x] **REQ-FR-6**: A request for an order that belongs to another account returns exactly the response a nonexistent order returns — identical status, body and headers — on every route including reconciliation. Negative set: read, open, close, capture, decide and sync routes byte-identical for an unowned id and a fabricated id. *[Verified by: test]*
 - [x] **REQ-FR-57**: Authorisation is decided by work-order assignment alone, in a single named accessor invoked by every route; a written non-bypassability description enumerates every route; no route consults RBAC tier; no authorisation in framework middleware; the highest-tier persona reaches exactly their assigned orders. *[Verified by: analysis (primary) + inspection]*
 - [x] **REQ-NFR-F1**: Every response carries no-store caching, the store kind and the serving instance identifier, so a reviewer can attribute any observed behaviour to an instance. *[Verified by: test]*
@@ -195,10 +195,10 @@ Addendum candidates adopted into prd.md (UI-01–08 as NFR-1–8, DEV-01 as NFR-
 | REQ-SM-5 | Phase 1 | Complete |
 | REQ-FR-21a | Phase 2 | Complete |
 | REQ-FR-1 | Phase 3 | Complete |
-| REQ-FR-2 | Phase 3 | Pending |
-| REQ-FR-3 | Phase 3 | Pending |
+| REQ-FR-2 | Phase 3 | Complete |
+| REQ-FR-3 | Phase 3 | Complete |
 | REQ-FR-4 | Phase 3 | Complete |
-| REQ-FR-5 | Phase 3 | Pending |
+| REQ-FR-5 | Phase 3 | Complete |
 | REQ-FR-6 | Phase 3 | Complete |
 | REQ-FR-7 | Phase 3 | Complete |
 | REQ-FR-8 | Phase 3 | Complete |
