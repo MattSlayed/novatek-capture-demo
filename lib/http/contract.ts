@@ -2,14 +2,15 @@
    HTTP CONTRACT — the wire format, provable without a server (AD-11)
 
    Pure values and pure functions only. This module has no runtime
-   dependency on the Next.js framework at all — no NextResponse, no
-   framework import of any kind — and that omission is deliberate,
-   not an oversight: the framework's server module does not resolve
-   under a bare `node --test` run (verified this session — see
-   03-02-PLAN.md's own interfaces note), so anything that needs
-   `NextResponse` lives in `lib/http/respond.ts` instead, and
-   everything provable without a running server lives here, where a
-   plain `node --test` run can prove it.
+   dependency on the Next.js framework at all — no response
+   constructor, no framework import of any kind — and that omission
+   is deliberate, not an oversight: the framework's server module
+   does not resolve under a bare `node --test` run (verified this
+   session — see 03-02-PLAN.md's own interfaces note), so the one
+   function that builds a framework response object lives in
+   `lib/http/respond.ts` instead, and everything provable without a
+   running server lives here, where a plain `node --test` run can
+   prove it.
 
    What this module owns: the three universal headers every response
    carries, the table marking every other `X-CAP-*` name universal or
