@@ -5,3 +5,19 @@
 # already-checked-out copy. Marking it -text disables all newline
 # conversion so the bytes survive checkout unchanged.
 app/styles/tokens.inherited.css -text
+
+# The four fixture files below are the opposite case: they are
+# actively edited and re-pinned through the rest of the project
+# (D-14), not pinned once and left alone. `text eol=lf` normalises
+# them to LF on checkout and check-in instead of disabling
+# normalisation outright. This entry is defence in depth only — it
+# acts on checkout and check-in and does not retroactively
+# renormalise content already committed with CRLF. The load-bearing
+# mechanism is the CRLF-to-LF normalisation inside
+# scripts/check-fixture-hash.mjs itself, which recomputes the pinned
+# digest over normalised content and so cannot be defeated by an
+# editor's line-ending setting.
+lib/data/plant.ts text eol=lf
+lib/data/artisans.ts text eol=lf
+lib/data/orders.ts text eol=lf
+lib/data/observations.ts text eol=lf
