@@ -157,7 +157,7 @@ Plans:
 - [x] 03-07-PLAN.md — Routes: health, session, orders and order detail (wave 4)
 - [x] 03-08-PLAN.md — Routes: open, close and the read-only hours route with its explicit 405 (wave 4)
 - [x] 03-09-PLAN.md — Routes: verify, captures and decisions (wave 4)
-- [ ] 03-10-PLAN.md — Route: sync, whole — the envelope, the ceiling, the loop and the four counters (wave 4)
+- [x] 03-10-PLAN.md — Route: sync, whole — the envelope, the ceiling, the loop and the four counters (wave 4)
 - [ ] 03-11-PLAN.md — The walk payload and the walk route (wave 4)
 
 **Wave 5** *(blocked on Wave 4 completion)*

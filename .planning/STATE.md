@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-09-PLAN.md
-last_updated: "2026-09-17T22:46:05.268Z"
+stopped_at: Completed 03-10-PLAN.md
+last_updated: "2026-09-17T23:31:02.547Z"
 last_activity: 2026-09-17
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 32
-  completed_plans: 25
+  completed_plans: 26
   percent: 22
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 03 (server-seam) — EXECUTING
-Plan: 10 of 16
+Plan: 11 of 16
 Status: Ready to execute
 Last activity: 2026-09-17
 
-Progress: [████████░░] 78%
+Progress: [████████░░] 81%
 
 ## Performance Metrics
 
@@ -78,6 +78,7 @@ Progress: [████████░░] 78%
 | Phase 03-server-seam P07 | 28min | 2 tasks | 4 files |
 | Phase 03-server-seam P08 | 20min | 2 tasks | 3 files |
 | Phase 03-server-seam P09 | 26min | 2 tasks | 3 files |
+| Phase 03-server-seam P10 | 47min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -158,6 +159,8 @@ Recent decisions affecting current work:
 - [Phase 03-server-seam]: Reconstructed the capture object for verify/captures success bodies by reading it back from lib/store/memory.ts's readCaptures() rather than from result.server (03-09) — SyncItemResult.server carries no capture field at all; reading it back by item.client_id (AD-16) is also the only way to get a byte-exact recorded_at on a duplicate replay, mirroring 03-07's precedent for verifications
 - [Phase 03-server-seam]: Derived X-CAP-Decision-State from the decision's own outcome when no local proposal copy exists to read a state from (03-09) — lib/reconcile/apply.ts's own documented case of a decision reaching an instance that never issued the proposal leaves result.server.proposals absent, so a bare index-and-property read would be undefined there
 - [Phase 03-server-seam]: Wrote every module/function-absence comment in the three new routes without the literal banned identifier its own acceptance criteria check for (03-09) — The plan's own literal comment wording would self-trip the acceptance criteria checking for the absence of specific banned identifiers, same class of issue STATE.md already logs for lib/attribution and lib/access
+- [Phase 03-server-seam]: [Phase 03-server-seam P10] app/api/sync/route.ts gates whether an item reaches applyItem on validateEnvelopeItem(item).field === "client_id" rather than on the refusal's code — validateEnvelopeItem checks client_id before any other field and returns on first failure, so a refusal on any other field structurally proves client_id already passed; the one no-writer exception item is rendered with client_id: "" (a non-nullable string) rather than dropped from results[].
+- [Phase 03-server-seam]: [Phase 03-server-seam P10] Added a defensive try/catch around the one applyItem call site in app/api/sync/route.ts, converting any exception into a local rejected/bad_shape result (Rule 1 fix) — lib/reconcile/validate.ts's idempotencyHash() indexes ACCEPTED_PAYLOAD_FIELDS by item.kind before the writer's own shape step ever runs; every online route hardcodes a literal valid kind, but /api/sync is the first caller that can hand the writer an attacker- or version-skew-controlled kind (AD-18), and an unrecognised one throws inside pick()'s for...of, which would otherwise abort the whole batch and drop every other item's result with it. Empirically reproduced and confirmed fixed against a live server before this fix was added.
 
 ### Pending Todos
 
@@ -194,6 +197,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-17T22:46:05.238Z
-Stopped at: Completed 03-09-PLAN.md
+Last session: 2026-09-17T23:31:02.518Z
+Stopped at: Completed 03-10-PLAN.md
 Resume file: None
