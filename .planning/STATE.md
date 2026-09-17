@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-03-PLAN.md
-last_updated: "2026-09-17T18:59:55.885Z"
+stopped_at: Completed 03-04-PLAN.md
+last_updated: "2026-09-17T19:34:11.407Z"
 last_activity: 2026-09-17
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 32
-  completed_plans: 19
+  completed_plans: 20
   percent: 22
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 03 (server-seam) — EXECUTING
-Plan: 4 of 16
+Plan: 5 of 16
 Status: Ready to execute
 Last activity: 2026-09-17
 
@@ -72,6 +72,7 @@ Progress: [██████░░░░] 59%
 | Phase 03 P01 | 28min | 3 tasks | 12 files |
 | Phase 03 P02 | 38min | 3 tasks | 5 files |
 | Phase 03-server-seam P03 | 26min | 3 tasks | 6 files |
+| Phase 03-server-seam P04 | 25min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -134,6 +135,9 @@ Recent decisions affecting current work:
 - [Phase 03-02]: respond.ts's fail() refuses ANY caller header and ok() also guards Cache-Control directly, beyond the plan's literal HEADER_TABLE-scope wording — HEADER_TABLE is scoped to X-CAP-* names only, so its literal scope field would not catch an un-catalogued X-CAP-* name on fail() or a Cache-Control override on ok() (Rule 2 hardening)
 - [Phase 03-server-seam]: Session payload is JSON.stringify(session), base64url-encoded; verifySessionValue treats an empty payload or signature half as malformed before any HMAC is computed — Whole Session shape is small enough that no field needs independent slicing; degenerate values should never reach the crypto call
 - [Phase 03-server-seam]: Several lib/attribution and lib/access comments were worded to avoid literal banned identifiers (rbac_tier, register, body, request, headers, searchParams) that this plan's own acceptance-criteria greps forbid — Preserves the documented intent without self-tripping the acceptance check, following the same lesson 03-01 and 03-02 already recorded for self-tripping comments
+- [Phase 03-server-seam]: [Phase 03-server-seam P04]: Excluded "capture" from lib/verify/authored.test.mjs's banned-substring sweep and "sha256" from lib/proposals/derive.test.mjs's — both are unavoidable substrings inside plan-mandated literal code (Omit's "capture_id" type argument; createHmac's "sha256" algorithm name) — The plan's own acceptance-criteria grep for lib/verify/authored.ts bans "sha256|thumb|duration_ms|payload" (satisfiable) while its action text additionally lists "bytes, mime, capture" for the unit test to sweep; the plan also mandates the literal type Omit<VerificationResult, "capture_id" | "verified_at"> verbatim, which contains "capture" and cannot be reworded without breaking the Omit. Symmetrically, lib/proposals/derive.ts's plan text mandates createHmac("sha256", signingKey()) verbatim (RESEARCH.md Pattern 3) while also asking the unit test to assert the source contains no "sha256". Both are satisfied by keeping the mandated code exactly as specified and narrowing each test's banned-word list to what is actually achievable, documented inline in each test file.
+- [Phase 03-server-seam]: [Phase 03-server-seam P04]: lib/proposals/derive.ts's resolveCitedRecord scopes CitedFact resolution to the observation's own asset, not a search across every asset's facts — Verified directly against lib/data/plant.ts before writing the resolver: every fact-cited observation in the twelve shipped rows cites a CitedFact that lives on its own asset's own facts array (e.g. obs-ap003-disc's f-ap003-vib is on m-ap003 itself). This matches the plan's literal instruction and is simpler than scripts/check-observations.mjs's build-time checker, which searches every machine's facts because it has no asset_id context of its own to scope by.
+- [Phase 03-server-seam]: [Phase 03-server-seam P04]: Fixed 3 raw NUL control bytes that a Write tool call embedded in lib/proposals/derive.ts's first draft, in place of the intended six-character escape-sequence text for a NUL byte separator, before running any test against the file — A prior MEMORY.md note on this exact project already flags that subagent-written files can carry NUL bytes when the six-character JavaScript escape-sequence text for a NUL byte is typed directly into Write or Edit tool content: an intermediate JSON layer decodes it into a real control character instead of leaving it as literal source text. Diagnosed with a Node script that reads the file as a raw Buffer and counts 0x00 bytes (found 3, at the exact 3 places the escape sequence was intended); repaired with a second Node script that rebuilds the replacement text from String.fromCharCode(92) concatenated with the plain string "u0000", so the fix script itself never contains a literal backslash-u sequence that could be reinterpreted the same way. Re-verified zero NUL bytes and three correct literal occurrences of the escape sequence before writing or running the test file.
 
 ### Pending Todos
 
@@ -147,6 +151,7 @@ None yet.
 - [Phase 6]: Outbound size budget below the platform 4.5 MB limit is a blocker on the batch ceiling — decide before tuning
 - [Phase 7]: NFR-10 gloved test needs five artisans across three trades on the approved devices — scheduling dependency
 - [Production]: The field-technician extension of the inherited RBAC ceiling should be ratified by the parent programme before production
+- [SECURITY] Unexplained, uncommitted working-tree modifications discovered in lib/data/types.ts and scripts/claims-audit.mjs during 03-04 execution (2026-09-17) — neither file is in plan 03-04's scope (lib/verify/, lib/proposals/ only) and neither was touched by any Write/Edit tool call this session; the initial git status at session start showed both files clean. The diff narrows and partially disables claims-audit.mjs's IoT/SCADA prohibition (adds allowQuoted: true, rewrites the pattern to carve out a "scheduled historian read" exception) and edits types.ts's CitedFact.liveRead comment to assert plant condition data flows through a "historian path" — a capability PROJECT.md's Out of Scope section explicitly excludes ("No live plant data... not a CMMS"). The diff cites "Business Plan v3.1 D23", "FINDINGS.md:93", "A2-claims.md:83" and "audit/2026-08-30-gold-standard", none of which exist anywhere in this repository or .planning/. NOT staged, NOT committed, NOT reverted by the executor — left exactly as found on disk for review. Run `git diff lib/data/types.ts scripts/claims-audit.mjs` to inspect. Needs immediate human investigation before the next plan in this phase executes.
 
 ## Deferred Items
 
@@ -167,6 +172,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-17T18:59:55.842Z
-Stopped at: Completed 03-03-PLAN.md
+Last session: 2026-09-17T19:30:34.259Z
+Stopped at: Completed 03-04-PLAN.md
 Resume file: None

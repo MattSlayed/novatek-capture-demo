@@ -145,7 +145,7 @@ Plans:
 
 - [x] 03-02-PLAN.md — The memory store, the transport contract and the one Response constructor (wave 2)
 - [x] 03-03-PLAN.md — The session cookie, the one attribution producer and the one accessor (wave 2)
-- [ ] 03-04-PLAN.md — The authored match and the derived proposal id (wave 2)
+- [x] 03-04-PLAN.md — The authored match and the derived proposal id (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -291,7 +291,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 |-------|----------------|--------|-----------|
 | 1. Scaffold & conventions | 9/9 | Complete    | 2026-09-08 |
 | 2. Fixtures & types | 7/7 | Complete    | 2026-09-17 |
-| 3. Server seam | 2/16 | In Progress|  |
+| 3. Server seam | 4/16 | In Progress|  |
 | 4. Shell, gate, orders, clock (online) | 0/TBD | Not started | - |
 | 5. Camera → verify → capture → proposals → decisions (online) | 0/TBD | Not started | - |
 | 6. Offline | 0/TBD | Not started | - |
