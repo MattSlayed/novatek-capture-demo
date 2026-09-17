@@ -95,7 +95,7 @@ None - no external service configuration required.
 
 - REQ-FR-21a is complete: `docs/analysis/provenance-check.md` is a signed, per-row artefact a second person can repeat without reading the code, with the reviewer's name and the date, and the two referral rows recorded as considered and not subject.
 - `02-VALIDATION.md`'s Manual-Only Verifications row for this gate is discharged.
-- Phase 2 (Fixtures & types) is now complete — this was the last plan (6 of ... per STATE.md's plan-of-7 framing; confirm against ROADMAP.md at state-update time).
+- Phase 2 (Fixtures & types) is not yet complete: `02-07-PLAN.md` (fixture versioning and the content-hash pin, wave 6, `depends_on: ["02-04", "02-06"]`) is the remaining plan, now unblocked by this plan's completion.
 - `npm run verify` is green end-to-end with the signed file and its structural guard in place; no regression in any of the existing 218 fixture-suite tests.
 
 ## Self-Check: PASSED
