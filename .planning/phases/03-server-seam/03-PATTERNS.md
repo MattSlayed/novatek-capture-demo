@@ -46,7 +46,7 @@ This project's `next.config.ts` sets `cacheComponents: true` (build-asserted by 
 | `scripts/check-named-packages.mjs` + `.test.mjs` | config/tooling | batch | `scripts/check-governed.mjs` (text sweep) + `scripts/check-headers.mjs` (JSON read) | partial |
 | `scripts/check-accepted-fields.mjs` + `.test.mjs` | config/tooling | batch | `scripts/check-headers.mjs` | strong |
 | `scripts/check-non-bypassability.mjs` + `.test.mjs` | config/tooling | batch | `scripts/check-structure.mjs` + `.test.mjs` | exact (D-12 names this explicitly) |
-| `scripts/server/route-suite.test.mjs` | test | request-response (HTTP) | `scripts/check-wcag.mjs` + `scripts/lib/server.mjs` | strong |
+| `scripts/server/route-suite.proof.mjs` | test | request-response (HTTP) | `scripts/check-wcag.mjs` + `scripts/lib/server.mjs` | strong |
 | `scripts/curl-suite.sh` | test script | request-response | `docs/CAPTURE-PLAN-SEED.md` §Verification's embedded bash block (no `.sh` file precedent in `scripts/`) | partial |
 | `docs/analysis/single-writer-non-bypassability.md` | doc | n/a | `docs/analysis/deployment-gate.md` | strong |
 | `docs/analysis/server-seam-verification.md` (name TBD) | doc | n/a | `docs/analysis/deployment-gate.md` + `docs/analysis/vercel-regions.md` | strong |
@@ -500,7 +500,7 @@ D-12's rule inverts this "must be absent" check into a "must be present [in the 
 
 ---
 
-### `scripts/server/route-suite.test.mjs` (test, request-response over HTTP)
+### `scripts/server/route-suite.proof.mjs` (test, request-response over HTTP)
 
 **Analogs:** `scripts/check-wcag.mjs` (build-then-start-then-assert-then-teardown shape, lines 241-318) + `scripts/lib/server.mjs` (`startServer`/`stopServer`, both read in full).
 
@@ -527,7 +527,7 @@ while (Date.now() < deadline) {
 }
 ```
 This phase's readiness probe should poll `GET /api/health` instead of `/` (RESEARCH.md's own recommendation) since that IS the route under test.
-**Critical placement gotcha (RESEARCH.md Code Example 9's closing paragraph):** `verify.mjs`'s `fixture-suite` STEP runs `node --test scripts/**/*.test.mjs` **before** `next-build`. If `scripts/server/route-suite.test.mjs` matches that glob, it gets collected and run when `.next` doesn't exist yet and fails for an unrelated reason. Give it its own explicit STEPS entry (`{ command: process.execPath, args: ["--test", "scripts/server/route-suite.test.mjs"] }`) placed after `next-build`, and verify `scripts/verify.test.mjs`'s step-counting assertions (see below) don't double-count it against the `fixture-suite` glob.
+**Critical placement gotcha (RESEARCH.md Code Example 9's closing paragraph):** `verify.mjs`'s `fixture-suite` STEP runs `node --test scripts/**/*.test.mjs` **before** `next-build`. If `scripts/server/route-suite.proof.mjs` matches that glob, it gets collected and run when `.next` doesn't exist yet and fails for an unrelated reason. Give it its own explicit STEPS entry (`{ command: process.execPath, args: ["--test", "scripts/server/route-suite.proof.mjs"] }`) placed after `next-build`, and verify `scripts/verify.test.mjs`'s step-counting assertions (see below) don't double-count it against the `fixture-suite` glob.
 **Cookie-jar helper:** `node:test` + `fetch` has no built-in cookie jar (RESEARCH.md Wave 0 Gaps) — write a small manual `Set-Cookie`-capture-then-`Cookie`-header-replay helper; no existing script in this repo needs one, so there is no in-repo analog for this specific piece.
 
 ### `scripts/curl-suite.sh` (test script, request-response)
@@ -589,8 +589,8 @@ Both new fields optional so `source: "server"` segments (every online-path segme
 
 **Insertion points:**
 - Six new source-assertion steps (`check-single-writer`, `check-actor-field`, `check-fixture-inputs`, `check-named-packages`, `check-accepted-fields`, `check-non-bypassability`) join the existing source-side block **before** `next-build` — alongside `check-structure`/`check-register-isolation` (current lines 90-95), same `{ id, command: process.execPath, args: ["scripts/check-X.mjs"] }` shape, no `shell: true` (only the npx-resolved binaries use a shell).
-- One new step, `route-suite` (or similar id), joins **after** `next-build` (current line 97-103) and **before** `check-contrast`/`check-wcag-*` (current lines 119-131) — its own explicit non-globbed path per the placement gotcha noted above under `route-suite.test.mjs`, not folded into the existing `fixture-suite` step (current line 87).
-- Every new `.mjs` check's own `.test.mjs` fixture file (e.g. `scripts/check-single-writer.test.mjs`) is **automatically** picked up by the existing `fixture-suite` glob (`scripts/**/*.test.mjs`, current line 87) — no STEPS change needed for those six test files, only for the six `.mjs` checks themselves and the one `route-suite.test.mjs` (which must be *excluded* from that glob's effective double-run, per the placement gotcha).
+- One new step, `route-suite` (or similar id), joins **after** `next-build` (current line 97-103) and **before** `check-contrast`/`check-wcag-*` (current lines 119-131) — its own explicit non-globbed path per the placement gotcha noted above under `route-suite.proof.mjs`, not folded into the existing `fixture-suite` step (current line 87).
+- Every new `.mjs` check's own `.test.mjs` fixture file (e.g. `scripts/check-single-writer.test.mjs`) is **automatically** picked up by the existing `fixture-suite` glob (`scripts/**/*.test.mjs`, current line 87) — no STEPS change needed for those six test files, only for the six `.mjs` checks themselves and the one `route-suite.proof.mjs` (which must be *excluded* from that glob's effective double-run, per the placement gotcha).
 
 ### `scripts/verify.test.mjs` (modified — test)
 
@@ -629,7 +629,7 @@ Every ownership check runs and returns before any existence/state check, so an u
 ### One responder, one header table
 **Source:** the repeated `NextResponse.json(..., { status, headers: {...} })` blocks across all three sibling route files
 **Apply to:** every route file, via `lib/http/respond.ts` — no route ever calls `NextResponse.json` directly
-`Cache-Control: no-store`, `X-CAP-Store`, `X-CAP-Instance` on every response; `{ error, detail }` on every error; route-specific `X-CAP-*` counters added only through this module so a not-found path can never leak one (AD-4/AD-11, proved by `scripts/server/route-suite.test.mjs`'s D-11 comparator).
+`Cache-Control: no-store`, `X-CAP-Store`, `X-CAP-Instance` on every response; `{ error, detail }` on every error; route-specific `X-CAP-*` counters added only through this module so a not-found path can never leak one (AD-4/AD-11, proved by `scripts/server/route-suite.proof.mjs`'s D-11 comparator).
 
 ### Module-level Map store, oldest-first eviction
 **Source:** `../ipv-demo/lib/decision/store.ts` lines 35, 48, 110-116
