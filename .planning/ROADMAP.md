@@ -134,7 +134,48 @@ Plans:
 
 **Scheduled closures**: `lib/limits` values first needed here (media and thumbnail caps in encoded bytes, store caps, TTL); the non-bypassability description enumerating every route and every configuration value; the seed's API contracts as the route shapes
 **Review gate**: `bmad-code-review` on the seam
-**Plans**: TBD
+**Plans**: 16 plans in 8 waves
+
+Plans:
+**Wave 1**
+
+- [ ] 03-01-PLAN.md — lib/limits, the one signing key, not_open and the retained segment fields, the refusal sentences, and the unit-suite gate step (wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 03-02-PLAN.md — The memory store, the transport contract and the one Response constructor (wave 2)
+- [ ] 03-03-PLAN.md — The session cookie, the one attribution producer and the one accessor (wave 2)
+- [ ] 03-04-PLAN.md — The authored match and the derived proposal id (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 03-05-PLAN.md — lib/reconcile: the strict shapes, the accepted-field enumerations and the one writer (wave 3)
+- [ ] 03-06-PLAN.md — The fixture-inputs rule and the named-package ban wired into verify (wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 03-07-PLAN.md — Routes: health, session, orders and order detail (wave 4)
+- [ ] 03-08-PLAN.md — Routes: open, close and the read-only hours route with its explicit 405 (wave 4)
+- [ ] 03-09-PLAN.md — Routes: verify, captures and decisions (wave 4)
+- [ ] 03-10-PLAN.md — Route: sync, whole — the envelope, the ceiling, the loop and the four counters (wave 4)
+- [ ] 03-11-PLAN.md — The walk payload and the walk route (wave 4)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 03-12-PLAN.md — The single-writer rule, the actor-field rule and the accepted-field enumerations wired into verify (wave 5)
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
+- [ ] 03-13-PLAN.md — The route suite: the byte-identity comparator, curl A–H and the five negative sets, after next-build (wave 6)
+- [ ] 03-14-PLAN.md — The non-bypassability enumeration and the reviewer-facing curl suite (wave 6)
+
+**Wave 7** *(blocked on Wave 6 completion)*
+
+- [ ] 03-15-PLAN.md — The non-bypassability check wired into verify, closing the step list at twenty-six (wave 7)
+
+**Wave 8** *(blocked on Wave 7 completion)*
+
+- [ ] 03-16-PLAN.md — The recorded curl-suite run against a Preview deployment (wave 8, not autonomous)
 
 ### Phase 4: Shell, gate, orders, clock (online)
 
