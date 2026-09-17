@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 02-06-PLAN.md
-last_updated: "2026-09-17T07:01:17.238Z"
+status: verifying
+stopped_at: Completed 02-07-PLAN.md
+last_updated: "2026-09-17T07:21:16.061Z"
 last_activity: 2026-09-17
 progress:
   total_phases: 9
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 16
-  completed_plans: 15
-  percent: 11
+  completed_plans: 16
+  percent: 22
 ---
 
 # Project State
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 Phase: 2 (Fixtures & types) — EXECUTING
 Plan: 7 of 7
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-09-17
 
-Progress: [█████████░] 94%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -67,6 +67,7 @@ Progress: [█████████░] 94%
 | Phase 02 P04 | 20min | 3 tasks | 7 files |
 | Phase 02-fixtures-types P05 | 15min | 2 tasks | 3 files |
 | Phase 02-fixtures-types P06 | 15min | 2 tasks | 3 files |
+| Phase 02 P07 | 20min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -118,6 +119,8 @@ Recent decisions affecting current work:
 - [Phase 02-05]: gs001 label_illegible and an001 fixing_missing cite the closest-available fact rather than one directly about the condition — dispute candidates flagged for 02-06
 - [Phase 02-06]: All twelve provenance-check rows verdict confirmed as drafted (Matthew Koeberg: 'all are quite accurate to the citations') — No reword, re-cite or drop; lib/data/observations.ts and check-observations.mjs left unchanged
 - [Phase 02-06]: Appended a three-test structural completeness guard to check-fixture-shape.test.mjs, never a substitute for the human judgment it guards — T-2-24 mitigation: proves row count, verdict closed-set membership and reviewer/date presence, nothing more
+- [Phase 02-07]: FIXTURE_CONTENT_SHA256 computed once via a throwaway node -e script and hardcoded as a literal in lib/data/fixtures.ts, matching check-tokens.mjs's own pinned-constant precedent
+- [Phase 02-07]: check-fixture-hash.mjs imports lib/data/fixtures.ts via pathToFileURL(path.join(process.cwd(), ...)) and a dynamic import(), not a static import — so a fixture tree under test is checked against its own pin rather than the real repository's, closing off a vacuously-passing check (T-2-30)
 
 ### Pending Todos
 
@@ -151,6 +154,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-17T07:01:17.199Z
-Stopped at: Completed 02-06-PLAN.md
+Last session: 2026-09-17T07:21:16.022Z
+Stopped at: Completed 02-07-PLAN.md
 Resume file: None

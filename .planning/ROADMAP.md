@@ -18,7 +18,7 @@ Nine phases, 1:1 with the seed's build order and PRD §6.1. The labels ship firs
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Scaffold & conventions** - Project configuration, deployment headers, tokens, the governed-sentence module, the ribbon and the one build-check command, so the first (production) deploy is already labelled (completed 2026-09-08)
-- [ ] **Phase 2: Fixtures & types** - The synthetic plant subset, artisans, orders and authored observations with cited records, closed by the human provenance check
+- [x] **Phase 2: Fixtures & types** - The synthetic plant subset, artisans, orders and authored observations with cited records, closed by the human provenance check (completed 2026-09-17)
 - [ ] **Phase 3: Server seam** - Session, the one authorisation accessor, memory store, the one mediating writer, the one responder, every route; proved by the curl suite A–H
 - [ ] **Phase 4: Shell, gate, orders, clock (online)** - Entry, persona choice, long-form disclosure, order list and detail, the clock, on the one client projection
 - [ ] **Phase 5: Camera → verify → capture → proposals → decisions (online)** - Camera, file-input path, voice note, authored verification, authored proposals, accept/reject at parity, on real phones
@@ -117,7 +117,7 @@ Plans:
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
-- [ ] 02-07-PLAN.md — FIXTURE_VERSION, the pinned content hash and the hash check wired into verify (wave 6)
+- [x] 02-07-PLAN.md — FIXTURE_VERSION, the pinned content hash and the hash check wired into verify (wave 6)
 
 ### Phase 3: Server seam
 
@@ -249,7 +249,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Scaffold & conventions | 9/9 | Complete    | 2026-09-08 |
-| 2. Fixtures & types | 6/7 | In Progress|  |
+| 2. Fixtures & types | 7/7 | Complete   | 2026-09-17 |
 | 3. Server seam | 0/TBD | Not started | - |
 | 4. Shell, gate, orders, clock (online) | 0/TBD | Not started | - |
 | 5. Camera → verify → capture → proposals → decisions (online) | 0/TBD | Not started | - |
