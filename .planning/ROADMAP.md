@@ -144,7 +144,7 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [x] 03-02-PLAN.md — The memory store, the transport contract and the one Response constructor (wave 2)
-- [ ] 03-03-PLAN.md — The session cookie, the one attribution producer and the one accessor (wave 2)
+- [x] 03-03-PLAN.md — The session cookie, the one attribution producer and the one accessor (wave 2)
 - [ ] 03-04-PLAN.md — The authored match and the derived proposal id (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*

@@ -9,13 +9,13 @@ IDs keep the PRD's own numbering (`REQ-{PRD id}`). Each FR carries its verificat
 
 ### Identity and work-order access — the seam (PRD §4.1)
 
-- [ ] **REQ-FR-1**: An unauthenticated visitor chooses one of three artisan personas at the gate and receives a session bound to that account: HttpOnly, SameSite=Lax cookie (Secure in production); unknown persona returns 404 with a stated reason; no identity value from the body is persisted. *[Verified by: test]*
+- [x] **REQ-FR-1**: An unauthenticated visitor chooses one of three artisan personas at the gate and receives a session bound to that account: HttpOnly, SameSite=Lax cookie (Secure in production); unknown persona returns 404 with a stated reason; no identity value from the body is persisted. *[Verified by: test]*
 - [ ] **REQ-FR-2**: A client can ask the server which account it is acting as and receives the account or 401. *[Verified by: test]*
 - [ ] **REQ-FR-3**: An artisan can end the session; the cookie is cleared. Stated limitation (Limits screen + handover): the credential is stateless, so a copied credential remains valid until expiry; no revocation is claimed. *[Verified by: test]*
-- [ ] **REQ-FR-4**: An artisan sees the work orders assigned to their account and no others, read through one named accessor taking the session-derived account as a non-optional argument; a build rule asserts no other module reads the order store. Negative set: B's and C's ids directly, `account` query parameter, `account` in body, `X-Account` header — no response contains an order not assigned to A; unauthenticated → 401; response carries the acting account in a header. *[Verified by: analysis (primary) + enumerated negative test set]*
+- [x] **REQ-FR-4**: An artisan sees the work orders assigned to their account and no others, read through one named accessor taking the session-derived account as a non-optional argument; a build rule asserts no other module reads the order store. Negative set: B's and C's ids directly, `account` query parameter, `account` in body, `X-Account` header — no response contains an order not assigned to A; unauthenticated → 401; response carries the acting account in a header. *[Verified by: analysis (primary) + enumerated negative test set]*
 - [ ] **REQ-FR-5**: An artisan can open a work order assigned to them and receive the order, its assets, its clock, and any verifications, proposals and decisions already recorded; server-only fields stripped. *[Verified by: test]*
 - [x] **REQ-FR-6**: A request for an order that belongs to another account returns exactly the response a nonexistent order returns — identical status, body and headers — on every route including reconciliation. Negative set: read, open, close, capture, decide and sync routes byte-identical for an unowned id and a fabricated id. *[Verified by: test]*
-- [ ] **REQ-FR-57**: Authorisation is decided by work-order assignment alone, in a single named accessor invoked by every route; a written non-bypassability description enumerates every route; no route consults RBAC tier; no authorisation in framework middleware; the highest-tier persona reaches exactly their assigned orders. *[Verified by: analysis (primary) + inspection]*
+- [x] **REQ-FR-57**: Authorisation is decided by work-order assignment alone, in a single named accessor invoked by every route; a written non-bypassability description enumerates every route; no route consults RBAC tier; no authorisation in framework middleware; the highest-tier persona reaches exactly their assigned orders. *[Verified by: analysis (primary) + inspection]*
 - [x] **REQ-NFR-F1**: Every response carries no-store caching, the store kind and the serving instance identifier, so a reviewer can attribute any observed behaviour to an instance. *[Verified by: test]*
 
 ### The clock (PRD §4.2)
@@ -35,7 +35,7 @@ IDs keep the PRD's own numbering (`REQ-{PRD id}`). Each FR carries its verificat
 - [ ] **REQ-FR-15**: For a photograph only a hash of the full image, its size, its type and a bounded thumbnail leave the device; the request body contains no full-resolution image field; the thumbnail bound is enforced client- and server-side in encoded bytes. *[Verified by: test + inspection]*
 - [ ] **REQ-FR-16**: A spoken note's request carries a hash, a size, a type and a duration and no audio — exactly the four declared fields; the governed sentence states exactly this and no more. *[Verified by: test + inspection]*
 - [ ] **REQ-FR-17**: A verify-purpose capture returns a match drawn from the asset record, labelled authored / no model ran; one named module declares inputs `(assetId, fixtureSet)` and a build rule asserts the capture payload is neither a parameter nor reachable; negative set: differing images, no thumbnail, solid-colour thumbnail → byte-identical results; the dependency manifest contains no image-analysis, vision, OCR or inference library; a response header states the verification is authored; null confidence, authored extractor, no code path sets a confidence. *[Verified by: analysis (primary) + enumerated negative test set + inspection]*
-- [ ] **REQ-FR-18**: A capture against an asset not on the artisan's order is refused with a stated reason; a referral is a different object, not a bypass. *[Verified by: test]*
+- [x] **REQ-FR-18**: A capture against an asset not on the artisan's order is refused with a stated reason; a referral is a different object, not a bypass. *[Verified by: test]*
 - [x] **REQ-FR-19**: Oversized media is refused with a stated reason and a sentence the artisan can act on. *[Verified by: test]*
 - [ ] **REQ-NFR-F2**: On iOS only one capture is active at a time — camera tracks stopped before the recorder starts and vice versa; tracks re-acquired on return to visibility. *[Verified by: demonstration]*
 - [ ] **REQ-NFR-F3**: Recording does not continue when the app is backgrounded; the recording is finalised on the visibility change and this is stated, not silently unsupported. *[Verified by: test + demonstration]*
@@ -46,7 +46,7 @@ IDs keep the PRD's own numbering (`REQ-{PRD id}`). Each FR carries its verificat
 - [x] **REQ-FR-21a**: Every authored observation passes a human provenance check before it ships: a person has read the record it cites and confirmed the wording is an inference that record supports or only situates it; the fixture file carries the cited record's own sentence in a comment beside each observation; the evidence-or-context relation records which was confirmed. Phase 2 does not close on referential integrity alone. *[Verified by: inspection]*
 - [ ] **REQ-FR-21**: A proposal identifier is derived by the server from the account, the capture and the observation; a client cannot construct a valid one; identifiers are not sequential; a decision against a fabricated id and against another account's id return the same unknown-proposal response; derivation documented as reproducible by any instance without shared state. *[Verified by: test + analysis]*
 - [ ] **REQ-FR-22**: An artisan can accept or reject one open proposal on an asset within their order, with an optional note; parity asserted in CI against the rendered card at 360 px (equal hit area, contrast, font size and weight; neither carries focus ring, autofocus or pre-selection; neither reachable by an interaction the other is not); neither is a default; no interaction accepts more than one proposal at a time. *[Verified by: test]*
-- [ ] **REQ-FR-23**: Every actor field on every record is the acting account derived from the session, produced by one named function; a build rule asserts no other module assigns one and no route schema contains one; negative set across session, clock segment, capture, verification, decision, referral: a body naming a different artisan yields a record naming the acting account and the submitted value appears nowhere. *[Verified by: analysis (primary) + enumerated negative test set]*
+- [x] **REQ-FR-23**: Every actor field on every record is the acting account derived from the session, produced by one named function; a build rule asserts no other module assigns one and no route schema contains one; negative set across session, clock segment, capture, verification, decision, referral: a body naming a different artisan yields a record naming the acting account and the submitted value appears nowhere. *[Verified by: analysis (primary) + enumerated negative test set]*
 - [ ] **REQ-FR-59**: Recording a decision persists the decision context (proposal text as rendered, grade, cited record, evidence-or-context relation, fixture version in force) bound before the decision is recorded; retrievable with the decision, in the record handed onward, surviving later fixture changes. *[Verified by: test]*
 - [ ] **REQ-FR-60**: Every act on a proposal or referral — create, decide, refuse, conflict, reject, success and failure alike — produces a server-generated, time-stamped entry naming the acting account, event type and outcome; retained for the store's stated window; surfaced in the record handed onward; never obscures an earlier entry. *[Verified by: test]*
 - [ ] **REQ-FR-61**: No route accepts client-supplied observation text, grade or provenance that becomes a proposal; every write route enumerated against accepted fields. *[Verified by: inspection]*
@@ -194,10 +194,10 @@ Addendum candidates adopted into prd.md (UI-01–08 as NFR-1–8, DEV-01 as NFR-
 | REQ-NFR-9 | Phase 1 | Complete |
 | REQ-SM-5 | Phase 1 | Complete |
 | REQ-FR-21a | Phase 2 | Complete |
-| REQ-FR-1 | Phase 3 | Pending |
+| REQ-FR-1 | Phase 3 | Complete |
 | REQ-FR-2 | Phase 3 | Pending |
 | REQ-FR-3 | Phase 3 | Pending |
-| REQ-FR-4 | Phase 3 | Pending |
+| REQ-FR-4 | Phase 3 | Complete |
 | REQ-FR-5 | Phase 3 | Pending |
 | REQ-FR-6 | Phase 3 | Complete |
 | REQ-FR-7 | Phase 3 | Pending |
@@ -208,13 +208,13 @@ Addendum candidates adopted into prd.md (UI-01–08 as NFR-1–8, DEV-01 as NFR-
 | REQ-FR-15 | Phase 3 | Pending |
 | REQ-FR-16 | Phase 3 | Pending |
 | REQ-FR-17 | Phase 3 | Pending |
-| REQ-FR-18 | Phase 3 | Pending |
+| REQ-FR-18 | Phase 3 | Complete |
 | REQ-FR-19 | Phase 3 | Complete |
 | REQ-FR-21 | Phase 3 | Pending |
-| REQ-FR-23 | Phase 3 | Pending |
+| REQ-FR-23 | Phase 3 | Complete |
 | REQ-FR-24 | Phase 3 | Pending |
 | REQ-FR-27 | Phase 3 | Pending |
-| REQ-FR-57 | Phase 3 | Pending |
+| REQ-FR-57 | Phase 3 | Complete |
 | REQ-FR-61 | Phase 3 | Pending |
 | REQ-NFR-F1 | Phase 3 | Complete |
 | REQ-FR-48a | Phase 4 | Pending |
