@@ -2,7 +2,7 @@
    VERIFY — fixture proof of the fail-fast contract (D-20, D-23)
 
    Demonstrates, from injected synthetic steps and never a real
-   check, that: STEPS carries D-20's exact nineteen-step order;
+   check, that: STEPS carries D-20's exact twenty-one-step order;
    runSteps stops at the first non-zero exit and never continues past
    it; resolveSteps removes only the two check-wcag steps, only under
    the platform's own VERCEL variable, and nothing else — no other
@@ -41,6 +41,8 @@ const EXPECTED_ORDER = [
   "check-sw",
   "check-structure",
   "check-register-isolation",
+  "check-fixture-inputs",
+  "check-named-packages",
   "next-build",
   "check-structure-build-output",
   "check-register-isolation-bundle",
@@ -49,7 +51,7 @@ const EXPECTED_ORDER = [
   "check-wcag",
 ];
 
-test("STEPS carries D-20's nineteen ids in the exact order", () => {
+test("STEPS carries D-20's twenty-one ids in the exact order", () => {
   assert.deepEqual(
     STEPS.map((s) => s.id),
     EXPECTED_ORDER,
@@ -298,15 +300,15 @@ test("VERCEL=1 excludes exactly the two check-wcag steps and reports the exclusi
   } finally {
     console.log = originalLog;
   }
-  assert.equal(kept.length, 17);
+  assert.equal(kept.length, 19);
   assert.ok(!kept.some((s) => s.id === "check-wcag-self-test" || s.id === "check-wcag"));
   assert.ok(messages.some((m) => m.includes("check-wcag-self-test")));
   assert.ok(messages.some((m) => m.includes("check-wcag") && !m.includes("check-wcag-self-test")));
 });
 
-test("VERCEL unset retains all nineteen steps", () => {
+test("VERCEL unset retains all twenty-one steps", () => {
   const kept = resolveSteps(STEPS, {});
-  assert.equal(kept.length, 19);
+  assert.equal(kept.length, 21);
   assert.deepEqual(kept.map((s) => s.id), EXPECTED_ORDER);
 });
 
@@ -321,7 +323,7 @@ test("no environment variable other than VERCEL changes the step list", () => {
   ];
   for (const env of distractors) {
     const kept = resolveSteps(STEPS, env);
-    assert.equal(kept.length, 19, `env ${JSON.stringify(env)} must not change the step list`);
+    assert.equal(kept.length, 21, `env ${JSON.stringify(env)} must not change the step list`);
   }
 });
 
@@ -332,7 +334,7 @@ test("no argv flag changes the step list (--skip, --only, --fast, --no-wcag)", (
     for (const flag of flags) {
       process.argv = [...originalArgv, flag];
       const kept = resolveSteps(STEPS, {});
-      assert.equal(kept.length, 19, `argv flag ${flag} must not change the step list`);
+      assert.equal(kept.length, 21, `argv flag ${flag} must not change the step list`);
     }
   } finally {
     process.argv = originalArgv;

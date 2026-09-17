@@ -98,6 +98,21 @@ export const STEPS = [
     command: process.execPath,
     args: ["scripts/check-register-isolation.mjs"],
   },
+  /* AD-8's no-model claim as two build rules (plan 03-06): the
+     authored modules' declared inputs plus their import graph, and
+     the dependency manifest's own package names. Both are
+     source-side, need no browser, and so carry no vercelExcluded —
+     they run on Vercel's build as well as in the GitHub job. */
+  {
+    id: "check-fixture-inputs",
+    command: process.execPath,
+    args: ["scripts/check-fixture-inputs.mjs"],
+  },
+  {
+    id: "check-named-packages",
+    command: process.execPath,
+    args: ["scripts/check-named-packages.mjs"],
+  },
   {
     id: "next-build",
     command: "npx",
