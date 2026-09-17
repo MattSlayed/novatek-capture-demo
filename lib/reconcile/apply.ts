@@ -17,8 +17,10 @@
 
 import { deriveAccount, type ActingAccount } from "../attribution/index.ts";
 import type { SessionResult } from "../session/cookie.ts";
-import { orderOwned } from "../access/scope.ts";
-import { proposalIdMatches } from "../proposals/derive.ts";
+import { orderOwned, assetInOrder } from "../access/scope.ts";
+import { proposalIdMatches, deriveProposalId, authoredProposals } from "../proposals/derive.ts";
+import { authoredMatch } from "../verify/authored.ts";
+import { FIXTURE_VERSION } from "../data/fixtures.ts";
 import {
   readSeen,
   writeSeen,
@@ -26,9 +28,21 @@ import {
   stampLastContact,
   readClock,
   writeClockSegment,
+  closeClockSegment,
+  writeCapture,
+  writeProposals,
+  writeDecision,
+  readProposal,
+  wasEvicted,
+  readLastContact,
 } from "../store/memory.ts";
 import { CONFLICT_COPY, REJECT_COPY, TRANSPORT_COPY } from "../copy/conflicts.ts";
 import type { WireErrorCode } from "../http/contract.ts";
+import {
+  ONLINE_CLOCK_OFFSET_WINDOW_SECONDS,
+  QUEUED_CLOCK_FUTURE_TOLERANCE_SECONDS,
+  QUEUED_CLOCK_FLOOR_SLACK_SECONDS,
+} from "../limits/index.ts";
 import {
   idempotencyHash,
   validateEnvelopeItem,
@@ -37,7 +51,7 @@ import {
   validateClockPayload,
   type ShapeRefusal,
 } from "./validate.ts";
-import type { SyncItem, SyncItemResult } from "../data/types";
+import type { SyncItem, SyncItemResult, Capture, Decision, Proposal, ProposalState, VerificationResult } from "../data/types";
 
 /**
  * `result` is always a well-formed SyncItemResult, so /api/sync can
@@ -106,15 +120,40 @@ function finalize(
 }
 
 /**
- * Reached only after session, ownership, idempotency and shape (step
- * 4, below) have all passed for a kind other than `referral` (shape
- * already refuses that one `unknown_kind`). This commit implements
- * only order_open's immediate-path branch — enough for this task's
- * own idempotency and attempt-writing proofs. A later commit in this
- * same plan extends this function with order_open's queued clamp,
- * order_close, capture and decision.
+ * FR-24/AD-19: no operation in this module ever creates a fifth
+ * state — a finding. This is the executable proof, not just a
+ * comment: every proposal state this module writes passes through
+ * here first, and there is no fifth member to create one with.
+ */
+const TERMINAL_STATES: ProposalState[] = ["open", "accepted", "rejected", "superseded"];
+
+function assertProposalState(state: ProposalState): ProposalState {
+  if (!TERMINAL_STATES.includes(state)) {
+    throw new Error(`applyByKind: "${state}" is not a member of the closed proposal-state set`);
+  }
+  return state;
+}
+
+/** Whole-second difference between the server's own clock and a
+    device-claimed or client-claimed instant — used for both
+    order_open's device_offset_s and Decision.device_offset_s, so the
+    two records measure the same quantity the same way. */
+function wholeSecondOffset(nowMs: number, claimedMs: number): number {
+  return Math.round((nowMs - claimedMs) / 1000);
+}
+
+/**
+ * Reached only after session, ownership, idempotency and shape have
+ * all passed for a kind other than `referral` (shape already refuses
+ * that one `unknown_kind`). `arrived_via` is derived from the item's
+ * own `state`, never read from a body: an item whose state marks it
+ * as having been queued is "queued", everything else is "immediate".
  */
 function applyByKind(account: ActingAccount, item: SyncItem<unknown>): SyncItemResult {
+  const arrivedVia: "immediate" | "queued" = item.state === "queued" ? "queued" : "immediate";
+  const payload = payloadRecord(item.payload);
+  const nowMs = Date.now();
+
   if (item.kind === "order_open") {
     const existing = readClock(account.account_id, item.order_id);
     const openSegment = existing?.segments.find((segment) => segment.closed_at === null);
@@ -128,8 +167,40 @@ function applyByKind(account: ActingAccount, item: SyncItem<unknown>): SyncItemR
         server: existing ? { clock: existing } : undefined,
       };
     }
-    const openedAt = new Date().toISOString();
-    writeClockSegment(account.account_id, item.order_id, { opened_at: openedAt, source: "server" });
+
+    if (arrivedVia === "immediate") {
+      const openedAt = new Date(nowMs).toISOString();
+      writeClockSegment(account.account_id, item.order_id, { opened_at: openedAt, source: "server" });
+    } else {
+      // D-04/D-07/FR-11: the queued clamp. `claimed` is the device's
+      // own word; `floor` is the later of the session's issued_at and
+      // the account's last server contact, and is issued_at alone
+      // when contact is absent — silently, as AD-10 already permits
+      // for any cold start. Both the claim and the measured offset
+      // are retained; neither replaces the other.
+      const claimedRaw = payload.device_claimed_opened_at;
+      const claimedMs = typeof claimedRaw === "string" ? Date.parse(claimedRaw) : NaN;
+      const issuedAtMs = Date.parse(account.session.issued_at);
+      const lastContactMs = readLastContact(account.account_id);
+      const floorMs = lastContactMs !== null ? Math.max(issuedAtMs, lastContactMs) : issuedAtMs;
+      const tooEarly = claimedMs < floorMs - QUEUED_CLOCK_FLOOR_SLACK_SECONDS * 1000;
+      const tooLate = claimedMs > nowMs + QUEUED_CLOCK_FUTURE_TOLERANCE_SECONDS * 1000;
+      if (!Number.isFinite(claimedMs) || tooEarly || tooLate) {
+        return {
+          client_id: item.client_id,
+          status: "conflict",
+          code: "clock_skew",
+          detail: CONFLICT_COPY.clock_skew.sentence,
+        };
+      }
+      const openedAtMs = Math.max(claimedMs, floorMs);
+      writeClockSegment(account.account_id, item.order_id, {
+        opened_at: new Date(openedAtMs).toISOString(),
+        source: "device_reconciled",
+        device_claimed_opened_at: claimedRaw as string,
+        device_offset_s: wholeSecondOffset(nowMs, claimedMs),
+      });
+    }
     const clock = readClock(account.account_id, item.order_id);
     return {
       client_id: item.client_id,
@@ -139,11 +210,204 @@ function applyByKind(account: ActingAccount, item: SyncItem<unknown>): SyncItemR
     };
   }
 
-  // order_close, capture and decision are extended onto this
-  // function by a later commit in this same plan (Task 3). Nothing
-  // in this task's own tests reaches this branch — Task 3 replaces
-  // it before writing its own state-transition tests.
-  throw new Error(`applyByKind: "${item.kind}" is not yet implemented`);
+  if (item.kind === "order_close") {
+    const closed = closeClockSegment(account.account_id, item.order_id);
+    if (!closed) {
+      // D-06: closed already, or never opened — the same refusal
+      // either way, and no `already_open`-shaped code is introduced.
+      return {
+        client_id: item.client_id,
+        status: "conflict",
+        code: "not_open",
+        detail: CONFLICT_COPY.not_open.sentence,
+      };
+    }
+    const clock = readClock(account.account_id, item.order_id);
+    return {
+      client_id: item.client_id,
+      status: "recorded",
+      detail: "",
+      server: clock ? { clock } : undefined,
+    };
+  }
+
+  if (item.kind === "capture") {
+    const order = orderOwned(account, item.order_id);
+    const assetId = String(payload.asset_id);
+    if (!order || !assetInOrder(order, assetId)) {
+      return {
+        client_id: item.client_id,
+        status: "conflict",
+        code: "asset_not_in_order",
+        detail: CONFLICT_COPY.asset_not_in_order.sentence,
+      };
+    }
+    const clock = readClock(account.account_id, item.order_id);
+    const hasOpenSegment = clock?.segments.some((segment) => segment.closed_at === null) ?? false;
+    if (!hasOpenSegment) {
+      // D-05: the clock gates the record — WorkOrder.status is
+      // fixture text and is consulted by nothing here.
+      return {
+        client_id: item.client_id,
+        status: "conflict",
+        code: "order_closed",
+        detail: CONFLICT_COPY.order_closed.sentence,
+      };
+    }
+
+    // AD-16: the item's own client id is the capture's own id.
+    const capture: Capture = {
+      id: item.client_id,
+      order_id: item.order_id,
+      asset_id: assetId,
+      kind: payload.kind as "photo" | "voice",
+      purpose: payload.purpose as "verify" | "evidence",
+      captured_at: String(payload.captured_at),
+      mime: String(payload.mime),
+      bytes: Number(payload.bytes),
+      sha256: String(payload.sha256),
+      captured_by: account.account_id,
+      recorded_at: new Date(nowMs).toISOString(),
+      ...(payload.duration_ms !== undefined ? { duration_ms: Number(payload.duration_ms) } : {}),
+      ...(payload.thumb !== undefined ? { thumb: String(payload.thumb) } : {}),
+    };
+    writeCapture(account.account_id, capture);
+
+    if (payload.purpose !== "verify") {
+      return { client_id: item.client_id, status: "recorded", detail: "" };
+    }
+
+    const match = authoredMatch(assetId, FIXTURE_VERSION);
+    const verification: VerificationResult = {
+      ...match,
+      capture_id: capture.id,
+      verified_at: new Date(nowMs).toISOString(),
+    };
+    const authored = authoredProposals(assetId, FIXTURE_VERSION);
+    const proposals: Proposal[] = authored.map((entry) => ({
+      ...entry,
+      id: deriveProposalId(account.account_id, item.client_id, entry.observation_id),
+      capture_id: capture.id,
+      order_id: item.order_id,
+      issued_at: new Date(nowMs).toISOString(),
+      state: assertProposalState("open"),
+    }));
+    writeProposals(account.account_id, proposals);
+
+    return {
+      client_id: item.client_id,
+      status: "recorded",
+      detail: "",
+      server: { verification, proposals },
+    };
+  }
+
+  // item.kind === "decision" (the only remaining member of
+  // SYNC_ITEM_KINDS — referral was already refused unknown_kind at
+  // the shape step).
+  const proposalId = String(payload.proposal_id);
+
+  // AD-5: validation reads nothing from the store — this consult
+  // happens only after the HMAC already validated at the ownership
+  // position (applyItem's own step 2, above).
+  if (wasEvicted(account.account_id, proposalId)) {
+    return {
+      client_id: item.client_id,
+      status: "rejected",
+      code: "store_evicted",
+      detail: REJECT_COPY.store_evicted.sentence,
+    };
+  }
+
+  const proposal = readProposal(account.account_id, proposalId);
+  const decidedAtRaw = String(payload.decided_at);
+  const decidedAtMs = Date.parse(decidedAtRaw);
+
+  // A missing proposal means this instance never shared state with
+  // whichever instance issued it. AD-5's HMAC match already proved
+  // this decision is legitimate, and there is no local state left to
+  // gate it against, so it is recorded outright — never a "server
+  // restarted" sentence anywhere for this case (EXPERIENCE.md).
+  if (proposal) {
+    if (proposal.state !== "open") {
+      return {
+        client_id: item.client_id,
+        status: "conflict",
+        code: "proposal_superseded",
+        detail: CONFLICT_COPY.proposal_superseded.sentence,
+      };
+    }
+    const clock = readClock(account.account_id, proposal.order_id);
+    const hasOpenSegment = clock?.segments.some((segment) => segment.closed_at === null) ?? false;
+    if (!hasOpenSegment) {
+      return {
+        client_id: item.client_id,
+        status: "conflict",
+        code: "order_closed",
+        detail: CONFLICT_COPY.order_closed.sentence,
+      };
+    }
+
+    let withinBounds: boolean;
+    if (arrivedVia === "immediate") {
+      withinBounds =
+        Number.isFinite(decidedAtMs) &&
+        Math.abs(nowMs - decidedAtMs) <= ONLINE_CLOCK_OFFSET_WINDOW_SECONDS * 1000;
+    } else {
+      const issuedAtMs = Date.parse(account.session.issued_at);
+      const lastContactMs = readLastContact(account.account_id);
+      const floorMs = lastContactMs !== null ? Math.max(issuedAtMs, lastContactMs) : issuedAtMs;
+      withinBounds =
+        Number.isFinite(decidedAtMs) &&
+        decidedAtMs >= floorMs - QUEUED_CLOCK_FLOOR_SLACK_SECONDS * 1000 &&
+        decidedAtMs <= nowMs + QUEUED_CLOCK_FUTURE_TOLERANCE_SECONDS * 1000;
+    }
+    if (!withinBounds) {
+      return {
+        client_id: item.client_id,
+        status: "conflict",
+        code: "clock_skew",
+        detail: CONFLICT_COPY.clock_skew.sentence,
+      };
+    }
+  }
+
+  const decision: Decision = {
+    id: item.client_id,
+    proposal_id: proposalId,
+    outcome: payload.outcome as "accept" | "reject",
+    decided_at: decidedAtRaw,
+    decided_where_claimed: payload.decided_where_claimed as "online" | "on_device",
+    arrived_via: arrivedVia,
+    decided_by: account.account_id,
+    recorded_at: new Date(nowMs).toISOString(),
+    device_offset_s: Number.isFinite(decidedAtMs) ? wholeSecondOffset(nowMs, decidedAtMs) : 0,
+    reconciled: "recorded",
+    ...(payload.note !== undefined ? { note: String(payload.note) } : {}),
+  };
+  writeDecision(account.account_id, decision);
+
+  // FR-25: a rejected proposal is retained with its decision, never
+  // deleted. There is no singular "proposal" slot on SyncItemResult's
+  // server shape, so the one proposal this decision touches (when a
+  // local copy exists) rides the same plural `proposals` field a
+  // capture's verify-purpose result uses.
+  let updatedProposals: Proposal[] | undefined;
+  if (proposal) {
+    const updated: Proposal = {
+      ...proposal,
+      state: assertProposalState(payload.outcome === "accept" ? "accepted" : "rejected"),
+    };
+    writeProposals(account.account_id, [updated]);
+    updatedProposals = [updated];
+  }
+
+  return {
+    client_id: item.client_id,
+    status: "recorded",
+    detail: "",
+    server: { decision, ...(updatedProposals ? { proposals: updatedProposals } : {}) },
+  };
 }
 
 export async function applyItem(
