@@ -292,7 +292,7 @@ function key(): string {
 
 export function deriveProposalId(accountId: string, clientId: string, observationId: string): string {
   return createHmac("sha256", key())
-    .update(`${accountId} ${clientId} ${observationId}`)
+    .update(`${accountId}\u0000${clientId}\u0000${observationId}`)
     .digest("base64url");
 }
 
@@ -302,7 +302,7 @@ export function proposalIdMatches(candidate: string, accountId: string, clientId
   return expected.length === actual.length && timingSafeEqual(expected, actual);
 }
 ```
-Note the ` ` (NUL) field separator — a plain `·`/`:` join is ambiguous if any input field could itself contain that character; account ids and client ids are controlled formats here (`acc-<surname>`, UUID) so a simple separator is safe in practice, but a NUL byte is the cheap, unambiguous choice and costs nothing.
+Note the `\u0000` (NUL) field separator — a plain `·`/`:` join is ambiguous if any input field could itself contain that character; account ids and client ids are controlled formats here (`acc-<surname>`, UUID) so a simple separator is safe in practice, but a NUL byte is the cheap, unambiguous choice and costs nothing.
 
 ### Pattern 4: One responder, header table (AD-11)
 **What:** `lib/http/respond.ts` is the only place a `Response`/`NextResponse` is constructed. It always stamps `Cache-Control: no-store`, `X-CAP-Store`, `X-CAP-Instance`; every error body is `{ error, detail }`. Route-specific `X-CAP-*` counters are added by the route through the responder, never bypassing it, and are documented in a table as universal-or-success-only so the not-found path never leaks one.
