@@ -72,6 +72,7 @@ export const STEPS = [
   { id: "tsc", command: "npx", args: ["tsc", "--noEmit"], shell: true },
   { id: "eslint", command: "npx", args: ["eslint", "."], shell: true },
   { id: "check-tokens", command: process.execPath, args: ["scripts/check-tokens.mjs"] },
+  { id: "check-fixture-hash", command: process.execPath, args: ["scripts/check-fixture-hash.mjs"] },
   { id: "check-governed", command: process.execPath, args: ["scripts/check-governed.mjs"] },
   { id: "claims-audit", command: process.execPath, args: ["scripts/claims-audit.mjs"] },
   /* The whole fixture suite, browser-free by construction — this is
