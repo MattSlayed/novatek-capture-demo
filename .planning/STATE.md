@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-05-PLAN.md
-last_updated: "2026-09-17T20:41:19.365Z"
+stopped_at: Completed 03-06-PLAN.md
+last_updated: "2026-09-17T21:10:20.369Z"
 last_activity: 2026-09-17
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 32
-  completed_plans: 21
+  completed_plans: 22
   percent: 22
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 03 (server-seam) — EXECUTING
-Plan: 6 of 16
+Plan: 7 of 16
 Status: Ready to execute
 Last activity: 2026-09-17
 
-Progress: [███████░░░] 66%
+Progress: [███████░░░] 69%
 
 ## Performance Metrics
 
@@ -74,6 +74,7 @@ Progress: [███████░░░] 66%
 | Phase 03-server-seam P03 | 26min | 3 tasks | 6 files |
 | Phase 03-server-seam P04 | 25min | 2 tasks | 4 files |
 | Phase 03 P05 | 49min | 3 tasks | 5 files |
+| Phase 03-server-seam P06 | 21min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -142,6 +143,8 @@ Recent decisions affecting current work:
 - [Phase 03]: Added lib/store/memory.ts's readUnattributedAttempts() export (Rule 2) — No export exposed the no-session refusal ring; this plan's own test needed to read it back to prove FR-60's retained-and-readable guarantee
 - [Phase 03]: apply.ts builds every written record by explicit named-field assignment, never spreading a payload — Makes AD-20's drop-at-parse guarantee hold at the writer regardless of caller behaviour; pick() stays exported from validate.ts for a later route layer's own body parsing
 - [Phase 03]: A decision reaching an instance that never issued the proposal is recorded outright, bypassing proposal_superseded/order_closed/clock_skew — None of those checks has local state to compare against; EXPERIENCE.md's own stated behaviour for this case is unconditional recording, never a server-restarted sentence
+- [Phase 03-server-seam]: Excluded sha256 and capture_id from check-fixture-inputs.mjs's payload-identifier sweep — Both are unavoidable, safe substrings already committed in lib/verify/authored.ts's and lib/proposals/derive.ts's own 03-04 code (an Omit type argument that excludes capture_id, and createHmac's sha256 algorithm name), mirroring 03-04's identical exclusions for its own unit tests
+- [Phase 03-server-seam]: Added KNOWN_TRANSITIVE_EXCEPTIONS (sharp@0.35.4, zod@4.5.4) to check-named-packages.mjs — This repository's own package-lock.json already carries both transitively and legitimately (next's optional image-resizing dependency; eslint-plugin-react-hooks's own dev dependency); the allowlist is scoped to the lockfile-transitive sweep only and pinned by exact version, so a direct addition of either name to package.json is still caught unconditionally
 
 ### Pending Todos
 
@@ -178,6 +181,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-17T20:41:19.334Z
-Stopped at: Completed 03-05-PLAN.md
+Last session: 2026-09-17T21:10:20.329Z
+Stopped at: Completed 03-06-PLAN.md
 Resume file: None
