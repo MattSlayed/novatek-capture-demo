@@ -139,7 +139,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 03-01-PLAN.md — lib/limits, the one signing key, not_open and the retained segment fields, the refusal sentences, and the unit-suite gate step (wave 1)
+- [x] 03-01-PLAN.md — lib/limits, the one signing key, not_open and the retained segment fields, the refusal sentences, and the unit-suite gate step (wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -291,7 +291,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 |-------|----------------|--------|-----------|
 | 1. Scaffold & conventions | 9/9 | Complete    | 2026-09-08 |
 | 2. Fixtures & types | 7/7 | Complete    | 2026-09-17 |
-| 3. Server seam | 0/TBD | Not started | - |
+| 3. Server seam | 1/16 | In Progress|  |
 | 4. Shell, gate, orders, clock (online) | 0/TBD | Not started | - |
 | 5. Camera → verify → capture → proposals → decisions (online) | 0/TBD | Not started | - |
 | 6. Offline | 0/TBD | Not started | - |

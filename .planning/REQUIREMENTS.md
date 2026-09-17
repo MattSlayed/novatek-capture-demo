@@ -21,10 +21,10 @@ IDs keep the PRD's own numbering (`REQ-{PRD id}`). Each FR carries its verificat
 ### The clock (PRD §4.2)
 
 - [ ] **REQ-FR-7**: Opening an assigned work order starts a server-stamped clock segment; opening an already-open order is idempotent and creates no second segment. *[Verified by: test]*
-- [ ] **REQ-FR-8**: Closing an open order ends the current segment; closing a closed or unopened order returns a stated conflict. *[Verified by: test]*
+- [x] **REQ-FR-8**: Closing an open order ends the current segment; closing a closed or unopened order returns a stated conflict. *[Verified by: test]*
 - [ ] **REQ-FR-9**: Reopening a closed order appends a new segment; prior segments are retained. *[Verified by: test]*
 - [ ] **REQ-FR-10**: Accrued hours are computed server-side from segments; the hours route accepts reads only (write → 405); every write route is enumerated against its accepted fields and none accepts an artisan-supplied duration or hour value. *[Verified by: test + inspection]*
-- [ ] **REQ-FR-11**: A segment opened without signal records the device-claimed start, clamped no earlier than the session's issue time and the device's last server contact, marked device-reconciled rather than server-stamped; both the device-claimed time and the server-measured offset are retained; neither silently replaces the other. *[Verified by: test]*
+- [x] **REQ-FR-11**: A segment opened without signal records the device-claimed start, clamped no earlier than the session's issue time and the device's last server contact, marked device-reconciled rather than server-stamped; both the device-claimed time and the server-measured offset are retained; neither silently replaces the other. *[Verified by: test]*
 - [ ] **REQ-FR-58**: An artisan can read their own accrued record in full — every segment, its source, any measured offset; nothing withheld. Stated limitation: no route to contest a segment. *[Verified by: demonstration]*
 
 ### Capture at the asset (PRD §4.3)
@@ -36,7 +36,7 @@ IDs keep the PRD's own numbering (`REQ-{PRD id}`). Each FR carries its verificat
 - [ ] **REQ-FR-16**: A spoken note's request carries a hash, a size, a type and a duration and no audio — exactly the four declared fields; the governed sentence states exactly this and no more. *[Verified by: test + inspection]*
 - [ ] **REQ-FR-17**: A verify-purpose capture returns a match drawn from the asset record, labelled authored / no model ran; one named module declares inputs `(assetId, fixtureSet)` and a build rule asserts the capture payload is neither a parameter nor reachable; negative set: differing images, no thumbnail, solid-colour thumbnail → byte-identical results; the dependency manifest contains no image-analysis, vision, OCR or inference library; a response header states the verification is authored; null confidence, authored extractor, no code path sets a confidence. *[Verified by: analysis (primary) + enumerated negative test set + inspection]*
 - [ ] **REQ-FR-18**: A capture against an asset not on the artisan's order is refused with a stated reason; a referral is a different object, not a bypass. *[Verified by: test]*
-- [ ] **REQ-FR-19**: Oversized media is refused with a stated reason and a sentence the artisan can act on. *[Verified by: test]*
+- [x] **REQ-FR-19**: Oversized media is refused with a stated reason and a sentence the artisan can act on. *[Verified by: test]*
 - [ ] **REQ-NFR-F2**: On iOS only one capture is active at a time — camera tracks stopped before the recorder starts and vice versa; tracks re-acquired on return to visibility. *[Verified by: demonstration]*
 - [ ] **REQ-NFR-F3**: Recording does not continue when the app is backgrounded; the recording is finalised on the visibility change and this is stated, not silently unsupported. *[Verified by: test + demonstration]*
 
@@ -201,15 +201,15 @@ Addendum candidates adopted into prd.md (UI-01–08 as NFR-1–8, DEV-01 as NFR-
 | REQ-FR-5 | Phase 3 | Pending |
 | REQ-FR-6 | Phase 3 | Pending |
 | REQ-FR-7 | Phase 3 | Pending |
-| REQ-FR-8 | Phase 3 | Pending |
+| REQ-FR-8 | Phase 3 | Complete |
 | REQ-FR-9 | Phase 3 | Pending |
 | REQ-FR-10 | Phase 3 | Pending |
-| REQ-FR-11 | Phase 3 | Pending |
+| REQ-FR-11 | Phase 3 | Complete |
 | REQ-FR-15 | Phase 3 | Pending |
 | REQ-FR-16 | Phase 3 | Pending |
 | REQ-FR-17 | Phase 3 | Pending |
 | REQ-FR-18 | Phase 3 | Pending |
-| REQ-FR-19 | Phase 3 | Pending |
+| REQ-FR-19 | Phase 3 | Complete |
 | REQ-FR-21 | Phase 3 | Pending |
 | REQ-FR-23 | Phase 3 | Pending |
 | REQ-FR-24 | Phase 3 | Pending |

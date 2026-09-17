@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 3 context gathered
-last_updated: "2026-09-17T11:46:45.118Z"
-last_activity: 2026-09-17 -- Phase 3 planning complete
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-09-17T17:34:53.166Z"
+last_activity: 2026-09-17
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 32
-  completed_plans: 16
+  completed_plans: 17
   percent: 22
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-04)
 
 **Core value:** The preview is real where it claims to be real — every enforced claim is enforced server-side and survives a hostile reviewer; every authored claim is labelled at the point it is met.
-**Current focus:** Phase 3 — server seam
+**Current focus:** Phase 03 — server-seam
 
 ## Current Position
 
-Phase: 3
-Plan: Not started
+Phase: 03 (server-seam) — EXECUTING
+Plan: 2 of 16
 Status: Ready to execute
-Last activity: 2026-09-17 -- Phase 3 planning complete
+Last activity: 2026-09-17
 
-Progress: [██████████] 100%
+Progress: [█████░░░░░] 53%
 
 ## Performance Metrics
 
@@ -69,6 +69,7 @@ Progress: [██████████] 100%
 | Phase 02-fixtures-types P05 | 15min | 2 tasks | 3 files |
 | Phase 02-fixtures-types P06 | 15min | 2 tasks | 3 files |
 | Phase 02 P07 | 20min | 2 tasks | 6 files |
+| Phase 03 P01 | 28min | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -122,6 +123,9 @@ Recent decisions affecting current work:
 - [Phase 02-06]: Appended a three-test structural completeness guard to check-fixture-shape.test.mjs, never a substitute for the human judgment it guards — T-2-24 mitigation: proves row count, verdict closed-set membership and reviewer/date presence, nothing more
 - [Phase 02-07]: FIXTURE_CONTENT_SHA256 computed once via a throwaway node -e script and hardcoded as a literal in lib/data/fixtures.ts, matching check-tokens.mjs's own pinned-constant precedent
 - [Phase 02-07]: check-fixture-hash.mjs imports lib/data/fixtures.ts via pathToFileURL(path.join(process.cwd(), ...)) and a dynamic import(), not a static import — so a fixture tree under test is checked against its own pin rather than the real repository's, closing off a vacuously-passing check (T-2-30)
+- [Phase 03-01]: Adopted the seed's P3 starting bounded values verbatim in lib/limits, plus three additional exports the plan names outright — CONTEXT.md's Claude's-discretion bullet and the plan text both specify exact values; nothing was invented
+- [Phase 03-01]: account_mismatch's copy sentence names the mechanism without naming a persona — the acting account is a runtime value; a sentence that interpolated one would be a second literal
+- [Phase 03-01]: scripts/scaffold.test.mjs's stale npm-test-script literal assertion updated to the new two-glob value — Rule 1 fix: Task 2's required package.json edit made this Phase 1 test fail
 
 ### Pending Todos
 
@@ -155,6 +159,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-17T09:03:36.319Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-server-seam/03-CONTEXT.md
+Last session: 2026-09-17T17:34:53.140Z
+Stopped at: Completed 03-01-PLAN.md
+Resume file: None
