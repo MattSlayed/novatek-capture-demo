@@ -573,22 +573,27 @@ const childEnv = { ...process.env, CAPTURE_SESSION_KEY: process.env.CAPTURE_SESS
 
 **If this table is empty:** N/A — four items logged above, all flagged for live-deployment falsification consistent with this project's existing pattern (Phase 1 D-22).
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+All three were decided during planning. Each carries the resolution inline, with the plan and task that implements it.
 
 1. **Exact new fields on `OrderClock.segments` for FR-11's retained device-claim + measured-offset**
    - What we know: `Decision` already carries a precedent field, `device_offset_s: number`, for the exact same "retain both the claim and the measured offset" requirement on the online path. `OrderClock.segments` currently has only `{ opened_at, closed_at, source }`.
    - What's unclear: whether the new fields should be named to mirror `Decision.device_offset_s` (e.g. `device_claimed_opened_at?: string; device_offset_s?: number`) or something else; CONTEXT.md explicitly marks this as Claude's discretion ("Extending the clock segment type in types.ts... shape is not content, so the fixture hash is unaffected").
    - Recommendation: mirror `Decision`'s naming for consistency (`device_offset_s`), add `device_claimed_opened_at?: string` alongside it, both optional (present only when `source: "device_reconciled"`), so `source: "server"` segments need no new fields and every existing fixture/type-check stays valid.
+   - **RESOLVED:** the recommendation was taken as written. Plan 03-01 Task 2 adds `device_claimed_opened_at?: string` and `device_offset_s?: number` to `OrderClock.segments`, both optional and present only under `source: "device_reconciled"`; plan 03-05 Task 3 writes them on the queued path and proves the clamp retains claim and measured offset separately.
 
 2. **Where exactly `docs/analysis/single-writer-non-bypassability.md`'s enumeration is regenerated vs hand-maintained**
    - What we know: D-12 requires it hand-written "in the voice the handover needs," while also requiring a build-time check that fails when any route/env-read/store-writer is *absent* from the document by name.
    - What's unclear: whether the check reads the document as a literal string-membership sweep (does `app/api/session/route.ts` appear anywhere in the file?) or something more structured (a table with defined columns the check parses).
    - Recommendation: literal string-membership sweep, matching `check-governed.mjs`'s and `claims-audit.mjs`'s established "sweep source as text" precedent in this codebase — simplest mechanism that still satisfies "every later phase that adds a route... must extend the document or the build fails."
+   - **RESOLVED:** the recommendation was taken. Plan 03-15 Task 1's `scripts/check-non-bypassability.mjs` is a literal string-membership sweep, and its fixture test proves both edges deliberately: a route named only inside a fenced code block still passes, and a missing document fails rather than passing silently.
 
 3. **Whether `POST /api/hours`'s explicit 405 stub should check the session cookie before responding**
    - What we know: REQ-FR-10 only requires the 405 status and (per NFR-F1) the universal headers; the seed's route table shows no auth requirement listed for the 405 case specifically.
    - What's unclear: whether AD-1's "session → ownership → ..." check order is meant to apply even to a method-not-allowed response, or whether routing-level method rejection is understood to precede identity entirely (as Next's own auto-405 does).
    - Recommendation: skip the session check for this one response — return 405 unconditionally through the responder. It is simpler, matches how HTTP method negotiation conventionally precedes authentication, and nothing in the requirements or the curl suite exercises an unauthenticated `POST /api/hours`.
+   - **RESOLVED:** the recommendation was taken. Plan 03-08 Task 2's `POST /api/hours` returns 405 unconditionally through `lib/http/respond.ts` with no session read, and the route suite's check G asserts the status, the `{ error, detail }` envelope and all three universal headers.
 
 ## Environment Availability
 
