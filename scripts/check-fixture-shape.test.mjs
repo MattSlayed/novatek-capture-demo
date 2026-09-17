@@ -62,6 +62,7 @@ import {
 
 import { ARTISANS, ARTISAN_BY_ID, ORDER_IDS_BY_ARTISAN } from "../lib/data/artisans.ts";
 import { ORDERS, ORDER_BY_ID } from "../lib/data/orders.ts";
+import { OBSERVATIONS } from "../lib/data/observations.ts";
 
 /* ---------------------------------------------------------------
    Closed-set assertions (D-19) — one test per set, exact contents,
@@ -514,5 +515,101 @@ test("rbac_tier is carried only as a record field in artisans.ts, and is absent 
   assert.ok(
     !ordersSource.includes("rbac_tier"),
     "orders.ts must not mention rbac_tier at all — the assignment plane never carries the display-only tier",
+  );
+});
+
+/* ---------------------------------------------------------------
+   FR-21a provenance check — structural completeness guard (D-02,
+   D-03, D-04, AD-15, T-2-24).
+
+   This is a STRUCTURAL guard only: it proves the signed file cannot
+   silently lose a verdict, gain an unaccounted row, or lose its
+   reviewer/date, on a later edit. It is never a substitute for the
+   judgment recorded in the verdict cells themselves — that judgment
+   is the human provenance check's, performed once at plan 02-06's
+   checkpoint and never re-run by a machine.
+   --------------------------------------------------------------- */
+
+const VALID_VERDICTS = ["confirmed", "reworded", "re-cited", "dropped"];
+
+function parseMainTable(markdown) {
+  const lines = markdown.split(/\r?\n/);
+  const startIndex = lines.findIndex((line) => line.startsWith("## Main table"));
+  assert.ok(startIndex !== -1, "provenance-check.md is missing its '## Main table' heading");
+
+  const rows = [];
+  for (let i = startIndex + 1; i < lines.length; i += 1) {
+    const line = lines[i];
+    if (line.startsWith("## ")) break; // next section
+    if (!line.startsWith("|")) continue;
+    if (/^\|[\s-]*\|/.test(line) && line.includes("---")) continue; // header separator
+    const cells = line
+      .split("|")
+      .slice(1, -1)
+      .map((cell) => cell.trim());
+    if (cells[0] === "Observation id") continue; // header row itself
+    rows.push(cells);
+  }
+  return rows;
+}
+
+test("provenance-check.md's main table has one row per OBSERVATIONS entry, matched by id (FR-21a structural guard)", async () => {
+  const root = repoRoot();
+  const markdown = await readFile(path.join(root, "docs/analysis/provenance-check.md"), "utf8");
+  const rows = parseMainTable(markdown);
+
+  assert.equal(
+    rows.length,
+    OBSERVATIONS.length,
+    `provenance-check.md's main table has ${rows.length} rows; OBSERVATIONS has ${OBSERVATIONS.length}`,
+  );
+
+  const observationIds = new Set(OBSERVATIONS.map((o) => o.id));
+  for (const cells of rows) {
+    const observationId = cells[0];
+    const verdict = cells[8];
+    const isKnownId = observationIds.has(observationId);
+    const isDropped = verdict === "dropped";
+    assert.ok(
+      isKnownId || isDropped,
+      `row '${observationId}' matches no id in OBSERVATIONS and does not carry the verdict 'dropped'`,
+    );
+  }
+});
+
+test("every row of provenance-check.md's main table carries one of the four verdicts (FR-21a structural guard)", async () => {
+  const root = repoRoot();
+  const markdown = await readFile(path.join(root, "docs/analysis/provenance-check.md"), "utf8");
+  const rows = parseMainTable(markdown);
+
+  assert.ok(rows.length > 0, "provenance-check.md's main table has no rows to check");
+  for (const cells of rows) {
+    const observationId = cells[0];
+    const verdict = cells[8];
+    assert.ok(
+      VALID_VERDICTS.includes(verdict),
+      `row '${observationId}' carries verdict '${verdict}', not one of ${VALID_VERDICTS.join(", ")}`,
+    );
+  }
+});
+
+test("provenance-check.md carries a non-empty reviewer name and date on every row (FR-21a structural guard)", async () => {
+  const root = repoRoot();
+  const markdown = await readFile(path.join(root, "docs/analysis/provenance-check.md"), "utf8");
+  const rows = parseMainTable(markdown);
+
+  assert.ok(rows.length > 0, "provenance-check.md's main table has no rows to check");
+  for (const cells of rows) {
+    const observationId = cells[0];
+    const reviewer = cells[9];
+    const date = cells[10];
+    assert.ok(reviewer && reviewer.length > 0, `row '${observationId}' has no reviewer name`);
+    assert.ok(date && date.length > 0, `row '${observationId}' has no date`);
+  }
+
+  assert.match(
+    markdown,
+    /Recorded \d{4}-\d{2}-\d{2}\./,
+    "provenance-check.md is missing its closing 'Recorded <date>.' line",
   );
 });

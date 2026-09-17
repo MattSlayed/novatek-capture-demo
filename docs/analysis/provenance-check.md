@@ -1,6 +1,5 @@
 # Provenance check — FR-21a human review
 
-**DRAFT — the verdict column is empty. This is not the signed artefact.**
 This file records the one build gate no command can run (AD-15): a named
 person reading each authored observation in `lib/data/observations.ts`
 against the record it cites in `lib/data/plant.ts`, and judging whether the
@@ -8,8 +7,16 @@ record supports the wording (`relation: evidence`) or only situates it
 (`relation: context`). The automated half — every `drawn_from` resolves and
 every quoted comment still equals the record — is already green
 (`node scripts/check-observations.mjs`). What follows is the per-row table a
-second person could repeat without reading the code, with the verdict,
-reviewer and date cells left blank until the checkpoint is answered.
+second person can repeat without reading the code, signed below with the
+reviewer's name and the date.
+
+Matthew Koeberg read each of the twelve rows of the main table against the
+record quoted beside it and confirmed, in his own words, that "all are quite
+accurate to the citations": every wording is an honest inference the cited
+record supports, or the record only situates it and the row says so, exactly
+as drafted. No row was reworded, re-cited or dropped, so `relation` is
+confirmed as drafted on every row and `lib/data/observations.ts` is
+unchanged by this check.
 
 ## How to read a row
 
@@ -33,18 +40,18 @@ verdict.
 
 | Observation id | Asset id · tag | Kind | Wording as it will render | Cited record id | Record's own sentence (field named) | Grade | Relation | Verdict | Reviewer | Date |
 |---|---|---|---|---|---|---|---|---|---|---|
-| obs-ap003-disc | m-ap003 · 20LAC10AP003 | discolouration | Discolouration is visible on the drive-end bearing housing. | f-ap003-vib | label "Last vibration reading", value "9.4", unit "mm/s RMS": *"Last vibration reading: 9.4 mm/s RMS"* | INFERRED | evidence | | | |
-| obs-ap003-guard | m-ap003 · 20LAC10AP003 | fixing_missing | A missing fixing is visible on the coupling guard. | f-ap003-status | label "Service state", value "Off duty — isolated": *"Service state: Off duty — isolated"* | AMBIGUOUS | context | | | |
-| obs-ap003-iso | m-ap003 · 20LAC10AP003 | isolation_present | An isolation tag is visible on the pump. | ncr-0118 | field `immediate_action`: *"Set taken off duty. Duty transferred to the adjacent transfer set. Isolation applied and tagged."* (comment quotes the trailing clause, *"Isolation applied and tagged"*) | INFERRED | evidence | | | |
-| obs-as001-gauge | m-as001 · 20LAC30AS001 | gauge_obscured | Fogging is visible on the differential-pressure gauge face. | f-as001-dp | label "Differential pressure", value "0.28", unit "bar": *"Differential pressure: 0.28 bar"* | AMBIGUOUS | context | | | |
-| obs-gs001-iso | m-gs001 · 20BFA10GS001 | isolation_present | A lock and tag are visible on the isolation point. | f-gs001-iso | label "Isolations applied", value "1 — transfer set C": *"Isolations applied: 1 — transfer set C"* | INFERRED | evidence | | | |
-| obs-gs001-label | m-gs001 · 20BFA10GS001 | label_illegible | An illegible label is visible on the switchgear. | f-gs001-due | label "Protection test due", value "2026-07-04": *"Protection test due: 2026-07-04"* | AMBIGUOUS | context | | | |
-| obs-an001-screw | m-an001 · 20LAC10AN001 | fixing_missing | A missing screw is visible on the actuator cover. | f-an001-due | label "Stroke test due", value "2027-05-05": *"Stroke test due: 2027-05-05"* | AMBIGUOUS | context | | | |
-| obs-aa601-weep | m-aa601 · 20HAD10AA601 | gland_weep | Moisture is visible on the surface below the bonnet. | f-aa601-seal | label "Lead seal", value "Broken at inspection 2026-05-18": *"Lead seal: Broken at inspection 2026-05-18"* | AMBIGUOUS | context | | | |
-| obs-aa601-seal | m-aa601 · 20HAD10AA601 | seal_absent | The lead seal wire is absent from the valve. | ncr-0104 | field `description`: *"Lead seal found broken at routine inspection. Valve cannot be assumed to be at certified setpoint and must be de-commissioned and re-calibrated before it counts as a protective device."* (comment quotes *"Lead seal found broken at routine inspection."*) | INFERRED | evidence | | | |
-| obs-aa601-corr | m-aa601 · 20HAD10AA601 | corrosion_visible | Corrosion is visible on the spring housing. | f-aa601-cert | label "Certification state", value "Uncertified — seal broken": *"Certification state: Uncertified — seal broken"* | AMBIGUOUS | context | | | |
-| obs-ac001-residue | m-ac001 · 20GHC20AC001 | leak_evidence | Residue is visible at the tube-side flange. | ncr-0091 | field `description`: *"Minor tube-side fouling identified at inspection; heat-transfer duty marginally below specification."* (comment quotes *"Minor tube-side fouling identified at inspection"*) | AMBIGUOUS | context | | | |
-| obs-bb001-stamp | m-bb001 · 20GHC10BB001 | label_illegible | Part of the inspection stamp is obscured on the vessel. | f-bb001-insp | label "Last statutory inspection", value "2025-04-02": *"Last statutory inspection: 2025-04-02"* | AMBIGUOUS | context | | | |
+| obs-ap003-disc | m-ap003 · 20LAC10AP003 | discolouration | Discolouration is visible on the drive-end bearing housing. | f-ap003-vib | label "Last vibration reading", value "9.4", unit "mm/s RMS": *"Last vibration reading: 9.4 mm/s RMS"* | INFERRED | evidence | confirmed | Matthew Koeberg | 2026-09-17 |
+| obs-ap003-guard | m-ap003 · 20LAC10AP003 | fixing_missing | A missing fixing is visible on the coupling guard. | f-ap003-status | label "Service state", value "Off duty — isolated": *"Service state: Off duty — isolated"* | AMBIGUOUS | context | confirmed | Matthew Koeberg | 2026-09-17 |
+| obs-ap003-iso | m-ap003 · 20LAC10AP003 | isolation_present | An isolation tag is visible on the pump. | ncr-0118 | field `immediate_action`: *"Set taken off duty. Duty transferred to the adjacent transfer set. Isolation applied and tagged."* (comment quotes the trailing clause, *"Isolation applied and tagged"*) | INFERRED | evidence | confirmed | Matthew Koeberg | 2026-09-17 |
+| obs-as001-gauge | m-as001 · 20LAC30AS001 | gauge_obscured | Fogging is visible on the differential-pressure gauge face. | f-as001-dp | label "Differential pressure", value "0.28", unit "bar": *"Differential pressure: 0.28 bar"* | AMBIGUOUS | context | confirmed | Matthew Koeberg | 2026-09-17 |
+| obs-gs001-iso | m-gs001 · 20BFA10GS001 | isolation_present | A lock and tag are visible on the isolation point. | f-gs001-iso | label "Isolations applied", value "1 — transfer set C": *"Isolations applied: 1 — transfer set C"* | INFERRED | evidence | confirmed | Matthew Koeberg | 2026-09-17 |
+| obs-gs001-label | m-gs001 · 20BFA10GS001 | label_illegible | An illegible label is visible on the switchgear. | f-gs001-due | label "Protection test due", value "2026-07-04": *"Protection test due: 2026-07-04"* | AMBIGUOUS | context | confirmed | Matthew Koeberg | 2026-09-17 |
+| obs-an001-screw | m-an001 · 20LAC10AN001 | fixing_missing | A missing screw is visible on the actuator cover. | f-an001-due | label "Stroke test due", value "2027-05-05": *"Stroke test due: 2027-05-05"* | AMBIGUOUS | context | confirmed | Matthew Koeberg | 2026-09-17 |
+| obs-aa601-weep | m-aa601 · 20HAD10AA601 | gland_weep | Moisture is visible on the surface below the bonnet. | f-aa601-seal | label "Lead seal", value "Broken at inspection 2026-05-18": *"Lead seal: Broken at inspection 2026-05-18"* | AMBIGUOUS | context | confirmed | Matthew Koeberg | 2026-09-17 |
+| obs-aa601-seal | m-aa601 · 20HAD10AA601 | seal_absent | The lead seal wire is absent from the valve. | ncr-0104 | field `description`: *"Lead seal found broken at routine inspection. Valve cannot be assumed to be at certified setpoint and must be de-commissioned and re-calibrated before it counts as a protective device."* (comment quotes *"Lead seal found broken at routine inspection."*) | INFERRED | evidence | confirmed | Matthew Koeberg | 2026-09-17 |
+| obs-aa601-corr | m-aa601 · 20HAD10AA601 | corrosion_visible | Corrosion is visible on the spring housing. | f-aa601-cert | label "Certification state", value "Uncertified — seal broken": *"Certification state: Uncertified — seal broken"* | AMBIGUOUS | context | confirmed | Matthew Koeberg | 2026-09-17 |
+| obs-ac001-residue | m-ac001 · 20GHC20AC001 | leak_evidence | Residue is visible at the tube-side flange. | ncr-0091 | field `description`: *"Minor tube-side fouling identified at inspection; heat-transfer duty marginally below specification."* (comment quotes *"Minor tube-side fouling identified at inspection"*) | AMBIGUOUS | context | confirmed | Matthew Koeberg | 2026-09-17 |
+| obs-bb001-stamp | m-bb001 · 20GHC10BB001 | label_illegible | Part of the inspection stamp is obscured on the vessel. | f-bb001-insp | label "Last statutory inspection", value "2025-04-02": *"Last statutory inspection: 2025-04-02"* | AMBIGUOUS | context | confirmed | Matthew Koeberg | 2026-09-17 |
 
 Twelve rows, one per entry in `OBSERVATIONS` (D-08).
 
@@ -100,3 +107,17 @@ row, the choice made and why, and what the alternative was:
 
 The size of the set is not one of these judgments: it is twelve, as D-08
 enumerates it. The reviewer is being asked about rows, not about the count.
+
+## Sign-off
+
+Matthew Koeberg read each of the twelve rows above against the record's own
+sentence quoted beside it and confirmed every wording as drafted: an honest
+inference the cited record supports where the relation is `evidence`, or a
+wording the record only situates where the relation is `context`. No row was
+reworded, no row was re-cited, no row was dropped. The `Verdict`, `Reviewer`
+and `Date` columns of the main table above record exactly this, on every
+row. The two referral rows remain not subject to this gate, unchanged.
+
+---
+
+Recorded 2026-09-17.
