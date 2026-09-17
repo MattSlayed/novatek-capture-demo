@@ -104,7 +104,9 @@ describe("package.json — declared pins (D-01)", () => {
     // `**` is a plain `*` and only scripts/lib/*.test.mjs would run;
     // cmd.exe on Windows never expands globs, which is why the
     // unquoted form passed locally.
-    assert.equal(pkg.scripts.test, 'node --test "scripts/**/*.test.mjs"');
+    // Phase 3 03-01 added a second quoted glob so `npm test` runs the
+    // same two globs scripts/verify.mjs's "unit-suite" step added.
+    assert.equal(pkg.scripts.test, 'node --test "scripts/**/*.test.mjs" "lib/**/*.test.mjs"');
     assert.equal(pkg.scripts.verify, "node scripts/verify.mjs");
   });
 });

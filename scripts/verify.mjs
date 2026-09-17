@@ -85,6 +85,11 @@ export const STEPS = [
      itself rather than a parent shell, behaves identically here and
      on Ubuntu. */
   { id: "fixture-suite", command: process.execPath, args: ["--test", "scripts/**/*.test.mjs"] },
+  /* The pure lib/ logic this phase (and later ones) adds is provable
+     without a build or a server, so it runs early and cheaply, right
+     after the fixture suite and before next-build. Same unshelled,
+     single-argv-entry glob discipline as fixture-suite above. */
+  { id: "unit-suite", command: process.execPath, args: ["--test", "lib/**/*.test.mjs"] },
   { id: "check-headers", command: process.execPath, args: ["scripts/check-headers.mjs"] },
   { id: "check-sw", command: process.execPath, args: ["scripts/check-sw.mjs"] },
   { id: "check-structure", command: process.execPath, args: ["scripts/check-structure.mjs"] },

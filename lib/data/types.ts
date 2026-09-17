@@ -361,12 +361,15 @@ export const QUEUE_ITEM_STATES: QueueItemState[] = [
 ];
 
 /**
- * `referral_evidence_missing` has no sentence yet — P9 supplies it.
- * AD-9's `already_open` and `not_open` join this set in P4.
+ * `not_open` landed in P3 under D-06, with its sentence and next act
+ * defined in `lib/copy/conflicts.ts`. AD-9's `already_open` remains on
+ * its stated P4 schedule — no code for it is introduced in this
+ * phase. `referral_evidence_missing` still has no sentence until P9.
  */
 export type ConflictCode =
   | "order_not_found"
   | "order_closed"
+  | "not_open"
   | "asset_not_in_order"
   | "account_mismatch"
   | "proposal_superseded"
@@ -377,6 +380,7 @@ export type ConflictCode =
 export const CONFLICT_CODES: ConflictCode[] = [
   "order_not_found",
   "order_closed",
+  "not_open",
   "asset_not_in_order",
   "account_mismatch",
   "proposal_superseded",
@@ -560,11 +564,29 @@ export interface VerificationResult {
   verified_at: string;
 }
 
+/**
+ * AD-5: `Proposal.id` is the HMAC over the account, the capture
+ * envelope's client id and the observation id, so the decision item
+ * must carry `capture_client_id` plus `observation_id` for any
+ * instance to reconstruct that triple and re-derive without reading
+ * the store. A client can only send back an observation id the server
+ * told it, and `observation_id` below is where it is told.
+ *
+ * This deliberately does not widen the plural, server-only id list
+ * carried on `OrderAsset` (stripped from every response): that list
+ * names observations the artisan has not been shown, whereas an
+ * issued proposal already carries its observation's full wording, and
+ * naming that observation's id discloses nothing further. It also
+ * adds nothing to `Decision`, whose identity pair is a request-time
+ * pair consumed at the ownership check and never stored on the
+ * record.
+ */
 export interface Proposal {
   id: string;
   capture_id: string;
   asset_id: string;
   order_id: string;
+  observation_id: string;
   observation: string;
   provenance: ObservationProvenance;
   issued_at: string;
@@ -636,6 +658,24 @@ export interface OrderClock {
     opened_at: string;
     closed_at: string | null;
     source: "server" | "device_reconciled";
+    /**
+     * Present only when `source` is `"device_reconciled"`. Retained
+     * alongside the measured offset below rather than replacing
+     * `opened_at`, because FR-11 says neither silently replaces the
+     * other: this is what the device claimed, `opened_at` is what the
+     * server recorded. `types.ts` sits outside
+     * `check-fixture-hash.mjs`'s `FIXTURE_PATHS` (Phase 2 D-14), so
+     * this edit does not move the pinned fixture hash — shape is not
+     * content.
+     */
+    device_claimed_opened_at?: string;
+    /**
+     * Present only when `source` is `"device_reconciled"`. Named to
+     * match the same-named field already carried on `Decision`
+     * (naming precedent), so the same quantity carries the same name
+     * on both records.
+     */
+    device_offset_s?: number;
   }[];
   elapsed_s: number;
 }
