@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-09-17T17:34:53.166Z"
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-09-17T18:29:47.831Z"
 last_activity: 2026-09-17
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 32
-  completed_plans: 17
+  completed_plans: 18
   percent: 22
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 03 (server-seam) — EXECUTING
-Plan: 2 of 16
+Plan: 3 of 16
 Status: Ready to execute
 Last activity: 2026-09-17
 
-Progress: [█████░░░░░] 53%
+Progress: [██████░░░░] 56%
 
 ## Performance Metrics
 
@@ -70,6 +70,7 @@ Progress: [█████░░░░░] 53%
 | Phase 02-fixtures-types P06 | 15min | 2 tasks | 3 files |
 | Phase 02 P07 | 20min | 2 tasks | 6 files |
 | Phase 03 P01 | 28min | 3 tasks | 12 files |
+| Phase 03 P02 | 38min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -126,6 +127,10 @@ Recent decisions affecting current work:
 - [Phase 03-01]: Adopted the seed's P3 starting bounded values verbatim in lib/limits, plus three additional exports the plan names outright — CONTEXT.md's Claude's-discretion bullet and the plan text both specify exact values; nothing was invented
 - [Phase 03-01]: account_mismatch's copy sentence names the mechanism without naming a persona — the acting account is a runtime value; a sentence that interpolated one would be a second literal
 - [Phase 03-01]: scripts/scaffold.test.mjs's stale npm-test-script literal assertion updated to the new two-glob value — Rule 1 fix: Task 2's required package.json edit made this Phase 1 test fail
+- [Phase 03-02]: CLOCK_SEGMENTS_PER_ACCOUNT_MAX caps the clocks Map's size (distinct order-clocks per account), matching every other per-account cap's Map.size idiom — The 5-order fixture universe means a segment-array-length sum would be equivalent in practice but Map.size keeps every per-account cap the same shape
+- [Phase 03-02]: OrderClock.elapsed_s is computed fresh from segment boundaries on every read, never stored or incrementally maintained — A running segment's duration grows continuously between writes; PROJECT.md states hours are server-derived
+- [Phase 03-02]: proposals and attempts have no per-account cap in lib/limits and rely on the STORE_GLOBAL_OBJECT_MAX safety net alone — Neither is named in lib/limits; the attempts ring gets its own small, unexported, non-AD-13 bound (50) since nothing about it is client-observable
+- [Phase 03-02]: respond.ts's fail() refuses ANY caller header and ok() also guards Cache-Control directly, beyond the plan's literal HEADER_TABLE-scope wording — HEADER_TABLE is scoped to X-CAP-* names only, so its literal scope field would not catch an un-catalogued X-CAP-* name on fail() or a Cache-Control override on ok() (Rule 2 hardening)
 
 ### Pending Todos
 
@@ -159,6 +164,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-17T17:34:53.140Z
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-09-17T18:29:47.800Z
+Stopped at: Completed 03-02-PLAN.md
 Resume file: None
