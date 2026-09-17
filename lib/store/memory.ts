@@ -612,6 +612,16 @@ export function readAttempts(account: string): AttemptEntry[] {
   return ring ? structuredClone(ring) : [];
 }
 
+/** The refusal ring for a request that resolved no acting account at
+    all — see the `unattributedAttempts` comment above. FR-60 says an
+    entry that cannot name an account is kept honestly separate
+    rather than attributed to a guess, and this is what makes that
+    entry readable back rather than only ever written. Same
+    defensive-copy discipline as readAttempts. */
+export function readUnattributedAttempts(): AttemptEntry[] {
+  return structuredClone(unattributedAttempts);
+}
+
 /** `null` before any `stampLastContact(account)` call, a number after,
     and `null` again once a sweep or an instance change has passed —
     the three states D-07's clamp floor distinguishes. */
