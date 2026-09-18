@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-10-PLAN.md
-last_updated: "2026-09-17T23:31:02.547Z"
+stopped_at: Completed 03-11-PLAN.md
+last_updated: "2026-09-18T00:02:04.562Z"
 last_activity: 2026-09-17
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 32
-  completed_plans: 26
+  completed_plans: 27
   percent: 22
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 03 (server-seam) — EXECUTING
-Plan: 11 of 16
+Plan: 12 of 16
 Status: Ready to execute
 Last activity: 2026-09-17
 
-Progress: [████████░░] 81%
+Progress: [████████░░] 84%
 
 ## Performance Metrics
 
@@ -79,6 +79,7 @@ Progress: [████████░░] 81%
 | Phase 03-server-seam P08 | 20min | 2 tasks | 3 files |
 | Phase 03-server-seam P09 | 26min | 2 tasks | 3 files |
 | Phase 03-server-seam P10 | 47min | 2 tasks | 1 files |
+| Phase 03-server-seam P11 | 26min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -161,6 +162,9 @@ Recent decisions affecting current work:
 - [Phase 03-server-seam]: Wrote every module/function-absence comment in the three new routes without the literal banned identifier its own acceptance criteria check for (03-09) — The plan's own literal comment wording would self-trip the acceptance criteria checking for the absence of specific banned identifiers, same class of issue STATE.md already logs for lib/attribution and lib/access
 - [Phase 03-server-seam]: [Phase 03-server-seam P10] app/api/sync/route.ts gates whether an item reaches applyItem on validateEnvelopeItem(item).field === "client_id" rather than on the refusal's code — validateEnvelopeItem checks client_id before any other field and returns on first failure, so a refusal on any other field structurally proves client_id already passed; the one no-writer exception item is rendered with client_id: "" (a non-nullable string) rather than dropped from results[].
 - [Phase 03-server-seam]: [Phase 03-server-seam P10] Added a defensive try/catch around the one applyItem call site in app/api/sync/route.ts, converting any exception into a local rejected/bad_shape result (Rule 1 fix) — lib/reconcile/validate.ts's idempotencyHash() indexes ACCEPTED_PAYLOAD_FIELDS by item.kind before the writer's own shape step ever runs; every online route hardcodes a literal valid kind, but /api/sync is the first caller that can hand the writer an attacker- or version-skew-controlled kind (AD-18), and an unrecognised one throws inside pick()'s for...of, which would otherwise abort the whole batch and drop every other item's result with it. Empirically reproduced and confirmed fixed against a live server before this fix was added.
+- [Phase 03-server-seam]: [Phase 03-server-seam P11] lib/walk/payload.ts reads a candidate_facts entry's accepted_at off the matching Decision's decided_at field, not recorded_at — the name pairs semantically with accepted_by/decided_by, and both are already-validated, server-recorded values by the time a route reads them back
+- [Phase 03-server-seam]: [Phase 03-server-seam P11] lib/walk/payload.ts's candidate_facts/rejected/open sets are built from one filter on Proposal.state, with no fourth (superseded) bucket — lib/reconcile/apply.ts's assertProposalState never assigns superseded, so filtering on the three reachable states alone is exhaustive today, documented in a comment rather than silently assumed
+- [Phase 03-server-seam]: [Phase 03-server-seam P11] A missing Decision for an accepted proposal falls back to accepted_by: null, accepted_at: null, arrived_via: "immediate" in lib/walk/payload.ts — a type-safety accommodation for a case AD-6 makes unreachable (a Decision is created in the same commit that flips a proposal to accepted), not a real path
 
 ### Pending Todos
 
@@ -197,6 +201,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-17T23:31:02.518Z
-Stopped at: Completed 03-10-PLAN.md
+Last session: 2026-09-18T00:02:04.527Z
+Stopped at: Completed 03-11-PLAN.md
 Resume file: None
