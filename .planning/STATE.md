@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-11-PLAN.md
-last_updated: "2026-09-18T00:02:04.562Z"
-last_activity: 2026-09-17
+stopped_at: Completed 03-12-PLAN.md
+last_updated: "2026-09-18T17:42:13.020Z"
+last_activity: 2026-09-18
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 32
-  completed_plans: 27
+  completed_plans: 28
   percent: 22
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 03 (server-seam) — EXECUTING
-Plan: 12 of 16
+Plan: 13 of 16
 Status: Ready to execute
-Last activity: 2026-09-17
+Last activity: 2026-09-18
 
-Progress: [████████░░] 84%
+Progress: [█████████░] 88%
 
 ## Performance Metrics
 
@@ -80,6 +80,7 @@ Progress: [████████░░] 84%
 | Phase 03-server-seam P09 | 26min | 2 tasks | 3 files |
 | Phase 03-server-seam P10 | 47min | 2 tasks | 1 files |
 | Phase 03-server-seam P11 | 26min | 2 tasks | 3 files |
+| Phase 03-server-seam P12 | multi-session | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -165,6 +166,9 @@ Recent decisions affecting current work:
 - [Phase 03-server-seam]: [Phase 03-server-seam P11] lib/walk/payload.ts reads a candidate_facts entry's accepted_at off the matching Decision's decided_at field, not recorded_at — the name pairs semantically with accepted_by/decided_by, and both are already-validated, server-recorded values by the time a route reads them back
 - [Phase 03-server-seam]: [Phase 03-server-seam P11] lib/walk/payload.ts's candidate_facts/rejected/open sets are built from one filter on Proposal.state, with no fourth (superseded) bucket — lib/reconcile/apply.ts's assertProposalState never assigns superseded, so filtering on the three reachable states alone is exhaustive today, documented in a comment rather than silently assumed
 - [Phase 03-server-seam]: [Phase 03-server-seam P11] A missing Decision for an accepted proposal falls back to accepted_by: null, accepted_at: null, arrived_via: "immediate" in lib/walk/payload.ts — a type-safety accommodation for a case AD-6 makes unreachable (a Decision is created in the same commit that flips a proposal to accepted), not a real path
+- [Phase 03-server-seam]: [Phase 03-server-seam P12] check-actor-field.mjs enforces PERMITTED_RHS as a banlist over unsafe sources (body/payload/request/raw/searchParams/a quoted literal), not exact-string equality -- the real lib/reconcile/apply.ts assigns account_id through a ternary that no single permitted string equals, and account_id is not file-restricted the way captured_by/decided_by/raised_by are since it is a keying field constructed in several files outside PERMITTED_ASSIGNERS — A literal exact-string, file-restricted implementation would fail against already-shipped, correct code (verified by grep before the check was finalized)
+- [Phase 03-server-seam]: [Phase 03-server-seam P12] check-accepted-fields.mjs flags an unenumerated write route via a pick(..., ACCEPTED_BODY_FIELDS.key) call site naming a key outside EXPECTED_ROUTES, not bare POST-export presence -- app/api/hours/route.ts has a hand-written 405 POST that never calls pick() by 03-08s own design and accepts no field to enumerate — A literal any-POST-export sweep would report the already-correct hours route as an unenumerated write route, failing the checks own acceptance criterion against the real repository
+- [Phase 03-server-seam]: [Phase 03-server-seam P12] check-actor-field.mjs route-schema sweep flags an actor field only when read from body/payload/raw/request or named as a bare quoted string, not any occurrence at all — A bare word-boundary sweep would flag the account.account_id property read that legitimately appears in nearly every routes response headers and claimed_account_id assignment
 
 ### Pending Todos
 
@@ -201,6 +205,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-18T00:02:04.527Z
-Stopped at: Completed 03-11-PLAN.md
+Last session: 2026-09-18T17:42:12.996Z
+Stopped at: Completed 03-12-PLAN.md
 Resume file: None

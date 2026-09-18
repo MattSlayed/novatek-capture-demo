@@ -162,7 +162,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 03-12-PLAN.md — The single-writer rule, the actor-field rule and the accepted-field enumerations wired into verify (wave 5)
+- [x] 03-12-PLAN.md — The single-writer rule, the actor-field rule and the accepted-field enumerations wired into verify (wave 5)
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
