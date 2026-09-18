@@ -113,6 +113,27 @@ export const STEPS = [
     command: process.execPath,
     args: ["scripts/check-named-packages.mjs"],
   },
+  /* Plan 03-12's three remaining architectural claims turned into
+     build rules: one writer, one attribution producer, one
+     accepted-field enumeration per route (AD-1, AD-3, AD-20). All
+     three are source-side, need no browser and no build output, so
+     none carries vercelExcluded — they run on Vercel's build as well
+     as in the GitHub job. */
+  {
+    id: "check-single-writer",
+    command: process.execPath,
+    args: ["scripts/check-single-writer.mjs"],
+  },
+  {
+    id: "check-actor-field",
+    command: process.execPath,
+    args: ["scripts/check-actor-field.mjs"],
+  },
+  {
+    id: "check-accepted-fields",
+    command: process.execPath,
+    args: ["scripts/check-accepted-fields.mjs"],
+  },
   {
     id: "next-build",
     command: "npx",
