@@ -167,7 +167,7 @@ Plans:
 **Wave 6** *(blocked on Wave 5 completion)*
 
 - [x] 03-13-PLAN.md — The route suite: the byte-identity comparator, curl A–H and the five negative sets, after next-build (wave 6)
-- [ ] 03-14-PLAN.md — The non-bypassability enumeration and the reviewer-facing curl suite (wave 6)
+- [x] 03-14-PLAN.md — The non-bypassability enumeration and the reviewer-facing curl suite (wave 6)
 
 **Wave 7** *(blocked on Wave 6 completion)*
 

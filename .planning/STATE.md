@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-13-PLAN.md
-last_updated: "2026-09-19T07:24:46.544Z"
+stopped_at: Completed 03-14-PLAN.md
+last_updated: "2026-09-19T08:05:07.311Z"
 last_activity: 2026-09-19
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 32
-  completed_plans: 29
+  completed_plans: 30
   percent: 22
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 03 (server-seam) — EXECUTING
-Plan: 14 of 16
+Plan: 15 of 16
 Status: Ready to execute
 Last activity: 2026-09-19
 
-Progress: [█████████░] 91%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
@@ -82,6 +82,7 @@ Progress: [█████████░] 91%
 | Phase 03-server-seam P11 | 26min | 2 tasks | 3 files |
 | Phase 03-server-seam P12 | multi-session | 3 tasks | 8 files |
 | Phase 03-server-seam P13 | 43min | 3 tasks | 5 files |
+| Phase 03-server-seam P14 | 35min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -174,6 +175,10 @@ Recent decisions affecting current work:
 - [Phase 03-server-seam]: [Phase 03-server-seam P13] check B opens wo-0142 before its verify call -- D-05's clock gate is load-bearing but not spelled out in the plan's own check B text; without it check B returns 409 order_closed instead of 201
 - [Phase 03-server-seam]: [Phase 03-server-seam P13] The five REQ-FR negative-set tests are placed before check H in route-suite.proof.mjs, not appended after it -- H restarts the server and AD-10 empties every store Map on cold start, which would destroy checkBState's proposals and wo-0142's accumulated candidate_facts/rejected sets the negative sets read
 - [Phase 03-server-seam]: [Phase 03-server-seam P13] REQ-FR-6's POST /api/sync sub-case omits assertNoSuccessOnlyHeaders on the envelope itself -- unlike the other five routes, /api/sync always returns 200 with X-CAP-Account present by design (D-01/03-10), so that check would fail against already-correct code; compareResponses already proves no header value differs
+- [Phase 03-server-seam]: [Phase 03-server-seam P14] docs/analysis/single-writer-non-bypassability.md follows deployment-gate.md's dated-artefact shape and states its own limitation first: it proves completeness (every name present), never that the prose beside a name is true — Plan 03-15's check-non-bypassability.mjs asserts completeness only; a document that also claimed correctness would overclaim what a string sweep can prove.
+- [Phase 03-server-seam]: [Phase 03-server-seam P14] scripts/curl-suite.sh's check B opens wo-0142 before its verify call, matching plan 03-13's own identical finding — D-05's clock gate is load-bearing in the shipped writer but is not spelled out in this plan's own check B text; without it check B returns 409 order_closed instead of 201.
+- [Phase 03-server-seam]: [Phase 03-server-seam P14] new_uuid()'s fallback pool counter is persisted in a file under the script's own mktemp -d workdir, not a plain shell variable — A plain variable's increment inside a $(...) command substitution is discarded the instant that subshell exits, so every fallback-generated id collided with the one before it -- found only by actually running the script against a live server (Rule 1 fix).
+- [Phase 03-server-seam]: [Phase 03-server-seam P14] curl-suite.sh uses CAPTURE_BYTES=2048 rather than a value starting with the digit 1 (e.g. 1024) — So the field's own literal value could never contain the seed's retired "bytes":1 placeholder as a text substring, satisfying this plan's own acceptance-criteria grep without narrowing what the field actually proves.
 
 ### Pending Todos
 
@@ -210,6 +215,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-19T07:24:46.517Z
-Stopped at: Completed 03-13-PLAN.md
+Last session: 2026-09-19T08:05:07.282Z
+Stopped at: Completed 03-14-PLAN.md
 Resume file: None
