@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-12-PLAN.md
-last_updated: "2026-09-18T17:42:13.020Z"
-last_activity: 2026-09-18
+stopped_at: Completed 03-13-PLAN.md
+last_updated: "2026-09-19T07:24:46.544Z"
+last_activity: 2026-09-19
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 32
-  completed_plans: 28
+  completed_plans: 29
   percent: 22
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 03 (server-seam) — EXECUTING
-Plan: 13 of 16
+Plan: 14 of 16
 Status: Ready to execute
-Last activity: 2026-09-18
+Last activity: 2026-09-19
 
-Progress: [█████████░] 88%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
@@ -81,6 +81,7 @@ Progress: [█████████░] 88%
 | Phase 03-server-seam P10 | 47min | 2 tasks | 1 files |
 | Phase 03-server-seam P11 | 26min | 2 tasks | 3 files |
 | Phase 03-server-seam P12 | multi-session | 3 tasks | 8 files |
+| Phase 03-server-seam P13 | 43min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -169,6 +170,10 @@ Recent decisions affecting current work:
 - [Phase 03-server-seam]: [Phase 03-server-seam P12] check-actor-field.mjs enforces PERMITTED_RHS as a banlist over unsafe sources (body/payload/request/raw/searchParams/a quoted literal), not exact-string equality -- the real lib/reconcile/apply.ts assigns account_id through a ternary that no single permitted string equals, and account_id is not file-restricted the way captured_by/decided_by/raised_by are since it is a keying field constructed in several files outside PERMITTED_ASSIGNERS — A literal exact-string, file-restricted implementation would fail against already-shipped, correct code (verified by grep before the check was finalized)
 - [Phase 03-server-seam]: [Phase 03-server-seam P12] check-accepted-fields.mjs flags an unenumerated write route via a pick(..., ACCEPTED_BODY_FIELDS.key) call site naming a key outside EXPECTED_ROUTES, not bare POST-export presence -- app/api/hours/route.ts has a hand-written 405 POST that never calls pick() by 03-08s own design and accepts no field to enumerate — A literal any-POST-export sweep would report the already-correct hours route as an unenumerated write route, failing the checks own acceptance criterion against the real repository
 - [Phase 03-server-seam]: [Phase 03-server-seam P12] check-actor-field.mjs route-schema sweep flags an actor field only when read from body/payload/raw/request or named as a bare quoted string, not any occurrence at all — A bare word-boundary sweep would flag the account.account_id property read that legitimately appears in nearly every routes response headers and claimed_account_id assignment
+- [Phase 03-server-seam]: [Phase 03-server-seam P13] route-suite.proof.mjs resolves its own CAPTURE_BUILD_ID via git rev-parse in the child environment, mirroring verify.mjs's D-03 resolution -- next start reloads next.config.ts's build-id gate exactly as next build does, reproduced empirically
+- [Phase 03-server-seam]: [Phase 03-server-seam P13] check B opens wo-0142 before its verify call -- D-05's clock gate is load-bearing but not spelled out in the plan's own check B text; without it check B returns 409 order_closed instead of 201
+- [Phase 03-server-seam]: [Phase 03-server-seam P13] The five REQ-FR negative-set tests are placed before check H in route-suite.proof.mjs, not appended after it -- H restarts the server and AD-10 empties every store Map on cold start, which would destroy checkBState's proposals and wo-0142's accumulated candidate_facts/rejected sets the negative sets read
+- [Phase 03-server-seam]: [Phase 03-server-seam P13] REQ-FR-6's POST /api/sync sub-case omits assertNoSuccessOnlyHeaders on the envelope itself -- unlike the other five routes, /api/sync always returns 200 with X-CAP-Account present by design (D-01/03-10), so that check would fail against already-correct code; compareResponses already proves no header value differs
 
 ### Pending Todos
 
@@ -205,6 +210,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-18T17:42:12.996Z
-Stopped at: Completed 03-12-PLAN.md
+Last session: 2026-09-19T07:24:46.517Z
+Stopped at: Completed 03-13-PLAN.md
 Resume file: None
