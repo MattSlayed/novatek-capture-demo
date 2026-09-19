@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-15-PLAN.md
+stopped_at: "Plan 03-16 blocking human checkpoint: awaiting the developer's Preview deployment curl-suite run (push to dev, run B=<url> bash scripts/curl-suite.sh, paste output)"
 last_updated: "2026-09-19T08:37:06.018Z"
 last_activity: 2026-09-19
 progress:
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 Phase: 03 (server-seam) — EXECUTING
 Plan: 16 of 16
-Status: Ready to execute
+Status: Blocked on human checkpoint (03-16)
 Last activity: 2026-09-19
 
 Progress: [██████████] 97%
@@ -219,5 +219,5 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 ## Session Continuity
 
 Last session: 2026-09-19T08:37:05.976Z
-Stopped at: Completed 03-15-PLAN.md
+Stopped at: Plan 03-16 blocking human checkpoint: awaiting the developer's Preview deployment curl-suite run (push to dev, run B=<url> bash scripts/curl-suite.sh, paste output)
 Resume file: None
