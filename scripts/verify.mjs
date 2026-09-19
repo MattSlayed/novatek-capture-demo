@@ -134,6 +134,16 @@ export const STEPS = [
     command: process.execPath,
     args: ["scripts/check-accepted-fields.mjs"],
   },
+  /* Plan 03-15, the last automated addition this phase makes: D-12's
+     structure check over docs/analysis/single-writer-non-bypassability.md.
+     Every later phase that adds a route or an environment read must
+     extend that document or this step fails — the enumeration AD-19
+     asks for, produced by the same command that gates the build. */
+  {
+    id: "check-non-bypassability",
+    command: process.execPath,
+    args: ["scripts/check-non-bypassability.mjs"],
+  },
   {
     id: "next-build",
     command: "npx",

@@ -2,7 +2,7 @@
    VERIFY — fixture proof of the fail-fast contract (D-20, D-23)
 
    Demonstrates, from injected synthetic steps and never a real
-   check, that: STEPS carries D-20's exact twenty-five-step order;
+   check, that: STEPS carries D-20's exact twenty-six-step order;
    runSteps stops at the first non-zero exit and never continues past
    it; resolveSteps removes only the two check-wcag steps, only under
    the platform's own VERCEL variable, and nothing else — no other
@@ -46,6 +46,7 @@ const EXPECTED_ORDER = [
   "check-single-writer",
   "check-actor-field",
   "check-accepted-fields",
+  "check-non-bypassability",
   "next-build",
   "check-structure-build-output",
   "check-register-isolation-bundle",
@@ -55,7 +56,7 @@ const EXPECTED_ORDER = [
   "check-wcag",
 ];
 
-test("STEPS carries D-20's twenty-five ids in the exact order", () => {
+test("STEPS carries D-20's twenty-six ids in the exact order", () => {
   assert.deepEqual(
     STEPS.map((s) => s.id),
     EXPECTED_ORDER,
@@ -139,6 +140,36 @@ test("no STEPS entry's args name route-suite's path more than once, and the pre-
     !matches.some((p) => p.includes("route-suite")),
     "the pre-build fixture-suite glob must never collect route-suite.proof.mjs",
   );
+});
+
+/* ---------------------------------------------------------------
+   Phase 3's whole contribution to the gate, stated as a contract
+   (roadmap success criterion 3) — a later removal of any one of these
+   six source-side rules, or a change to where any of them or
+   route-suite sit relative to next-build, fails this test rather than
+   passing quietly.
+   --------------------------------------------------------------- */
+
+test("Phase 3's six source-side build rules all run before next-build and are not vercelExcluded, and route-suite runs after it", () => {
+  const ids = STEPS.map((s) => s.id);
+  const buildIndex = ids.indexOf("next-build");
+  const PHASE_3_SOURCE_RULES = [
+    "check-fixture-inputs",
+    "check-named-packages",
+    "check-single-writer",
+    "check-actor-field",
+    "check-accepted-fields",
+    "check-non-bypassability",
+  ];
+  for (const id of PHASE_3_SOURCE_RULES) {
+    const index = ids.indexOf(id);
+    assert.notEqual(index, -1, `${id} must be present`);
+    assert.ok(index < buildIndex, `${id} must run before next-build`);
+    assert.ok(!STEPS[index].vercelExcluded, `${id} must run on Vercel too`);
+  }
+  const routeSuiteIndex = ids.indexOf("route-suite");
+  assert.notEqual(routeSuiteIndex, -1, "route-suite must be present");
+  assert.ok(routeSuiteIndex > buildIndex, "route-suite must run after next-build");
 });
 
 /* ---------------------------------------------------------------
@@ -333,15 +364,15 @@ test("VERCEL=1 excludes exactly the two check-wcag steps and reports the exclusi
   } finally {
     console.log = originalLog;
   }
-  assert.equal(kept.length, 23);
+  assert.equal(kept.length, 24);
   assert.ok(!kept.some((s) => s.id === "check-wcag-self-test" || s.id === "check-wcag"));
   assert.ok(messages.some((m) => m.includes("check-wcag-self-test")));
   assert.ok(messages.some((m) => m.includes("check-wcag") && !m.includes("check-wcag-self-test")));
 });
 
-test("VERCEL unset retains all twenty-five steps", () => {
+test("VERCEL unset retains all twenty-six steps", () => {
   const kept = resolveSteps(STEPS, {});
-  assert.equal(kept.length, 25);
+  assert.equal(kept.length, 26);
   assert.deepEqual(kept.map((s) => s.id), EXPECTED_ORDER);
 });
 
@@ -356,7 +387,7 @@ test("no environment variable other than VERCEL changes the step list", () => {
   ];
   for (const env of distractors) {
     const kept = resolveSteps(STEPS, env);
-    assert.equal(kept.length, 25, `env ${JSON.stringify(env)} must not change the step list`);
+    assert.equal(kept.length, 26, `env ${JSON.stringify(env)} must not change the step list`);
   }
 });
 
@@ -367,7 +398,7 @@ test("no argv flag changes the step list (--skip, --only, --fast, --no-wcag)", (
     for (const flag of flags) {
       process.argv = [...originalArgv, flag];
       const kept = resolveSteps(STEPS, {});
-      assert.equal(kept.length, 25, `argv flag ${flag} must not change the step list`);
+      assert.equal(kept.length, 26, `argv flag ${flag} must not change the step list`);
     }
   } finally {
     process.argv = originalArgv;
