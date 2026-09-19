@@ -157,6 +157,20 @@ export const STEPS = [
     command: process.execPath,
     args: ["scripts/check-register-isolation.mjs", "--bundle", ".next/static"],
   },
+  /* D-09: the route suite starts the just-built production server
+     through scripts/lib/server.mjs and proves the curl A-H checks
+     plus the five negative sets of FR-4/FR-6/FR-23/FR-24/FR-27 over
+     fetch. It must run after next-build (it starts what that step
+     produced) and cannot be folded into fixture-suite above (that
+     step runs before the build, when there is nothing yet to start).
+     It needs no browser, so — unlike the two check-wcag steps below —
+     it carries no vercelExcluded and runs on Vercel's build as well
+     as in the GitHub job. */
+  {
+    id: "route-suite",
+    command: process.execPath,
+    args: ["--test", "scripts/server/route-suite.proof.mjs"],
+  },
   { id: "check-contrast", command: process.execPath, args: ["scripts/check-contrast.mjs"] },
   {
     id: "check-wcag-self-test",

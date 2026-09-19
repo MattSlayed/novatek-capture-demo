@@ -2,7 +2,7 @@
    VERIFY — fixture proof of the fail-fast contract (D-20, D-23)
 
    Demonstrates, from injected synthetic steps and never a real
-   check, that: STEPS carries D-20's exact twenty-four-step order;
+   check, that: STEPS carries D-20's exact twenty-five-step order;
    runSteps stops at the first non-zero exit and never continues past
    it; resolveSteps removes only the two check-wcag steps, only under
    the platform's own VERCEL variable, and nothing else — no other
@@ -49,12 +49,13 @@ const EXPECTED_ORDER = [
   "next-build",
   "check-structure-build-output",
   "check-register-isolation-bundle",
+  "route-suite",
   "check-contrast",
   "check-wcag-self-test",
   "check-wcag",
 ];
 
-test("STEPS carries D-20's twenty-four ids in the exact order", () => {
+test("STEPS carries D-20's twenty-five ids in the exact order", () => {
   assert.deepEqual(
     STEPS.map((s) => s.id),
     EXPECTED_ORDER,
@@ -109,6 +110,35 @@ test("no step id is duplicated — the deliberate check-structure pair uses two 
   const duplicated = [...counts.entries()].filter(([, n]) => n > 1);
   assert.deepEqual(duplicated, [], "every step id must be unique, including the two check-structure invocations");
   assert.ok(ids.includes("check-structure") && ids.includes("check-structure-build-output"));
+});
+
+/* ---------------------------------------------------------------
+   route-suite placement contract (D-09) — asserted, not remembered
+   --------------------------------------------------------------- */
+
+test("route-suite is not vercelExcluded and runs after next-build", () => {
+  const ids = STEPS.map((s) => s.id);
+  const routeSuiteIndex = ids.indexOf("route-suite");
+  const buildIndex = ids.indexOf("next-build");
+  assert.notEqual(routeSuiteIndex, -1, "route-suite must be present");
+  assert.ok(routeSuiteIndex > buildIndex, "route-suite must run after next-build");
+  assert.ok(!STEPS[routeSuiteIndex].vercelExcluded, "route-suite must run on Vercel too (D-09)");
+});
+
+test("no STEPS entry's args name route-suite's path more than once, and the pre-build fixture-suite glob does not match it", () => {
+  let occurrences = 0;
+  for (const step of STEPS) {
+    for (const arg of step.args) {
+      if (typeof arg === "string" && arg.includes("route-suite")) occurrences += 1;
+    }
+  }
+  assert.equal(occurrences, 1, "route-suite's path must be named in exactly one STEPS entry's args");
+
+  const matches = globSync("scripts/**/*.test.mjs").map((p) => p.replace(/\\/g, "/"));
+  assert.ok(
+    !matches.some((p) => p.includes("route-suite")),
+    "the pre-build fixture-suite glob must never collect route-suite.proof.mjs",
+  );
 });
 
 /* ---------------------------------------------------------------
@@ -303,15 +333,15 @@ test("VERCEL=1 excludes exactly the two check-wcag steps and reports the exclusi
   } finally {
     console.log = originalLog;
   }
-  assert.equal(kept.length, 22);
+  assert.equal(kept.length, 23);
   assert.ok(!kept.some((s) => s.id === "check-wcag-self-test" || s.id === "check-wcag"));
   assert.ok(messages.some((m) => m.includes("check-wcag-self-test")));
   assert.ok(messages.some((m) => m.includes("check-wcag") && !m.includes("check-wcag-self-test")));
 });
 
-test("VERCEL unset retains all twenty-four steps", () => {
+test("VERCEL unset retains all twenty-five steps", () => {
   const kept = resolveSteps(STEPS, {});
-  assert.equal(kept.length, 24);
+  assert.equal(kept.length, 25);
   assert.deepEqual(kept.map((s) => s.id), EXPECTED_ORDER);
 });
 
@@ -326,7 +356,7 @@ test("no environment variable other than VERCEL changes the step list", () => {
   ];
   for (const env of distractors) {
     const kept = resolveSteps(STEPS, env);
-    assert.equal(kept.length, 24, `env ${JSON.stringify(env)} must not change the step list`);
+    assert.equal(kept.length, 25, `env ${JSON.stringify(env)} must not change the step list`);
   }
 });
 
@@ -337,7 +367,7 @@ test("no argv flag changes the step list (--skip, --only, --fast, --no-wcag)", (
     for (const flag of flags) {
       process.argv = [...originalArgv, flag];
       const kept = resolveSteps(STEPS, {});
-      assert.equal(kept.length, 24, `argv flag ${flag} must not change the step list`);
+      assert.equal(kept.length, 25, `argv flag ${flag} must not change the step list`);
     }
   } finally {
     process.argv = originalArgv;
