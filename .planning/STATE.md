@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-14-PLAN.md
-last_updated: "2026-09-19T08:05:07.311Z"
+stopped_at: Completed 03-15-PLAN.md
+last_updated: "2026-09-19T08:37:06.018Z"
 last_activity: 2026-09-19
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 32
-  completed_plans: 30
+  completed_plans: 31
   percent: 22
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 03 (server-seam) — EXECUTING
-Plan: 15 of 16
+Plan: 16 of 16
 Status: Ready to execute
 Last activity: 2026-09-19
 
-Progress: [█████████░] 94%
+Progress: [██████████] 97%
 
 ## Performance Metrics
 
@@ -83,6 +83,7 @@ Progress: [█████████░] 94%
 | Phase 03-server-seam P12 | multi-session | 3 tasks | 8 files |
 | Phase 03-server-seam P13 | 43min | 3 tasks | 5 files |
 | Phase 03-server-seam P14 | 35min | 2 tasks | 3 files |
+| Phase 03-server-seam P15 | 27min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -179,6 +180,8 @@ Recent decisions affecting current work:
 - [Phase 03-server-seam]: [Phase 03-server-seam P14] scripts/curl-suite.sh's check B opens wo-0142 before its verify call, matching plan 03-13's own identical finding — D-05's clock gate is load-bearing in the shipped writer but is not spelled out in this plan's own check B text; without it check B returns 409 order_closed instead of 201.
 - [Phase 03-server-seam]: [Phase 03-server-seam P14] new_uuid()'s fallback pool counter is persisted in a file under the script's own mktemp -d workdir, not a plain shell variable — A plain variable's increment inside a $(...) command substitution is discarded the instant that subshell exits, so every fallback-generated id collided with the one before it -- found only by actually running the script against a live server (Rule 1 fix).
 - [Phase 03-server-seam]: [Phase 03-server-seam P14] curl-suite.sh uses CAPTURE_BYTES=2048 rather than a value starting with the digit 1 (e.g. 1024) — So the field's own literal value could never contain the seed's retired "bytes":1 placeholder as a text substring, satisfying this plan's own acceptance-criteria grep without narrowing what the field actually proves.
+- [Phase 03-server-seam]: [Phase 03-server-seam P15] Exported MUTATING_EXPORTS from scripts/check-single-writer.mjs and guarded its own check-and-report execution behind an isMainModule check (duplicated from scripts/verify.mjs) — Plan 03-15's check-non-bypassability.mjs must import that constant per the plan's own explicit instruction (the two rules must agree on what a write is); without the guard the import would silently re-run check-single-writer's own three checks and could process.exit out from under the importing script.
+- [Phase 03-server-seam]: [Phase 03-server-seam P15] check-non-bypassability.mjs ships as a new script rather than an extension of check-structure.mjs, and its three name sweeps (routes, env reads, store writers) are whole-document substring searches never scoped to a specific heading — check-structure.mjs asserts absence, this asserts presence, and the two failure messages read too differently to share one fixture set (D-12 left the choice open); the literal-sweep design matches 03-RESEARCH.md's Open Questions 2 resolution and is proved deliberately by a fixture where a route named only inside a fenced code block still passes.
 
 ### Pending Todos
 
@@ -215,6 +218,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-19T08:05:07.282Z
-Stopped at: Completed 03-14-PLAN.md
+Last session: 2026-09-19T08:37:05.976Z
+Stopped at: Completed 03-15-PLAN.md
 Resume file: None
