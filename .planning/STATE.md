@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: "Plan 03-16 blocking human checkpoint: awaiting the developer's Preview deployment curl-suite run (push to dev, run B=<url> bash scripts/curl-suite.sh, paste output)"
-last_updated: "2026-09-19T08:37:06.018Z"
+status: verifying
+stopped_at: Completed 03-16-PLAN.md
+last_updated: "2026-09-19T20:09:31.267Z"
 last_activity: 2026-09-19
 progress:
   total_phases: 9
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 32
-  completed_plans: 31
-  percent: 22
+  completed_plans: 32
+  percent: 33
 ---
 
 # Project State
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 Phase: 03 (server-seam) — EXECUTING
 Plan: 16 of 16
-Status: Blocked on human checkpoint (03-16)
+Status: Phase complete — ready for verification
 Last activity: 2026-09-19
 
-Progress: [██████████] 97%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -84,6 +84,7 @@ Progress: [██████████] 97%
 | Phase 03-server-seam P13 | 43min | 3 tasks | 5 files |
 | Phase 03-server-seam P14 | 35min | 2 tasks | 3 files |
 | Phase 03-server-seam P15 | 27min | 2 tasks | 5 files |
+| Phase 03-server-seam P16 | ~15min | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -182,6 +183,8 @@ Recent decisions affecting current work:
 - [Phase 03-server-seam]: [Phase 03-server-seam P14] curl-suite.sh uses CAPTURE_BYTES=2048 rather than a value starting with the digit 1 (e.g. 1024) — So the field's own literal value could never contain the seed's retired "bytes":1 placeholder as a text substring, satisfying this plan's own acceptance-criteria grep without narrowing what the field actually proves.
 - [Phase 03-server-seam]: [Phase 03-server-seam P15] Exported MUTATING_EXPORTS from scripts/check-single-writer.mjs and guarded its own check-and-report execution behind an isMainModule check (duplicated from scripts/verify.mjs) — Plan 03-15's check-non-bypassability.mjs must import that constant per the plan's own explicit instruction (the two rules must agree on what a write is); without the guard the import would silently re-run check-single-writer's own three checks and could process.exit out from under the importing script.
 - [Phase 03-server-seam]: [Phase 03-server-seam P15] check-non-bypassability.mjs ships as a new script rather than an extension of check-structure.mjs, and its three name sweeps (routes, env reads, store writers) are whole-document substring searches never scoped to a specific heading — check-structure.mjs asserts absence, this asserts presence, and the two failure messages read too differently to share one fixture set (D-12 left the choice open); the literal-sweep design matches 03-RESEARCH.md's Open Questions 2 resolution and is proved deliberately by a fixture where a route named only inside a fenced code block still passes.
+- [Phase 03-server-seam P16]: Recorded plainly that the orchestrator agent, not the developer personally, ran every mechanical verification step at the developer's explicit instruction — D-09b and this plan's own T-3-78 threat-register entry describe a person running the checks; an agent running them at a person's direction is a related but different claim, and this project's own honesty surface should not blur it
+- [Phase 03-server-seam P16]: Added age and x-robots-tag to HEADER_EXCLUSIONS after a real Preview deployment run, left x-matched-path un-excluded — Both new headers are platform-added and confirmed absent from this repository's own code; x-matched-path is identical on both sides of every comparison this suite performs today, so excluding it was unnecessary
 
 ### Pending Todos
 
@@ -218,6 +221,6 @@ Items acknowledged and carried forward (see PROJECT.md Deferred decisions and Op
 
 ## Session Continuity
 
-Last session: 2026-09-19T08:37:05.976Z
-Stopped at: Plan 03-16 blocking human checkpoint: awaiting the developer's Preview deployment curl-suite run (push to dev, run B=<url> bash scripts/curl-suite.sh, paste output)
+Last session: 2026-09-19T20:09:31.236Z
+Stopped at: Completed 03-16-PLAN.md
 Resume file: None
