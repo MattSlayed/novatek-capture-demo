@@ -344,21 +344,32 @@ plain `curl` and nothing else installed. A clean run proves the same
 behaviour holds over the network, against the deployed platform, not only
 against a server started locally inside the build gate. Plan 03-16 records
 its run against a real deployment — the deployment URL, the build id and
-the date — in this directory, beside this document.
+the date — in this directory, beside this document, at
+`docs/analysis/server-seam-verification.md`: the exact command, the
+Preview URL, the deployment id, the date, the complete pasted per-check
+output, and the two captured header blocks that reconciled this list
+against a real deployment's own header set.
 
 ## Open items
 
-**Does a real Vercel deployment add a response header this document's
-byte-identity comparator does not already exclude?**
-`scripts/server/route-assertions.mjs`'s `HEADER_EXCLUSIONS` list
-anticipates the `x-vercel-*` family and a possible platform `etag`,
-matching ordinary documented Vercel behaviour, but this was not
-independently verified against a live deployment during this phase's own
-research (03-RESEARCH.md Pitfall 3, Assumptions Log A2). If a real
-deployment adds a header this list does not name, the locally-run route
-suite's byte-identity proof would not carry over unchanged to the real
-platform. `scripts/curl-suite.sh`'s recorded run against a real deployment
-(plan 03-16) is the artefact that answers this.
+~~Does a real Vercel deployment add a response header this document's
+byte-identity comparator does not already exclude?~~ Resolved 2026-09-19:
+yes. Plan 03-16 ran `scripts/curl-suite.sh` against a real Preview
+deployment and additionally captured its actual response headers
+directly, finding two names neither this repository's own code nor the
+prior `HEADER_EXCLUSIONS` list anticipated: `age` (a CDN cache-age
+counter) and `x-robots-tag` (a Vercel addition observed on this Preview
+deployment, confirmed absent from every file in this repository), both
+platform-added and neither a fact about the record requested. Both are
+now `HEADER_EXCLUSIONS` entries, added in the same commit as the recorded
+run, each citing it as evidence. The `x-vercel-*` family and `server`
+were confirmed present exactly as already anticipated; `vary`,
+`connection`, `keep-alive` and `etag` were not observed on this
+deployment's responses at all, which the existing entries already
+tolerate without change. See `docs/analysis/server-seam-verification.md`
+for the full reconciliation, including the one platform header
+(`x-matched-path`) decided against excluding, since it reads identically
+on both sides of every comparison this suite performs.
 
 **Does Vercel Fluid Compute share one Node.js module scope across
 *concurrent* invocations on the same instance, the way AD-10's "per

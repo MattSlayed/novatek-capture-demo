@@ -36,6 +36,18 @@ import { HEADER_TABLE } from "../../lib/http/contract.ts";
  * suite against a real deployment (D-09b) is what confirms the
  * platform half; this list cannot confirm it by itself.
  *
+ * Plan 03-16 ran that live confirmation against a real Preview
+ * deployment (docs/analysis/server-seam-verification.md) and
+ * reconciled this list against the platform's own observed response
+ * headers: `x-vercel-*` and `server` were confirmed present exactly
+ * as anticipated; `date`, `connection`, `keep-alive`,
+ * `transfer-encoding`, `content-length`, `vary` and `etag` needed no
+ * change (several were not even observed on the routes exercised
+ * there, which this list already tolerates without change). `age`
+ * and `x-robots-tag` were platform-added headers neither this list
+ * nor this project's own code anticipated, and are added below as a
+ * direct result.
+ *
  * Names are lowercased. `prefix: true` marks an entry matched by
  * `String.prototype.startsWith` rather than exact equality — the one
  * such entry is Vercel's own routing/cache-identifier family.
@@ -77,6 +89,14 @@ export const HEADER_EXCLUSIONS = [
     name: "x-vercel-",
     reason: "Vercel's own routing and cache-identifier family, added by the platform's edge layer on a real deployment and never by this project's responder (CONTEXT.md D-11).",
     prefix: true,
+  },
+  {
+    name: "age",
+    reason: "A CDN/edge cache-age counter (seconds since the platform's edge cached the response) — observed as 0 for a cache MISS on a real Preview deployment's Route Handler responses (plan 03-16, docs/analysis/server-seam-verification.md); not set by this project's own responder and not a fact about the record requested.",
+  },
+  {
+    name: "x-robots-tag",
+    reason: "Vercel's own addition on a real Preview deployment, observed value \"noindex\" (plan 03-16, docs/analysis/server-seam-verification.md) — confirmed absent from this repository's own code (no next.config.ts headers() rule, no vercel.json headers entry, no lib/http/respond.ts or lib/http/contract.ts reference); keeps an ephemeral Preview URL out of a search index, not a fact about the record requested.",
   },
 ];
 
