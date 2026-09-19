@@ -21,3 +21,14 @@ lib/data/plant.ts text eol=lf
 lib/data/artisans.ts text eol=lf
 lib/data/orders.ts text eol=lf
 lib/data/observations.ts text eol=lf
+
+# scripts/curl-suite.sh (03-14) is a shebang script a reviewer runs
+# directly with `bash scripts/curl-suite.sh` from an ordinary Linux or
+# macOS shell. A CRLF line ending anywhere inside it — which
+# core.autocrlf=true would introduce silently on this machine's next
+# checkout, exactly as for the fixture files above — breaks a bash
+# script outright (a `\r` surviving inside a heredoc, a quoted string
+# or, worst case, the shebang line itself). `text eol=lf` keeps it
+# LF-terminated on checkout and check-in; scoped to this one path only,
+# per this plan's own instruction.
+scripts/curl-suite.sh text eol=lf
