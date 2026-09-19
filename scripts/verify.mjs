@@ -250,7 +250,16 @@ export async function runSteps(steps, run) {
 
 export async function spawnStep(step, onSpawn) {
   if (step.capture) {
-    await rm(step.capture, { force: true });
+    try {
+      await rm(step.capture, { force: true });
+    } catch (e) {
+      /* ENOTDIR: a component of `capture` is a file, so nothing can
+         exist at that path to be stale. Linux reports it here where
+         Windows reports ENOENT, which `force` already ignores; the
+         write below then fails the same way on both platforms and the
+         step resolves non-zero. Anything else is still an error. */
+      if (e?.code !== "ENOTDIR") throw e;
+    }
   }
   return new Promise((resolveSpawn) => {
     const child = spawn(step.command, step.args, {
