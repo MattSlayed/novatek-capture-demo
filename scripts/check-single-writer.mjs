@@ -31,7 +31,8 @@
    ================================================================ */
 
 import { readdir, readFile, access } from "node:fs/promises";
-import { join, dirname, relative, sep } from "node:path";
+import { join, dirname, relative, resolve, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const CWD = process.cwd();
 
@@ -44,7 +45,7 @@ const CWD = process.cwd();
  * own header flags it for exactly this reason, so it is listed here
  * by name rather than inferred.
  */
-const MUTATING_EXPORTS = [
+export const MUTATING_EXPORTS = [
   "writeCapture",
   "writeProposals",
   "writeDecision",
@@ -317,25 +318,47 @@ async function checkResponderMonopoly() {
 }
 
 /* ---------------------------------------------------------------
-   run all three assertions and report
+   run all three assertions and report — guarded so plan 03-15's
+   scripts/check-non-bypassability.mjs can `import { MUTATING_EXPORTS }
+   from "./check-single-writer.mjs"` (the two rules must agree on what
+   a write is, so the list is imported there rather than restated) WITHOUT
+   that import re-running this script's own checks or calling
+   process.exit out from under the importer. isMainModule is duplicated
+   from scripts/verify.mjs's identical helper rather than imported —
+   this script stays independently runnable and importable with no
+   dependency on verify.mjs, matching D-23's one-check-one-unit
+   discipline. Node 24.0/24.1 leaves import.meta.main undefined, hence
+   the entry-script-path fallback.
    --------------------------------------------------------------- */
 
-const alias = await loadAliasPrefix();
-await checkDirectImports(alias);
-await checkTransitiveReach(alias);
-await checkResponderMonopoly();
-
-console.log("SINGLE-WRITER CHECK");
-console.log("=".repeat(72));
-console.log(`Problems: ${problems.length}`);
-
-if (problems.length) {
-  console.log("\nDEFECTS — more than one path reaches the store, or a response is hand-built:");
-  for (const p of problems) console.log(`  !  ${p}`);
-  process.exit(1);
+function isMainModule(meta, argv = process.argv) {
+  if (typeof meta.main === "boolean") return meta.main;
+  if (typeof argv[1] !== "string" || argv[1].length === 0) return false;
+  const entry = resolve(argv[1]);
+  const self = fileURLToPath(meta.url);
+  return process.platform === "win32"
+    ? entry.toLowerCase() === self.toLowerCase()
+    : entry === self;
 }
 
-console.log(
-  "\nNothing but lib/reconcile/apply.ts reaches the store's mutating exports, directly or",
-);
-console.log("transitively, and nothing but lib/http/respond.ts constructs a response.");
+if (isMainModule(import.meta)) {
+  const alias = await loadAliasPrefix();
+  await checkDirectImports(alias);
+  await checkTransitiveReach(alias);
+  await checkResponderMonopoly();
+
+  console.log("SINGLE-WRITER CHECK");
+  console.log("=".repeat(72));
+  console.log(`Problems: ${problems.length}`);
+
+  if (problems.length) {
+    console.log("\nDEFECTS — more than one path reaches the store, or a response is hand-built:");
+    for (const p of problems) console.log(`  !  ${p}`);
+    process.exit(1);
+  }
+
+  console.log(
+    "\nNothing but lib/reconcile/apply.ts reaches the store's mutating exports, directly or",
+  );
+  console.log("transitively, and nothing but lib/http/respond.ts constructs a response.");
+}
