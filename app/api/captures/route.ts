@@ -136,6 +136,18 @@ export async function POST(request: NextRequest) {
     // its own server-side recorded_at that this route has no other
     // way to reproduce byte-exact, especially on a replay.
     const capture = readCaptures(account.account_id).find((entry) => entry.id === clientId);
+    if (!capture) {
+      // A `seen` entry outlives its own capture: the store's
+      // per-account idempotency cap (500) is larger than its capture
+      // cap (200), so an account that has captured enough can still
+      // hold the entry that makes this a replay after the record it
+      // points at has been evicted. Answering 201 anyway would send
+      // `{}` — JSON drops the undefined key entirely — under an
+      // X-CAP-Capture header naming a record this server no longer
+      // has, which is a success header for something that does not
+      // exist. Refusing says what actually happened.
+      return fail("store_evicted");
+    }
     return ok(
       { capture },
       {
