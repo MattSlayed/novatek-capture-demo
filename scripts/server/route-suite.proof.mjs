@@ -70,6 +70,7 @@ import {
   snapshot,
 } from "./route-assertions.mjs";
 import { CONFLICT_COPY, TRANSPORT_COPY } from "../../lib/copy/conflicts.ts";
+import { SESSION_COOKIE_NAME } from "../../lib/session/cookie.ts";
 
 const require = createRequire(import.meta.url);
 /* Resolved through node_modules, so the server can be started directly
@@ -1046,4 +1047,41 @@ test("H — X-CAP-Instance constant across calls and changed after restart", asy
   const afterRestart = await capFetch(`${BASE_URL}/api/health`);
   const newInstanceId = afterRestart.headers.get("x-cap-instance");
   assert.notEqual(newInstanceId, instanceIds[0]);
+});
+
+test("FR-3 — DELETE /api/session answers 204 with no body, clears the cookie, and the next read is 401", async () => {
+  /* Runs on its own jar so clearing the credential cannot disturb the
+     shared mabaso/naidoo jars, and last in the file for the same
+     reason. A 204 carrying a JSON body is forbidden by the Fetch
+     standard and throws out of the Response constructor, which would
+     surface here as a framework 500 with none of the universal
+     headers and no Set-Cookie at all. */
+  const jar = cookieJar(capFetch);
+  await mintSession(jar, "acc-vanwyk");
+
+  const before = await jar.fetch(`${BASE_URL}/api/session`);
+  assert.equal(before.status, 200, "the freshly minted credential must read back");
+
+  const deleted = await jar.fetch(`${BASE_URL}/api/session`, { method: "DELETE" });
+  assert.equal(deleted.status, 204);
+  assert.equal(await deleted.text(), "", "a 204 carries no body");
+  /* deleted already passed through capFetch's own automatic
+     assertUniversalHeaders call — a null-body response still carries
+     the universal set, which a framework 500 would not. */
+  assertNoSuccessOnlyHeaders(deleted, "FR-3 DELETE /api/session");
+
+  const setCookies =
+    typeof deleted.headers.getSetCookie === "function" ? deleted.headers.getSetCookie() : [];
+  const clearing = setCookies.find((raw) => raw.startsWith(`${SESSION_COOKIE_NAME}=`));
+  assert.ok(clearing, `expected a Set-Cookie clearing ${SESSION_COOKIE_NAME}, got ${JSON.stringify(setCookies)}`);
+  assert.match(clearing, /max-age=0/i);
+
+  /* The jar honours Max-Age=0 by dropping the name, so this request
+     genuinely carries no credential. */
+  assert.equal(jar.cookies.has(SESSION_COOKIE_NAME), false);
+  const after = await jar.fetch(`${BASE_URL}/api/session`);
+  assert.equal(after.status, 401);
+  const afterJson = await after.json();
+  assert.equal(afterJson.error, "no_session");
+  assert.equal(afterJson.detail, TRANSPORT_COPY.no_session.sentence);
 });

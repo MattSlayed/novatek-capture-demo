@@ -77,10 +77,25 @@ export function ok(
       throw new Error(`ok(): "${name}" is not in HEADER_TABLE — add it there before sending it`);
     }
   }
-  return NextResponse.json(body, {
-    status: init?.status ?? 200,
-    headers: withUniversalHeaders(callerHeaders),
-  });
+  const status = init?.status ?? 200;
+  const headers = withUniversalHeaders(callerHeaders);
+
+  // The three null-body statuses. `NextResponse.json` is
+  // `Response.json(body, init)` underneath, and the Fetch standard
+  // forbids a body on any of them — the installed framework does not
+  // quietly drop the body, it throws
+  // `Invalid response status code 204` out of the Response
+  // constructor, so the handler never returns at all and the
+  // framework serves its own 500 carrying none of the universal
+  // headers and none of the route's own Set-Cookie. Building the
+  // response with a literal null body is the only legal shape here,
+  // and it still goes through this one module, so the universal set
+  // is stamped exactly as it is on every other response.
+  if (status === 204 || status === 205 || status === 304) {
+    return new NextResponse(null, { status, headers });
+  }
+
+  return NextResponse.json(body, { status, headers });
 }
 
 /**
