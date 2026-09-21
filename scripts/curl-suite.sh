@@ -116,15 +116,32 @@ HDR_FILE="$WORKDIR/headers.txt"
 BODY_FILE="$WORKDIR/body.txt"
 
 # ----------------------------------------------------------------
-# UUID generation. Tried in this order: `uuidgen` (present on macOS
-# and most Linux distributions via util-linux — the most recognisably
-# "a real UUID tool" of the three), then the Linux kernel's own UUID
-# source (needs no external binary at all where it exists), then a
-# small fixed pool of literal v4-shaped UUIDs as the last resort for a
-# shell with neither. The fallback pool exists only so this script
-# still runs somewhere with just `bash` and `curl` and nothing else;
-# on any ordinary Linux or macOS reviewer machine one of the first two
-# fires and the pool is never touched.
+# UUID generation. Resolved ONCE, into $UUID_SOURCE, so the banner
+# below can name the source that actually fired: a recorded run of
+# this suite has to say which of the four it used, because they are
+# not equally reproducible.
+#
+# Tried in this order: `uuidgen` (present on macOS and most Linux
+# distributions via util-linux — the most recognisably "a real UUID
+# tool" of the four), then the Linux kernel's own UUID source (needs
+# no external binary at all where it exists), then `/dev/urandom` via
+# `od`, then a small fixed pool of literal v4-shaped UUIDs.
+#
+# /dev/urandom is on the list because this project's own primary
+# development platform — Git Bash on Windows — has neither of the
+# first two but does have both /dev/urandom and `od` (all four probed
+# directly on that shell). Without it the pool served the same twelve
+# literals on every run, which made this suite single-shot against a
+# warm instance: inside STORE_TTL_SECONDS (6 h), check B's verify
+# re-sends the first pool id with a fresh captured_at, gets 409
+# already_recorded_differently, and D, E and F fail behind it. FR-24
+# promises the seam is reproducible from an ordinary shell; on this
+# project's own primary platform it was not.
+#
+# The pool survives only so this script still runs somewhere with just
+# `bash` and `curl` and nothing else. It names itself loudly in the
+# banner when it fires, because a run on the pool is not a
+# reproducible run and a recorded one must not be read as if it were.
 # ----------------------------------------------------------------
 
 FALLBACK_UUIDS=(
@@ -144,17 +161,50 @@ FALLBACK_UUIDS=(
 FALLBACK_UUID_INDEX_FILE="$WORKDIR/uuid-index"
 printf '0' >"$FALLBACK_UUID_INDEX_FILE"
 
+if command -v uuidgen >/dev/null 2>&1; then
+  UUID_SOURCE="uuidgen"
+elif [ -r /proc/sys/kernel/random/uuid ]; then
+  UUID_SOURCE="/proc/sys/kernel/random/uuid"
+elif [ -r /dev/urandom ] && command -v od >/dev/null 2>&1; then
+  UUID_SOURCE="/dev/urandom"
+else
+  UUID_SOURCE="fixed-pool"
+fi
+
+# Sixteen random bytes as thirty-two lowercase hex characters, laid
+# out as v4/variant-1 — byte for byte the shape
+# lib/reconcile/validate.ts's isUuidShaped() accepts: a literal "4" in
+# the version position and one of 8/9/a/b in the variant position. The
+# variant nibble is derived from a random one with `(n & 3) | 8`
+# rather than picked from a list, so nothing here can bias it. `od` is
+# used rather than `hexdump` or `xxd`: it is the one of the three in
+# POSIX, and the one Git Bash actually ships.
+urandom_uuid() {
+  local h
+  h=$(od -An -tx1 -N16 /dev/urandom | tr -d ' \n')
+  printf '%s-%s-4%s-%x%s-%s\n' \
+    "${h:0:8}" "${h:8:4}" "${h:13:3}" \
+    "$(( (0x${h:16:1} & 3) | 8 ))" "${h:17:3}" "${h:20:12}"
+}
+
 new_uuid() {
-  if command -v uuidgen >/dev/null 2>&1; then
-    uuidgen | tr 'A-Z' 'a-z'
-  elif [ -r /proc/sys/kernel/random/uuid ]; then
-    cat /proc/sys/kernel/random/uuid
-  else
-    local idx
-    idx=$(cat "$FALLBACK_UUID_INDEX_FILE")
-    printf '%s' "${FALLBACK_UUIDS[$idx]}"
-    printf '%s' "$(( (idx + 1) % ${#FALLBACK_UUIDS[@]} ))" >"$FALLBACK_UUID_INDEX_FILE"
-  fi
+  case "$UUID_SOURCE" in
+    uuidgen)
+      uuidgen | tr 'A-Z' 'a-z'
+      ;;
+    /proc/sys/kernel/random/uuid)
+      cat /proc/sys/kernel/random/uuid
+      ;;
+    /dev/urandom)
+      urandom_uuid
+      ;;
+    *)
+      local idx
+      idx=$(cat "$FALLBACK_UUID_INDEX_FILE")
+      printf '%s' "${FALLBACK_UUIDS[$idx]}"
+      printf '%s' "$(( (idx + 1) % ${#FALLBACK_UUIDS[@]} ))" >"$FALLBACK_UUID_INDEX_FILE"
+      ;;
+  esac
 }
 
 # req METHOD URL [JAR] [BODY_JSON]
@@ -313,6 +363,17 @@ yes_no() {
 }
 
 echo "novatek-capture-demo curl suite — B=$B"
+# Recorded with every run (FR-24): which of the four id sources fired
+# decides whether this run is repeatable against the same instance.
+echo "UUID source: $UUID_SOURCE"
+if [ "$UUID_SOURCE" = "fixed-pool" ]; then
+  echo "WARNING: no uuidgen, no /proc/sys/kernel/random/uuid, and no /dev/urandom"
+  echo "         with od — this run is using curl-suite.sh's OWN FIXED POOL of"
+  echo "         twelve literal ids. Against the same warm instance inside"
+  echo "         STORE_TTL_SECONDS a second run re-sends them and check B onward"
+  echo "         will fail already_recorded_differently. This run is NOT"
+  echo "         reproducible; say so wherever its output is recorded."
+fi
 echo
 
 # ================================================================
