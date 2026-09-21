@@ -27,6 +27,12 @@ import { ok, fail } from "../../../lib/http/respond.ts";
 import { readSession } from "../../../lib/session/cookie.ts";
 import { deriveAccount } from "../../../lib/attribution/index.ts";
 import { applyItem, noteContact } from "../../../lib/reconcile/apply.ts";
+// Imported for the one `instanceof` test in the catch below and
+// nothing else — this route calls nothing in lib/proposals and
+// derives no proposal of its own. The class is already in this
+// route's module graph through the writer; naming it here is what
+// lets a fixture defect stay a fixture defect.
+import { UnknownCitedRecordError } from "../../../lib/proposals/derive.ts";
 import { pick, ACCEPTED_BODY_FIELDS, validateEnvelopeItem, badShapeDetail } from "../../../lib/reconcile/validate.ts";
 import { SYNC_MAX_ITEMS, SYNC_MAX_ENCODED_BYTES } from "../../../lib/limits/index.ts";
 import { TRANSPORT_COPY } from "../../../lib/copy/conflicts.ts";
@@ -135,16 +141,39 @@ export async function POST(request: NextRequest) {
       try {
         const outcome = await applyItem(sessionResult, item);
         results.push(outcome.result);
-      } catch {
-        // Defensive only: the queue envelope is versioned (AD-18)
-        // and this server may receive an item shaped by a kind it
-        // does not (or no longer) recognise. The writer's own shape
-        // step already refuses a recognised-but-wrong shape safely;
-        // this catch exists for the one input shape that is not
-        // recognised at all and would otherwise throw before that
-        // shape step is ever reached — which would drop every other
-        // item in the batch along with it, never acceptable, since
-        // the batch is not a transaction.
+      } catch (error) {
+        // A repository defect is never dressed as a caller mistake.
+        // app/api/verify/route.ts deliberately does NOT catch
+        // UnknownCitedRecordError, so a fixture citing a record it
+        // does not hold surfaces as a 500 in the server's own logs.
+        // An unbound `catch {}` here caught that same error and told
+        // the artisan "a field was missing or malformed … The field
+        // was kind." — the identical capture item was a 500 on
+        // /api/verify and a quiet bad_shape on this route. It
+        // propagates from here too.
+        if (error instanceof UnknownCitedRecordError) throw error;
+
+        // Defensive only, and narrower than it was: the queue
+        // envelope is versioned (AD-18) and this server may receive
+        // an item shaped by a kind it does not (or no longer)
+        // recognise. The writer's own first three steps are total
+        // over an unshaped envelope now, so a missing order_id and an
+        // unknown kind are refused by name rather than thrown; what
+        // is left here is the genuinely unforeseen — a store error or
+        // a writer bug — which is what a defensive catch should be.
+        // It stays contained rather than rethrown because the batch
+        // is not a transaction and one item's failure must never drop
+        // its neighbours.
+        //
+        // Logged, though, rather than vanishing. Before this, such an
+        // error left nothing at all behind: no log line, no retained
+        // attempt, and a refusal naming a field the writer may never
+        // have reached.
+        console.error("sync: applyItem threw", {
+          client_id: typeof item.client_id === "string" ? item.client_id : null,
+          kind: typeof item.kind === "string" ? item.kind : null,
+          error,
+        });
         results.push({
           client_id: typeof item.client_id === "string" ? item.client_id : "",
           status: "rejected",
