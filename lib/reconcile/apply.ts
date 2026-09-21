@@ -138,7 +138,15 @@ function finalize(
     order_id: typeof item.order_id === "string" && item.order_id.length > 0 ? item.order_id : null,
   });
   if (result.status === "recorded" && account) {
-    writeSeen(account.account_id, item.client_id, idempotencyHash(item.kind, item.payload), result);
+    writeSeen(
+      account.account_id,
+      item.client_id,
+      idempotencyHash(item.kind, item.payload, {
+        order_id: item.order_id,
+        schema_version: item.schema_version,
+      }),
+      result,
+    );
   }
   return { result, code };
 }
@@ -525,7 +533,14 @@ export async function applyItem(
   // short-circuit into another's stored result, and two accounts
   // submitting the same client_id produce two independent results
   // (FR-34's server half).
-  const hash = idempotencyHash(item.kind, item.payload);
+  // The envelope enters the digest alongside the projected payload, so
+  // a client_id reused across two kinds or two orders is caught by
+  // already_recorded_differently rather than answered as a duplicate
+  // carrying the other item's stored result.
+  const hash = idempotencyHash(item.kind, item.payload, {
+    order_id: item.order_id,
+    schema_version: item.schema_version,
+  });
   const seenEntry = readSeen(account.account_id, item.client_id);
   if (seenEntry) {
     if (seenEntry.payload_hash === hash) {

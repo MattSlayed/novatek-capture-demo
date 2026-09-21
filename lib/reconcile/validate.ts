@@ -426,8 +426,31 @@ function canonicalize(value: unknown): string {
  * consequences: an unenumerated field added to an otherwise-identical
  * payload cannot change the hash, and the hash cannot depend on the
  * order keys happened to arrive in.
+ *
+ * The digest covers the envelope as well as the payload, because a
+ * `seen` entry answers the question "is this the same ITEM?", not
+ * "is this the same payload?". `kind` used to select the projection
+ * and enter the digest nowhere else, so two different kinds with the
+ * same projected payload hashed identically — `idempotencyHash(
+ * "order_open", {})` and `idempotencyHash("order_close", {})` were
+ * the same string. An order_close sent under an earlier order_open's
+ * client_id therefore came back `duplicate` carrying the open's
+ * stored result, with the segment still running and the close route
+ * answering 200; the same id reused against a different order
+ * returned the other order's clock. `already_recorded_differently`
+ * exists precisely to catch "same id, different item", and it could
+ * not see the envelope.
+ *
+ * `envelope` is typed loosely and normalised here for the same reason
+ * the `?? []` below exists: AD-1 runs idempotency before shape, so
+ * this function is reached by items whose envelope fields have not
+ * been proved yet and must never throw on one.
  */
-export function idempotencyHash(kind: SyncItemKind, payload: unknown): string {
+export function idempotencyHash(
+  kind: SyncItemKind,
+  payload: unknown,
+  envelope: { order_id: unknown; schema_version: unknown },
+): string {
   const source = asRecord(payload) ?? {};
   // `?? []` because AD-1 runs idempotency BEFORE shape: a `kind`
   // outside the closed set reaches this function before
@@ -438,7 +461,16 @@ export function idempotencyHash(kind: SyncItemKind, payload: unknown): string {
   // unknown kind projects to the empty payload and simply never
   // matches a stored hash — it is refused one step later, by name.
   const projected = pick(source, ACCEPTED_PAYLOAD_FIELDS[kind] ?? []);
-  return createHash("sha256").update(canonicalize(projected)).digest("hex");
+  return createHash("sha256")
+    .update(
+      canonicalize({
+        kind,
+        order_id: typeof envelope.order_id === "string" ? envelope.order_id : "",
+        schema_version: typeof envelope.schema_version === "number" ? envelope.schema_version : null,
+        payload: projected,
+      }),
+    )
+    .digest("hex");
 }
 
 /**
