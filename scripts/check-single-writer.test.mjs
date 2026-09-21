@@ -108,6 +108,64 @@ export function GET() { return BOOT_ID + String(readClock()); }
   );
 });
 
+test("a fixture where a route binds the store as a namespace exits non-zero — no mutator is named anywhere", async () => {
+  await withFixture(
+    {
+      "tsconfig.json": TSCONFIG,
+      "app/api/captures/route.ts": `import * as store from "../../../lib/store/memory.ts";
+export function POST() { store.writeCapture(); return null; }
+`,
+      "lib/store/memory.ts": STORE_STUB,
+    },
+    async (dir) => {
+      const { code, stdout } = await runCheck("scripts/check-single-writer.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+      assert.match(stdout, /app\/api\/captures\/route\.ts/);
+      assert.match(stdout, /namespace/);
+    },
+  );
+});
+
+test("a fixture where a helper re-exports a mutator under a different local name exits non-zero", async () => {
+  await withFixture(
+    {
+      "tsconfig.json": TSCONFIG,
+      "app/api/captures/route.ts": `import { w } from "../../../lib/helper.ts";
+export function POST() { w(); return null; }
+`,
+      "lib/helper.ts": `export { writeCapture as w } from "./store/memory.ts";\n`,
+      "lib/store/memory.ts": STORE_STUB,
+    },
+    async (dir) => {
+      const { code, stdout } = await runCheck("scripts/check-single-writer.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+      assert.match(stdout, /lib\/helper\.ts/);
+      assert.match(stdout, /writeCapture/);
+    },
+  );
+});
+
+test("a fixture where a helper binds the store as a namespace and a route imports the helper exits non-zero", async () => {
+  await withFixture(
+    {
+      "tsconfig.json": TSCONFIG,
+      "app/api/decisions/route.ts": `import { helperWrite } from "../../../lib/helper.ts";
+export function POST() { helperWrite(); return null; }
+`,
+      "lib/helper.ts": `import * as store from "./store/memory.ts";
+export function helperWrite() { store.writeDecision(); }
+`,
+      "lib/store/memory.ts": STORE_STUB,
+    },
+    async (dir) => {
+      const { code, stdout } = await runCheck("scripts/check-single-writer.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+      assert.match(stdout, /app\/api\/decisions\/route\.ts/);
+      assert.match(stdout, /lib\/helper\.ts/);
+    },
+  );
+});
+
 test("a fixture where app/api/orders/route.ts calls NextResponse.json exits non-zero", async () => {
   await withFixture(
     {

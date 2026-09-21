@@ -20,9 +20,12 @@
    WHAT IT CANNOT CATCH: the specifier extraction below is a regex,
    not a full parser — the same honest limitation
    check-register-isolation.mjs already states. A dynamic `import()`
-   built from a runtime string, and a mutating export re-exported
-   under a different local name from an intermediate module, are both
-   outside what a regex-over-source-text sweep can see.
+   built from a runtime string is outside what a regex-over-source-
+   text sweep can see. The namespace form (`import * as store from
+   "…/memory.ts"`) and the re-export form (`export { writeCapture as w }
+   from "…/memory.ts"`) were also outside it until this sweep learned
+   to extract them; both are now edges, and a namespace edge to the
+   store counts as reaching every mutating export at once.
 
      node scripts/check-single-writer.mjs
 
@@ -136,29 +139,63 @@ async function loadAliasPrefix() {
 }
 
 /**
- * Every named import in `src`: `import { a, b } from "spec"` and
- * `import type { a } from "spec"`, single- or multi-line alike (the
- * character class below matches across line breaks). A `type ` prefix
- * on an individual name and an `X as Y` rename are both normalised to
- * the real exported name — the local alias is never what matters
- * here. This is a regex, not a parser: a dynamic `import()` and a
- * bare `import "spec"` side-effect form are both outside it, and it
- * is not meant to see them — a mutating export cannot be invoked
- * through either shape without also naming it somewhere a specifier
- * this loose would still not resolve.
+ * Every import or re-export edge in `src`, with the names it binds,
+ * single- or multi-line alike (the character class below matches
+ * across line breaks):
+ *
+ *   import { a, b } from "spec"     -> names ["a","b"]
+ *   import type { a } from "spec"   -> names ["a"]
+ *   export { a as b } from "spec"   -> names ["a"]
+ *   import * as ns from "spec"      -> namespace: true
+ *   export * from "spec"            -> namespace: true
+ *   export * as ns from "spec"      -> namespace: true
+ *
+ * A `type ` prefix on an individual name and an `X as Y` rename are
+ * both normalised to the real exported name — the local alias is
+ * never what matters here.
+ *
+ * `namespace: true` is the form this sweep used to be blind to, and
+ * it is the likelier mistake of the two the header used to list as
+ * uncatchable: `import * as store from "…/lib/store/memory.ts"` in a
+ * route is ordinary, valid TypeScript (the store has no default
+ * export, so the mixed `import def, { … }` form is the only shape
+ * `tsc` itself blocks), it names no mutator anywhere in the source
+ * text, and it reaches every one of them. A caller enforcing a named
+ * ban has to treat a namespace edge as reaching ALL the names, which
+ * is what every consumer below does. `export … from` is now an edge
+ * too, so a re-export — including one under a different local name,
+ * which the header also used to list as uncatchable — is walked like
+ * any other hop.
+ *
+ * A `type`-modified edge is deliberately NOT exempted: the named
+ * branch has always reported `import type { writeCapture }` and this
+ * keeps the two consistent, erring toward the conservative answer for
+ * a rule that protects a load-bearing invariant.
+ *
+ * This is a regex, not a parser: a dynamic `import()` built from a
+ * runtime string, and a bare `import "spec"` side-effect form, are
+ * both outside it and it is not meant to see them.
  */
-function extractNamedImports(src) {
+function extractImportEdges(src) {
   const results = [];
-  const re = /import\s+(?:type\s+)?\{([^}]*)\}\s*from\s*["']([^"']+)["']/g;
+
+  const namedRe = /\b(?:import|export)\s+(?:type\s+)?\{([^}]*)\}\s*from\s*["']([^"']+)["']/g;
   let m;
-  while ((m = re.exec(src))) {
+  while ((m = namedRe.exec(src))) {
     const names = m[1]
       .split(",")
       .map((entry) => entry.trim())
       .filter((entry) => entry.length > 0)
       .map((entry) => entry.replace(/^type\s+/, "").split(/\s+as\s+/)[0].trim());
-    results.push({ names, specifier: m[2] });
+    results.push({ names, specifier: m[2], namespace: false });
   }
+
+  const namespaceRe =
+    /\b(?:import|export)\s+(?:type\s+)?\*\s*(?:as\s+[A-Za-z_$][\w$]*\s*)?from\s*["']([^"']+)["']/g;
+  while ((m = namespaceRe.exec(src))) {
+    results.push({ names: [], specifier: m[1], namespace: true });
+  }
+
   return results;
 }
 
@@ -204,9 +241,19 @@ async function checkDirectImports(alias) {
     const rel = toRel(file);
     if (PERMITTED_IMPORTERS.includes(rel) || rel === STORE_FILE) continue;
     const src = await readFile(file, "utf8");
-    for (const { names, specifier } of extractNamedImports(src)) {
+    for (const { names, specifier, namespace } of extractImportEdges(src)) {
       const resolved = await resolveImport(file, specifier, alias);
       if (!resolved || toRel(resolved) !== STORE_FILE) continue;
+      // A namespace edge binds the store's whole export object, so
+      // every mutator is reachable through it while none of them
+      // appears in the source text. There is no read-only version of
+      // this form to spare.
+      if (namespace) {
+        problems.push(
+          `${rel} binds the whole of ${STORE_FILE} as a namespace — every mutating export is reachable through it, and only ${PERMITTED_IMPORTERS[0]} may reach one (AD-1)`,
+        );
+        continue;
+      }
       // A file that imports only read-only accessors (BOOT_ID,
       // readClock, readCaptures, ...) is fine and must not be
       // reported: the responder needs BOOT_ID and every read-heavy
@@ -246,12 +293,15 @@ async function findMutatingReach(rootFile, alias) {
     } catch {
       continue;
     }
-    for (const { names, specifier } of extractNamedImports(src)) {
+    for (const { names, specifier, namespace } of extractImportEdges(src)) {
       const resolved = await resolveImport(current, specifier, alias);
       if (!resolved) continue;
       const rel = toRel(resolved);
       if (PERMITTED_IMPORTERS.includes(rel)) continue; // a sink, never expanded
       if (rel === STORE_FILE) {
+        if (namespace) {
+          return { chain: [...chain, resolved], target: rel, name: "* (the whole module namespace)" };
+        }
         const mutatingHit = names.find((name) => MUTATING_EXPORTS.includes(name));
         if (mutatingHit) {
           return { chain: [...chain, resolved], target: rel, name: mutatingHit };

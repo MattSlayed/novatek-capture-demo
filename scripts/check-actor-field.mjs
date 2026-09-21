@@ -143,18 +143,29 @@ async function loadAliasPrefix() {
   return null;
 }
 
-function extractNamedImports(src) {
+/** Reused verbatim from check-single-writer.mjs, which documents every
+    form it extracts and why a namespace edge counts as reaching every
+    name at once. The three import sweeps must see the same graph. */
+function extractImportEdges(src) {
   const results = [];
-  const re = /import\s+(?:type\s+)?\{([^}]*)\}\s*from\s*["']([^"']+)["']/g;
+
+  const namedRe = /\b(?:import|export)\s+(?:type\s+)?\{([^}]*)\}\s*from\s*["']([^"']+)["']/g;
   let m;
-  while ((m = re.exec(src))) {
+  while ((m = namedRe.exec(src))) {
     const names = m[1]
       .split(",")
       .map((entry) => entry.trim())
       .filter((entry) => entry.length > 0)
       .map((entry) => entry.replace(/^type\s+/, "").split(/\s+as\s+/)[0].trim());
-    results.push({ names, specifier: m[2] });
+    results.push({ names, specifier: m[2], namespace: false });
   }
+
+  const namespaceRe =
+    /\b(?:import|export)\s+(?:type\s+)?\*\s*(?:as\s+[A-Za-z_$][\w$]*\s*)?from\s*["']([^"']+)["']/g;
+  while ((m = namespaceRe.exec(src))) {
+    results.push({ names: [], specifier: m[1], namespace: true });
+  }
+
   return results;
 }
 
@@ -434,10 +445,19 @@ async function checkOrderIdsImporter(alias) {
     const rel = toRel(file);
     if (rel === SCOPE_FILE) continue;
     const src = await readFile(file, "utf8");
-    for (const { names, specifier } of extractNamedImports(src)) {
-      if (!names.includes(ORDER_IDS_EXPORT)) continue;
+    for (const { names, specifier, namespace } of extractImportEdges(src)) {
       const resolved = await resolveImport(file, specifier, alias);
-      if (resolved && toRel(resolved) === ARTISANS_FILE) {
+      if (!resolved || toRel(resolved) !== ARTISANS_FILE) continue;
+      // Resolved before the name test, not after, so a namespace edge
+      // — which names nothing in the source text yet reaches
+      // ORDER_IDS_BY_ARTISAN like any other export — is seen at all.
+      if (namespace) {
+        problems.push(
+          `${rel} binds the whole of ${ARTISANS_FILE} as a namespace — ${ORDER_IDS_EXPORT} is reachable through it, and only ${SCOPE_FILE} may reach it (FR-57)`,
+        );
+        continue;
+      }
+      if (names.includes(ORDER_IDS_EXPORT)) {
         problems.push(
           `${rel} imports ${ORDER_IDS_EXPORT} from ${ARTISANS_FILE} — only ${SCOPE_FILE} may (FR-57)`,
         );

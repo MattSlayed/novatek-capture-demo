@@ -142,18 +142,29 @@ async function loadAliasPrefix() {
   return null;
 }
 
-function extractNamedImports(src) {
+/** Reused verbatim from check-single-writer.mjs, which documents every
+    form it extracts and why a namespace edge counts as reaching every
+    name at once. The two rules must see the same import graph. */
+function extractImportEdges(src) {
   const results = [];
-  const re = /import\s+(?:type\s+)?\{([^}]*)\}\s*from\s*["']([^"']+)["']/g;
+
+  const namedRe = /\b(?:import|export)\s+(?:type\s+)?\{([^}]*)\}\s*from\s*["']([^"']+)["']/g;
   let m;
-  while ((m = re.exec(src))) {
+  while ((m = namedRe.exec(src))) {
     const names = m[1]
       .split(",")
       .map((entry) => entry.trim())
       .filter((entry) => entry.length > 0)
       .map((entry) => entry.replace(/^type\s+/, "").split(/\s+as\s+/)[0].trim());
-    results.push({ names, specifier: m[2] });
+    results.push({ names, specifier: m[2], namespace: false });
   }
+
+  const namespaceRe =
+    /\b(?:import|export)\s+(?:type\s+)?\*\s*(?:as\s+[A-Za-z_$][\w$]*\s*)?from\s*["']([^"']+)["']/g;
+  while ((m = namespaceRe.exec(src))) {
+    results.push({ names: [], specifier: m[1], namespace: true });
+  }
+
   return results;
 }
 
@@ -277,10 +288,13 @@ async function collectWriterModules(alias) {
     const rel = toRel(file);
     if (rel === STORE_FILE) continue;
     const src = await readFile(file, "utf8");
-    for (const { names, specifier } of extractNamedImports(src)) {
+    for (const { names, specifier, namespace } of extractImportEdges(src)) {
       const resolved = await resolveImport(file, specifier, alias);
       if (!resolved || toRel(resolved) !== STORE_FILE) continue;
-      if (names.some((name) => MUTATING_EXPORTS.includes(name))) {
+      // A namespace edge reaches every mutating export at once, so the
+      // document has to name the module holding it just as it names
+      // one that imports a mutator by name.
+      if (namespace || names.some((name) => MUTATING_EXPORTS.includes(name))) {
         writers.push(rel);
       }
     }

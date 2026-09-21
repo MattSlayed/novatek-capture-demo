@@ -228,3 +228,48 @@ export const count = Object.keys(ORDER_IDS_BY_ARTISAN).length;
     },
   );
 });
+
+test("a fixture where a second module binds lib/data/artisans.ts as a namespace exits non-zero", async () => {
+  // ORDER_IDS_BY_ARTISAN appears nowhere in this module's own source
+  // text, and it is reachable through the namespace binding like any
+  // other export — the shape the importer sweep used to be blind to.
+  await withFixture(
+    {
+      "tsconfig.json": `{
+  "compilerOptions": { "paths": { "@/*": ["./*"] } }
+}
+`,
+      "lib/data/artisans.ts": `export const ORDER_IDS_BY_ARTISAN = {};\n`,
+      "lib/reports/summary.ts": `import * as artisans from "../data/artisans.ts";
+export const count = Object.keys(artisans.ORDER_IDS_BY_ARTISAN).length;
+`,
+      "lib/reconcile/validate.ts": validateFixture(),
+    },
+    async (dir) => {
+      const { code, stdout } = await runCheck("scripts/check-actor-field.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+      assert.match(stdout, /lib\/reports\/summary\.ts/);
+      assert.match(stdout, /namespace/);
+    },
+  );
+});
+
+test("a fixture where a second module re-exports ORDER_IDS_BY_ARTISAN under another name exits non-zero", async () => {
+  await withFixture(
+    {
+      "tsconfig.json": `{
+  "compilerOptions": { "paths": { "@/*": ["./*"] } }
+}
+`,
+      "lib/data/artisans.ts": `export const ORDER_IDS_BY_ARTISAN = {};\n`,
+      "lib/reports/summary.ts": `export { ORDER_IDS_BY_ARTISAN as orderIds } from "../data/artisans.ts";\n`,
+      "lib/reconcile/validate.ts": validateFixture(),
+    },
+    async (dir) => {
+      const { code, stdout } = await runCheck("scripts/check-actor-field.mjs", { cwd: dir });
+      assert.notEqual(code, 0);
+      assert.match(stdout, /lib\/reports\/summary\.ts/);
+      assert.match(stdout, /ORDER_IDS_BY_ARTISAN/);
+    },
+  );
+});
