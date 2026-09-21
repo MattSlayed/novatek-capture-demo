@@ -263,27 +263,77 @@ function sweepAccount(account: string, nowMs: number): void {
 }
 
 /**
- * The running total `STORE_GLOBAL_OBJECT_MAX` bounds: the same six
- * categories `storeStats()` reports, except a clock counts once per
- * order here (what the caps actually bound) where `storeStats()`
- * reports a segment count instead (a more legible number for a
- * reviewer reading `/api/health`) — both are correct, they answer
- * different questions. Computed fresh rather than tracked
+ * The running total `STORE_GLOBAL_OBJECT_MAX` bounds: exactly the six
+ * categories `storeStats()` reports, counted the same way, clocks
+ * included — a clock contributes its SEGMENT count here, not one per
+ * order. Counting one per order was the bug: an account holds at most
+ * two orders, so clocks contributed at most two to a five-thousand
+ * ceiling no matter how many segments those two clocks had grown, and
+ * the one record in this store a caller can grow for free was the one
+ * the global cap could not see. Computed fresh rather than tracked
  * incrementally: this preview's account cardinality is fixture-
- * bounded (three artisans), so summing `Map.size` across each
- * account's slice is O(accounts), not O(objects), and that is cheap
- * enough to recompute rather than risk a running counter drifting
- * out of sync with one of the several sweep or evict paths above.
+ * bounded (three artisans) and an account's segment count is itself
+ * bounded by `CLOCK_SEGMENTS_PER_ACCOUNT_MAX` below, so this stays
+ * cheap enough to recompute rather than risk a running counter
+ * drifting out of sync with one of the several sweep or evict paths
+ * above.
  */
 function globalObjectCount(): number {
   let total = 0;
   for (const m of captures.values()) total += m.size;
   for (const m of decisions.values()) total += m.size;
   for (const m of proposals.values()) total += m.size;
-  for (const m of clocks.values()) total += m.size;
+  for (const m of clocks.values()) for (const clock of m.values()) total += clock.segments.length;
   for (const m of seen.values()) total += m.size;
   for (const ring of attempts.values()) total += ring.length;
   return total;
+}
+
+/** Segments across every clock one account holds — the quantity
+    `CLOCK_SEGMENTS_PER_ACCOUNT_MAX` names. */
+function accountSegmentCount(map: Map<string, StoredClock>): number {
+  let total = 0;
+  for (const clock of map.values()) total += clock.segments.length;
+  return total;
+}
+
+/**
+ * `CLOCK_SEGMENTS_PER_ACCOUNT_MAX`, applied to segments. It used to be
+ * handed to `enforceCaps` against the clocks map, whose keys are order
+ * ids: an account holds at most two orders, so the cap was compared
+ * against a number that never exceeded two and bounded nothing. Open
+ * and close the same order in a loop and the segment array grew
+ * without limit, for free, under fresh client ids — and every read
+ * that touches a clock (`/api/hours`, `/api/orders`, the walk payload,
+ * and the `readClock` inside every capture and decision)
+ * `structuredClone`s and walks all of it.
+ *
+ * Eviction is oldest-CLOSED-first, in the store's own oldest-first
+ * idiom, and never touches a running segment: a segment the artisan is
+ * still accruing against must survive, and at most one per order can
+ * be running. Stated plainly because it is a real consequence rather
+ * than a detail — dropping a closed segment lowers that order's
+ * `elapsed_s`, so an account past the cap is under-counted rather than
+ * unbounded. The honest alternative, refusing the write so the artisan
+ * is told, needs a conflict code that `lib/data/types.ts`'s closed set
+ * does not yet carry; this preview's bound is the eviction every other
+ * record kind in this module already gets.
+ */
+function enforceSegmentCap(map: Map<string, StoredClock>): void {
+  while (accountSegmentCount(map) > CLOCK_SEGMENTS_PER_ACCOUNT_MAX) {
+    let dropped = false;
+    for (const [orderId, clock] of map) {
+      const index = clock.segments.findIndex((segment) => segment.closed_at !== null);
+      if (index === -1) continue;
+      clock.segments.splice(index, 1);
+      if (clock.segments.length === 0) map.delete(orderId);
+      dropped = true;
+      break;
+    }
+    // Every remaining segment is still running; there is nothing left
+    // that can be dropped without discarding time being accrued now.
+    if (!dropped) return;
+  }
 }
 
 /**
@@ -432,7 +482,11 @@ export function writeClockSegment(
       at_ms: nowMs,
     });
   }
-  enforceCaps(map, CLOCK_SEGMENTS_PER_ACCOUNT_MAX);
+  // Segments first (the cap that names them), then the global pass
+  // with no per-account clock cap: the clocks map is keyed by order
+  // id, and an account's order count is fixture-bounded already.
+  enforceSegmentCap(map);
+  enforceCaps(map, null);
 }
 
 /**
