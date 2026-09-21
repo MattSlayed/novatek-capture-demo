@@ -92,10 +92,20 @@ export const CONFLICT_COPY: Record<ConflictCode, RefusalCopy> = {
       "This decision was already recorded, and it was recorded differently. Nothing was changed.",
     actions: ["Discard", "Re-decide"],
   },
-  // [seed]
+  // [seed, with the figure removed] — the seed's sentence carries an
+  // illustrative "by 3 h 12 m". Shipped as the one sentence for this
+  // code, that literal is returned whether the measured offset is 61
+  // seconds or a day: a number stated as fact that is always wrong,
+  // which is precisely the overclaim the claims register exists to
+  // stop. It survived review only because a literal that looks like a
+  // measurement reads like one. The writer does measure the real
+  // offset (lib/reconcile/apply.ts's wholeSecondOffset, retained on
+  // the record as device_offset_s) and a later plan may carry it here
+  // through errorBody()'s per-request `detail`; until something
+  // actually supplies the number, the sentence does not name one.
   clock_skew: {
     sentence:
-      "This phone's clock disagrees with the server by 3 h 12 m. Check the phone's time and decide again.",
+      "This phone's clock disagrees with the server. Check the phone's time and decide again.",
     actions: ["Discard", "Decide again"],
   },
   // P9 supplies this sentence. Kept as an explicit, empty gap rather
