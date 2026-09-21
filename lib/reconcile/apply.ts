@@ -93,11 +93,29 @@ function payloadRecord(value: unknown): Record<string, unknown> {
 /**
  * The one exit point every step of applyItem returns through. Writes
  * the retained attempt (FR-60: success and failure alike), then
- * writes `seen` for every terminal result other than `duplicate` —
+ * writes `seen` for a `recorded` result and for nothing else —
  * lib/store/memory.ts's own account-keyed Maps already give this the
  * per-account separation lib/reconcile/validate.ts's `seenKey`
  * states and tests conceptually; this call passes the account id and
  * client id from the item itself, not a pre-joined string.
+ *
+ * AD-9's text is "a retried client_id with an unchanged payload
+ * replays the same SUCCESSFUL result". A refusal is not a success and
+ * must never be memoised: a `conflict` or `rejected` entry written
+ * here would be replayed by step 3 as `duplicate` with `code: null`,
+ * which every online route renders as a 2xx — a refused close,
+ * capture or decision retried under its own client id would come back
+ * a false success, and the state the refusal was about would still be
+ * whatever it was. Restricting this to `recorded` has a second
+ * consequence worth stating: the `already_recorded_differently` branch
+ * of step 3 no longer reaches this call at all, so a changed replay
+ * can never overwrite the stored hash of a record that really exists
+ * and turn the original, unchanged item into a conflict.
+ *
+ * An unrecorded item therefore leaves no idempotency trace. Retrying
+ * it re-runs every step — which is the point: the refusal is recomputed
+ * against current state rather than remembered, so an item refused for
+ * a reason that has since been resolved is applied on its retry.
  */
 function finalize(
   account: ActingAccount | null,
@@ -113,7 +131,7 @@ function finalize(
     client_id: item.client_id,
     order_id: item.order_id.length > 0 ? item.order_id : null,
   });
-  if (result.status !== "duplicate" && account) {
+  if (result.status === "recorded" && account) {
     writeSeen(account.account_id, item.client_id, idempotencyHash(item.kind, item.payload), result);
   }
   return { result, code };
