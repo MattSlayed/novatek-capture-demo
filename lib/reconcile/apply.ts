@@ -129,7 +129,13 @@ function finalize(
     outcome: result.status,
     code: result.code ?? null,
     client_id: item.client_id,
-    order_id: item.order_id.length > 0 ? item.order_id : null,
+    // Total over an unshaped envelope on purpose. AD-1 runs ownership
+    // and idempotency before shape, so this choke point is reached by
+    // items whose order_id has not been proved to be a string yet;
+    // reading `.length` off an absent one threw a TypeError out of the
+    // writer, which retained no attempt at all and reached /api/sync's
+    // catch-all as a mislabelled bad_shape naming the wrong field.
+    order_id: typeof item.order_id === "string" && item.order_id.length > 0 ? item.order_id : null,
   });
   if (result.status === "recorded" && account) {
     writeSeen(account.account_id, item.client_id, idempotencyHash(item.kind, item.payload), result);
@@ -475,7 +481,14 @@ export async function applyItem(
       );
     }
   } else {
-    const owned = orderOwned(account, item.order_id);
+    // asString(), not item.order_id directly: an envelope that never
+    // carried an order id at all must reach the SAME order_not_found a
+    // fabricated one gets, decided here at the ownership position.
+    // Hoisting the whole envelope check above this point instead would
+    // turn an unowned-order-plus-bad-field into bad_shape, which AD-4
+    // forbids — so steps 1-3 are made total over an unshaped envelope
+    // rather than reordered.
+    const owned = orderOwned(account, asString(item.order_id));
     if (!owned) {
       return finalize(
         account,

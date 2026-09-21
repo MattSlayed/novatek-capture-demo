@@ -429,7 +429,15 @@ function canonicalize(value: unknown): string {
  */
 export function idempotencyHash(kind: SyncItemKind, payload: unknown): string {
   const source = asRecord(payload) ?? {};
-  const projected = pick(source, ACCEPTED_PAYLOAD_FIELDS[kind]);
+  // `?? []` because AD-1 runs idempotency BEFORE shape: a `kind`
+  // outside the closed set reaches this function before
+  // validateEnvelopeItem has had the chance to refuse it unknown_kind,
+  // and indexing the enumeration with it yields undefined. Without the
+  // fallback, pick() iterated undefined and threw, so the unknown_kind
+  // refusal was unreachable for the very case it was written for. An
+  // unknown kind projects to the empty payload and simply never
+  // matches a stored hash — it is refused one step later, by name.
+  const projected = pick(source, ACCEPTED_PAYLOAD_FIELDS[kind] ?? []);
   return createHash("sha256").update(canonicalize(projected)).digest("hex");
 }
 
