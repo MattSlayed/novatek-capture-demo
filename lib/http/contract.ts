@@ -60,9 +60,14 @@ export interface HeaderTableEntry {
   name: string;
   scope: CapHeaderScope;
   /** Method + path of every route this phase has that emits this
-      header. `["*"]` for the two universal names, which every route
-      emits. Routes are named here ahead of their own plans (03-05
-      onward) landing, from the seed's own route table. */
+      header, or `["*"]` for a name every route emits — the two
+      universal entries, and `X-CAP-Account`, which every
+      authenticated route stamps on its own 2xx. Routes were named
+      here ahead of their own plans (03-05 onward) landing, from the
+      seed's own route table, and drifted: this field is free text
+      that `lib/http/respond.ts` never reads, so nothing caught the
+      drift. `lib/http/contract.test.mjs` now asserts it against the
+      `X-CAP-` literals every route.ts under app/api actually emits. */
   routes: string[];
   /** One line: what a reviewer learns from this header, and — for
       every `success-only` entry — why letting it reach a not-found
@@ -99,9 +104,9 @@ export const HEADER_TABLE: HeaderTableEntry[] = [
   {
     name: "X-CAP-Account",
     scope: "success-only",
-    routes: ["POST /api/session"],
+    routes: ["*"],
     reason:
-      "Names the account a new session resolved to. This route has no ownership check to leak around, but the header still only ever accompanies the 201 it was minted for, never an error branch of the same route.",
+      "Names the account the request actually acted as — the session's own, stamped from the acting account and never read off the request. Every authenticated route in this phase emits it on its own 2xx, not the session mint alone, hence [\"*\"]: what separates this entry from the two universal ones above is scope, not breadth. Kept success-only precisely BECAUSE most of those routes do have an ownership check to leak around — on a not-found its presence would confirm that a session resolved and the request reached the ownership step before the refusal fired, which is the existence oracle AD-4 forbids.",
   },
   {
     name: "X-CAP-Orders",
