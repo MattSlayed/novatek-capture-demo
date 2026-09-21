@@ -38,7 +38,17 @@ export async function POST(request: NextRequest) {
   if (!account) {
     return fail("no_session");
   }
-  noteContact(account);
+
+  // D-07: this route does NOT stamp last contact here. Every queued
+  // item in the batch below is clamped against "the later of the
+  // session's issued_at and the device's LAST server contact", and
+  // the contact that matters is the one before the device went
+  // offline. Stamping first would make this request's own arrival the
+  // floor for the very items it carries — every queued order_open or
+  // decision claiming more than QUEUED_CLOCK_FLOOR_SLACK_SECONDS ago
+  // would be refused clock_skew, and anything inside that slack would
+  // be clamped to ≈now, so offline time would never be credited. The
+  // stamp happens after the loop instead; see the call below it.
 
   // The raw wire text is read once and measured directly, rather than
   // via a parsed-then-re-serialised object: the ceiling is about what
@@ -144,6 +154,13 @@ export async function POST(request: NextRequest) {
       }
     }
   }
+
+  // D-07: the batch has been applied, so stamping contact now records
+  // this request as the device's latest server contact without having
+  // moved the clamp floor under the items it just carried. The next
+  // batch's queued items are clamped against this instant, which is
+  // exactly what "last contact" is supposed to mean.
+  noteContact(account);
 
   // Tallied once, after the loop completes — never per item, and
   // never by mutating an already-built response. A dropped item

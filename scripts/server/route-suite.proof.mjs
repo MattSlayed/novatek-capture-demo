@@ -498,6 +498,66 @@ test("D-04 — a queued order_open is clamped and read back with source: device_
   assert.equal(closeResponse.status, 200);
 });
 
+test("D-07 — /api/sync stamps last contact after the batch, so a queued claim above the floor is kept verbatim", async () => {
+  /* The distinguishing test for the clamp floor. D-07's floor is "the
+     later of issued_at and the device's LAST server contact", and the
+     contact that matters is the one before the device went offline —
+     not the arrival of the batch being reconciled. This request is the
+     last contact the floor may use: */
+  const contactResponse = await mabasoJar.fetch(`${BASE_URL}/api/hours`);
+  assert.equal(contactResponse.status, 200);
+
+  /* ...and this gap is what makes the two orderings tell apart. The
+     claim below lands inside the gap: later than the floor if the
+     route stamps contact AFTER applying the batch (so the claim is
+     kept verbatim), earlier than it if the route stamps first (so the
+     claim is clamped up to this request's own arrival). */
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+
+  const deviceClaimedOpenedAt = new Date(Date.now() - 500).toISOString();
+  const item = {
+    client_id: randomUUID(),
+    kind: "order_open",
+    schema_version: 1,
+    order_id: "wo-0151",
+    created_at: isoNow(),
+    attempts: 1,
+    state: "queued",
+    claimed_account_id: "acc-mabaso",
+    payload: { device_claimed_opened_at: deviceClaimedOpenedAt },
+  };
+  const response = await mabasoJar.fetch(`${BASE_URL}/api/sync`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ items: [item] }),
+  });
+  assert.equal(response.status, 200);
+  const json = await response.json();
+  assert.equal(json.results[0].status, "recorded");
+
+  const hoursResponse = await mabasoJar.fetch(`${BASE_URL}/api/hours`);
+  const hoursBody = await hoursResponse.json();
+  const clock = hoursBody.clocks.find((entry) => entry.order_id === "wo-0151");
+  assert.ok(clock, "wo-0151's clock must be present");
+  const segment = clock.segments.find((entry) => entry.closed_at === null);
+  assert.ok(segment, "the queued open must have left a running segment");
+  assert.equal(
+    segment.opened_at,
+    deviceClaimedOpenedAt,
+    "a claim later than the clamp floor is kept verbatim; clamping it to the request's own arrival means the floor was this request's own stamp",
+  );
+
+  /* Closed again for the same reason D-04 closes it: check G's own
+     fresh open must land on an empty clock, not on this running
+     segment's D-06/FR-7 duplicate-open branch. */
+  const closeResponse = await mabasoJar.fetch(`${BASE_URL}/api/orders/wo-0151/close`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ client_id: randomUUID() }),
+  });
+  assert.equal(closeResponse.status, 200);
+});
+
 test("G — hours accrue server-side and a write to the hours route returns 405", async () => {
   const openResponse = await mabasoJar.fetch(`${BASE_URL}/api/orders/wo-0151/open`, {
     method: "POST",
