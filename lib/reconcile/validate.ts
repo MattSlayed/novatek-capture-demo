@@ -22,6 +22,8 @@ import {
   THUMB_MAX_ENCODED_BYTES,
   CAPTURE_MAX_DECLARED_BYTES,
   VOICE_MAX_DURATION_MS,
+  MIME_MAX_CHARS,
+  NOTE_MAX_CHARS,
 } from "../limits/index.ts";
 import { REJECT_COPY } from "../copy/conflicts.ts";
 import { SYNC_ITEM_KINDS, SYNC_ITEM_SCHEMA_VERSIONS } from "../data/types.ts";
@@ -279,6 +281,12 @@ export function validateCapturePayload(payload: unknown): ShapeRefusal | null {
   if ((p.bytes as number) > CAPTURE_MAX_DECLARED_BYTES) return tooLarge("bytes");
 
   const allowedMimes = p.kind === "photo" ? PHOTO_MIMES : VOICE_MIMES;
+  // Length before the allowlist: the allowlist compares the type and
+  // subtype BEFORE any `;` parameter, so everything after the
+  // semicolon passed unexamined and was stored verbatim. A mime longer
+  // than any this project can emit is malformed, not oversized media —
+  // bad_shape, naming the field.
+  if (typeof p.mime !== "string" || p.mime.length > MIME_MAX_CHARS) return badShape("mime");
   if (!mimeBaseMatches(p.mime, allowedMimes)) return badShape("mime");
 
   if (p.kind === "voice") {
@@ -325,7 +333,13 @@ export function validateDecisionPayload(payload: unknown): ShapeRefusal | null {
   if (p.decided_where_claimed !== "online" && p.decided_where_claimed !== "on_device") {
     return badShape("decided_where_claimed");
   }
-  if (p.note !== undefined && typeof p.note !== "string") return badShape("note");
+  if (p.note !== undefined) {
+    // The one free-text field an artisan supplies. Unbounded, it was
+    // structuredCloned into the store and echoed by every read-back
+    // path, 200 decisions to an account.
+    if (typeof p.note !== "string") return badShape("note");
+    if (p.note.length > NOTE_MAX_CHARS) return tooLarge("note");
+  }
 
   return null;
 }

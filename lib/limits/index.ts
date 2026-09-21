@@ -107,6 +107,39 @@ export const CAPTURE_MAX_DECLARED_BYTES = 33554432;
 export const VOICE_MAX_DURATION_MS = 120000;
 
 /**
+ * The ceiling on a capture's declared `mime` string (Claude's
+ * discretion, not in CONTEXT.md's table). The allowlist is compared on
+ * the type/subtype before any `;` parameter, so everything after the
+ * semicolon was previously unbounded and stored verbatim: a
+ * five-million-character `"image/jpeg;…"` passed shape validation and
+ * was echoed by /api/walk, /api/orders/[id] and every replay path.
+ * 255 is far above the longest value this project can emit
+ * ("audio/webm;codecs=opus" is 22).
+ */
+export const MIME_MAX_CHARS = 255;
+
+/**
+ * The ceiling on a decision's optional `note` (Claude's discretion,
+ * not in CONTEXT.md's table). The only free-text field an artisan
+ * supplies, previously unbounded and stored verbatim, 200 decisions to
+ * an account. 2000 characters is a generous note typed on a phone.
+ */
+export const NOTE_MAX_CHARS = 2000;
+
+/**
+ * The encoded-byte ceiling on a capture route's own request body
+ * (/api/verify and /api/captures; Claude's discretion, not in
+ * CONTEXT.md's table): 96 KB = 96 * 1024 bytes. Those two are the only
+ * online routes whose body can legitimately be large, because a
+ * capture body carries a base64 thumbnail — every other write route in
+ * this phase takes a handful of identifiers. Must stay strictly
+ * greater than `THUMB_MAX_ENCODED_BYTES` (asserted in this module's
+ * own test), since a body at the thumbnail ceiling still has to carry
+ * its own identifiers, timestamps and digest alongside it.
+ */
+export const CAPTURE_BODY_MAX_ENCODED_BYTES = 98304;
+
+/**
  * How many evicted proposal ids the store remembers per account
  * (Claude's discretion, not in CONTEXT.md's table), so `store_evicted`
  * is distinguishable from `unknown_proposal` after a sweep. Bounded so

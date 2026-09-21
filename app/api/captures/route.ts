@@ -44,6 +44,7 @@ import { applyItem, noteContact } from "../../../lib/reconcile/apply.ts";
 import { orderOwned } from "../../../lib/access/scope.ts";
 import { pick, ACCEPTED_BODY_FIELDS, ACCEPTED_PAYLOAD_FIELDS } from "../../../lib/reconcile/validate.ts";
 import { readCaptures } from "../../../lib/store/memory.ts";
+import { CAPTURE_BODY_MAX_ENCODED_BYTES } from "../../../lib/limits/index.ts";
 import { SYNC_ITEM_SCHEMA_VERSIONS } from "../../../lib/data/types.ts";
 import type { SyncItem } from "../../../lib/data/types";
 
@@ -55,9 +56,26 @@ export async function POST(request: NextRequest) {
   }
   noteContact(account);
 
+  // D-02's idiom, borrowed from /api/sync: the raw wire text is read
+  // once and measured directly, rather than via a parsed-then-
+  // re-serialised object, because the ceiling is about what actually
+  // crossed the wire. This route and its /api/verify sibling are the
+  // only online routes whose body can legitimately be large — a
+  // capture body carries a base64 thumbnail, while every other write
+  // route in this phase takes a handful of identifiers.
+  let rawText: string;
+  try {
+    rawText = await request.text();
+  } catch {
+    return fail("bad_request");
+  }
+  if (Buffer.byteLength(rawText, "utf8") > CAPTURE_BODY_MAX_ENCODED_BYTES) {
+    return fail("media_too_large");
+  }
+
   let parsed: unknown;
   try {
-    parsed = await request.json();
+    parsed = JSON.parse(rawText);
   } catch {
     return fail("bad_request");
   }
