@@ -1,6 +1,6 @@
 # Server seam verification — Preview deployment curl suite (D-09b)
 
-Dated artefact, not prose. Records one run of `scripts/curl-suite.sh` against a real
+Dated artefact, not prose. Records each run of `scripts/curl-suite.sh` against a real
 Vercel Preview deployment: the exact command, the deployment identity, the complete
 per-check output, the platform's own observed response headers reconciled against
 `scripts/server/route-assertions.mjs`'s `HEADER_EXCLUSIONS`, and what this one run does
@@ -306,6 +306,151 @@ The HTTP responses captured are the same either way — curl does not know who i
 it — but the provenance is different from D-09b's original human-hands framing, and this
 document says so rather than letting the distinction blur.
 
+## Second run — 2026-09-23, against the review-fixed build
+
+`B=https://novatek-capture-demo-git-dev-matthew-ks-projects-ab449c33.vercel.app bash scripts/curl-suite.sh`,
+completed 2026-09-23T19:13Z, curl 8.14.1, exit 0, 47 passed and 0 failed.
+
+**Why a second run at all.** The run recorded above was taken against `dev`@`2babfd8`.
+Thirteen code-review findings were fixed afterwards (`1091347`..`bde1407`), touching
+twenty-three non-documentation files — six route handlers, `lib/http/respond.ts`,
+`lib/http/contract.ts`, `lib/limits/index.ts`, `lib/reconcile/apply.ts`,
+`lib/reconcile/validate.ts`, `lib/store/memory.ts`, three of the build sweeps, and
+`scripts/curl-suite.sh` itself. The first record therefore attested a build that the
+repository no longer contains. This run re-attests against the build that carries the
+fixes; the first record stands unaltered as the record of its own moment.
+
+**Who ran it, stated plainly.** The developer composed and issued the command line
+verbatim in their own message, `B=` value included; the orchestrator agent executed it in
+a Git Bash shell on Windows and read the results back. The distinction the first run's own
+section draws is unchanged and is not quietly narrowed here: a person authored and
+directed the command, an agent's process invoked `curl`. D-09b and this document's
+`T-3-78` threat-register entry describe *a person* running the checks; whether this shape
+satisfies that wording is the developer's call, tracked in
+`.planning/phases/03-server-seam/03-HUMAN-UAT.md`, and is not settled by this document.
+
+**Deployment identity.** Built from `dev`@`bde1407` ("docs(phase-03): add security threat
+verification"), which reached `dev` as a fast-forward from `2babfd8` on 2026-09-23. The
+GitHub `verify` check and the Vercel build both concluded `success` on that commit (build
+inspector `.../2Pw5v3ouQjRvopdHyTKptP4VFsRM`). Two things differ from the first run and
+are recorded rather than glossed: the URL is the durable `git-dev` branch alias, not a
+per-deployment URL, so it names whatever deployment the branch last produced; and the
+Vercel deployment id and GitHub deployment record were **not** read this time — the
+GitHub deployments API returned an empty list for this sha — so both are recorded as not
+observed rather than inferred.
+
+**Build identity, independently probed.** Because an alias names a moving target, one
+request establishes positively which code answered: `POST /api/captures` carrying a valid
+120,012-byte JSON body returned `413 media_too_large`. That refusal is
+`app/api/captures/route.ts:72`, measuring the raw request body against
+`CAPTURE_BODY_MAX_ENCODED_BYTES` (98,304), and it exists only from WR-03 (`8312e93`)
+onward — on `2babfd8` no body ceiling existed anywhere in the route, and the identical
+request would have parsed, been stripped to the accepted-field enumeration, and been
+refused as `bad_shape`. The distinct code therefore places the served build at or after
+WR-03, which is to say on the fixed side of the review. `NEXT_PUBLIC_BUILD_ID` was again
+not fetched from the served bundle; the first run's reasoning about the resolution order
+applies unchanged.
+
+**What the suite's own first line now says.** `UUID source: /dev/urandom`. WR-07
+(`632991b`) moved the suite's identifier generation to the kernel entropy source and made
+it print which source it used, so this line is itself a property of the rewritten script —
+the first run predates the change and its output carries no such line.
+
+**Instances observed.** Three exchanges, two instance ids, in this order: a pre-flight
+`GET /api/health` taken as soon as the build completed read
+`X-Cap-Instance: 2fb2127b-2327-4945-b9c5-4ada88208d21` with `uptime_s: 0`; the suite run
+minutes later read `d2cda23e-0961-4146-a740-7f2d6baf7dec`, constant across its own three
+health calls (check H); the oversized-body probe's response headers were not captured, so
+which instance served it is unrecorded. Two distinct ids minutes apart against one
+deployment is an observation about platform instance lifetime — not a cold start forced by
+anything done here, and not something the first run could show at all, since it read one
+id throughout.
+
+## Result, second run
+
+Every lettered check A through H appears below, every line `PASS`, none `FAIL`. Pasted
+verbatim and unedited, including the suite's own header and summary lines:
+
+```
+novatek-capture-demo curl suite — B=https://novatek-capture-demo-git-dev-matthew-ks-projects-ab449c33.vercel.app
+UUID source: /dev/urandom
+
+PASS  A  mint a session for acc-mabaso
+PASS  A  mint a session for acc-naidoo
+PASS  A  GET /api/orders as acc-mabaso
+PASS  A  X-CAP-Account names the acting account
+PASS  A  identity from session, orders filtered by it: acc-mabaso holds exactly two orders
+PASS  A  wo-0142 is one of acc-mabaso's two orders
+PASS  A  wo-0151 is the other of acc-mabaso's two orders
+PASS  A  GET /api/orders as acc-naidoo
+PASS  A  a different persona's jar returns a different, disjoint order set
+PASS  A  acc-naidoo's one order is wo-0137
+PASS  A  no jar at all is refused, never a filtered empty list
+PASS  A  acc-mabaso reading acc-naidoo's own order wo-0137
+PASS  A  the not-found body names order_not_found, never a permission-specific code
+
+PASS  B  open wo-0142 so a capture against it is not order_closed
+PASS  B  verification authored and saying so in a header
+PASS  B  X-CAP-Verification names the method, not a fact about the world
+PASS  B  X-CAP-Proposals is non-zero (3)
+PASS  B  no model ran: confidence is null throughout
+PASS  B  captured two proposal identities to carry into D and E
+
+PASS  C  asset must belong to the order: m-gs001 is not one of wo-0142's assets
+PASS  C  asset_not_in_order, never a not-found, since the order itself is real and owned
+
+PASS  D  decided_by in the body ignored and the acting account stamped
+PASS  D  the response names the session's own account, not the body's claim
+PASS  D  the submitted decided_by appears nowhere in the raw response
+
+PASS  E  reject the second proposal ahead of the walk read-back
+PASS  E  GET /api/walk/wo-0142
+PASS  E  X-CAP-Redaction: none
+PASS  E  redaction.ran:false is present in the body
+PASS  E  rejections retained in the walk route: the accepted proposal reads back accepted
+PASS  E  rejections retained in the walk route: the rejected proposal reads back rejected, never dropped
+
+PASS  F  sync idempotency: first post of a new client_id
+PASS  F  X-CAP-Sync-Recorded: 1 on the first post
+PASS  F  sync idempotency: identical replay of the same client_id
+PASS  F  X-CAP-Sync-Duplicate: 1 on the identical replay
+PASS  F  sync idempotency: same client_id, a changed field
+PASS  F  X-CAP-Sync-Conflict: 1 on the changed replay
+PASS  F  already_recorded_differently names the conflict
+
+PASS  G  open wo-0151 for the hours check
+PASS  G  GET /api/hours
+PASS  G  hours accrue server-side: wo-0151's elapsed_s is at least 1 (got 2)
+PASS  G  a write to the hours route returns 405
+PASS  G  the hand-written 405 still carries Cache-Control: no-store
+PASS  G  the hand-written 405 still carries X-CAP-Store
+PASS  G  the hand-written 405 still carries X-CAP-Instance — the whole reason this route is hand-written
+
+PASS  H  GET /api/health, call 1 of 3
+PASS  H  X-CAP-Instance constant across calls (call 2 of 3)
+PASS  H  X-CAP-Instance constant across calls (call 3 of 3)
+H — this instance's id is: d2cda23e-0961-4146-a740-7f2d6baf7dec
+H — a platform cold start cannot be forced from a shell. Re-run this
+    script after redeploying the same URL and compare the printed id
+    by eye: a genuine cold start changes it; nothing else here does.
+
+----------------------------------------------------------------
+47 passed, 0 failed
+```
+
+No check failed, so there is no defect to record against a requirement.
+
+## What the second run does not prove
+
+Every limit stated in `## What this run does not prove` above still holds, and two are
+specific to this run. No response header block was captured this time, so this run adds
+no evidence for or against `HEADER_EXCLUSIONS`; the reconciliation and the two entries it
+produced (`age`, `x-robots-tag`) remain the first run's work and are untouched here. No
+cold start was forced — the two instance ids above arose on their own between requests,
+which is not the same thing as observing what a cold start changes. Assumptions Log A1,
+whether Fluid Compute shares one module scope across *concurrent* invocations, remains
+unmeasured: nothing in this run issues concurrent requests either.
+
 ---
 
-Recorded 2026-09-19.
+Recorded 2026-09-19. Second run appended 2026-09-23.
