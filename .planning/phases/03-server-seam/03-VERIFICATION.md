@@ -1,9 +1,15 @@
 ---
 phase: 03-server-seam
 verified: 2026-09-21T12:45:00Z
-status: human_needed
-score: 5/6 must-haves verified (1 process must-have requires a human decision)
-overrides_applied: 0
+status: passed
+score: 6/6 must-haves verified (the 6th closed by developer override, recorded in the closure addendum)
+overrides_applied: 1
+overrides:
+  - must_have: "a person ran the checks"
+    reason: "The developer composed and issued `B=<preview-url> bash scripts/curl-suite.sh` verbatim in their own message and the orchestrator agent process invoked curl. The developer reviewed the 47/47 result and the record, which discloses the agent execution plainly rather than presenting it as a human-typed run, and judged that this discharges the must-have: \"that counts, finish the phase\" (2026-09-23)."
+    accepted_by: "MattSlayed"
+    accepted_at: "2026-09-23T19:13Z"
+    evidence: "docs/analysis/server-seam-verification.md § Second run — 2026-09-23 (commits 871aa8f, 29873d2)"
 requirements_coverage: 23/23 satisfied
 human_verification:
   - test: "Decide whether the 03-16 must-have \"a person ran the checks\" is satisfied by the recorded run, or personally re-run `B=<preview-url> bash scripts/curl-suite.sh` from your own shell to close it literally."
@@ -15,7 +21,7 @@ human_verification:
 
 **Phase Goal:** Every enforced claim is enforced server-side and reproducible from a shell: identity from the session, the work order as the only authorisation, uniform not-found, one writer, one attribution producer, one responder, and no path that creates a finding (ROADMAP.md §Phase 3).
 **Verified:** 2026-09-21T12:45:00Z
-**Status:** human_needed
+**Status:** passed (6/6; the 6th by developer override — see the closure addendum at the end of this report)
 **Re-verification:** No — initial verification (no prior `03-VERIFICATION.md` existed; the previous attempt was cut off by a session rate limit before any file was written)
 
 ## Method
@@ -215,6 +221,75 @@ These are real, currently-open items in this repository, but neither is a Phase 
 ### Gaps Summary
 
 No code-level gap was found. Every one of the 5 ROADMAP Success Criteria and all 23 requirement IDs are satisfied by real, substantive, wired, non-stub code, corroborated by tests I ran live myself (466/466) and by independent CI/Vercel evidence. The single open item is procedural: plan 03-16's own must-have text demands literal human execution of the reviewer-facing curl suite, and the phase's own evidence honestly documents that this run was agent-executed under explicit human direction rather than human-executed. That gap is not in the server seam itself — it is in who gets credit for pressing enter — and only the developer can close it, either by accepting it via override or by spending the two minutes to re-run it personally.
+
+## Closure addendum — 2026-09-23
+
+Added at phase closure, two days after the report above. The report own findings are left
+exactly as the verifier wrote them, including truth 6 ✗ FAILED (as literally written)
+verdict and the ✗ in its table row — that was an accurate reading of the evidence on
+2026-09-21 and is not rewritten here. What changed is that the developer made the decision
+the verifier escalated, and that the code this report read has since moved. Both are
+recorded below.
+
+### 1. The escalated must-have, decided
+
+The developer accepted the agent-executed run, in the frontmatter `overrides` block above,
+in the exact shape this report own **Suggested override** proposed. Two facts about that
+decision, stated plainly so the override cannot read as stronger than it is:
+
+- The provenance improved between the two runs but did not become human-typed execution.
+  For the first run the developer said "run it from this shell"; for the second they
+  composed and issued the full command line themselves, `B=` value included, and an agent
+  process still invoked `curl`. The decision is that this discharges plan 03-16 "a person
+  ran the checks", not that a person typed it.
+- The run the override rests on is the **second** one, against `dev`@`bde1407` — the build
+  carrying all thirteen code-review fixes — not the `2babfd8` run this report saw. 47
+  passed, 0 failed, exit 0. Which build answered was established positively rather than
+  assumed, by a request whose refusal (`413 media_too_large`) exists only from WR-03
+  (`8312e93`) onward. Recorded in `docs/analysis/server-seam-verification.md`
+  § "Second run — 2026-09-23" (commits `871aa8f`, `29873d2`).
+
+### 2. This report predates the thirteen fixes — what covers the delta
+
+This report read the source at `bb72ebf`. Commits `1091347`..`bde1407` then changed
+twenty-three non-documentation files, six route handlers among them. The goal-backward
+source re-read was **not** redone against those twenty-three files, and this addendum does
+not claim it was. What stands in its place, all re-run first-hand on the current tree at
+closure rather than quoted from a log:
+
+- The thirteen architectural sweeps this report own **Method** section names —
+  `check-single-writer`, `check-actor-field`, `check-accepted-fields`,
+  `check-fixture-inputs`, `check-named-packages`, `check-non-bypassability`,
+  `check-structure`, `check-register-isolation`, `check-headers`, `check-governed`,
+  `check-fixture-hash`, `check-tokens`, and `claims-audit` at its HEAD version — each
+  exited 0 with `Problems: 0`. These sweeps are the mechanical enforcement of the
+  invariants the must-haves rest on (AD-1, AD-2, AD-3, AD-11, AD-20), so they bear
+  directly on whether the fixes disturbed them.
+- `node --test "lib/**/*.test.mjs"` 178/178 and `node --test "scripts/**/*.test.mjs"`
+  307/307 — 485 total, up from the 466 this report ran, the nineteen new tests being the
+  ones the fixes brought with them.
+- Independent CI: GitHub Actions run `35825596092` ran the full `verify` gate on `bde1407`
+  on Linux and concluded `success` at 2026-09-23T06:12:31Z, and the Vercel build of the
+  same commit concluded `success`. Neither ran on the developer machine.
+- The thirteen fixes were themselves reviewed and gated: `03-REVIEW-FIX.md` records
+  `findings_in_scope: 13, fixed: 13, skipped: 0, gate: pass`.
+
+The honest statement of coverage is therefore: every mechanical check this report relied on
+has been re-run green against the post-fix tree, and the fixes carry their own review and
+their own tests, but no second adversarial source re-reading of the changed files was
+performed. Anyone auditing this phase later should treat the source-level verification as
+dated 2026-09-21 and the mechanical verification as dated 2026-09-23.
+
+### 3. What closure does not resolve
+
+Both items in **Open Items (Not Phase Gaps)** above remain open and are unaffected by this
+closure: the `[SECURITY]` blocker covering the two files a concurrent `../ipv-demo` session
+left modified in this working tree, and Assumptions Log A1 on concurrent Fluid Compute
+invocations. The security audit own open item — that `/api/walk/[orderId]` is outside
+`compareResponses` byte-identity comparison — likewise stays open in `03-SECURITY.md`.
+None of the three is a Phase 3 deliverable gap; all three outlive it.
+
+_Addendum by: Claude (orchestrator, execute-phase close-out)_
 
 ---
 
