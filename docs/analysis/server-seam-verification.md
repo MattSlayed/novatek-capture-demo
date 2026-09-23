@@ -330,9 +330,11 @@ satisfies that wording is the developer's call, tracked in
 `.planning/phases/03-server-seam/03-HUMAN-UAT.md`, and is not settled by this document.
 
 **Deployment identity.** Built from `dev`@`bde1407` ("docs(phase-03): add security threat
-verification"), which reached `dev` as a fast-forward from `2babfd8` on 2026-09-23. The
-GitHub `verify` check and the Vercel build both concluded `success` on that commit (build
-inspector `.../2Pw5v3ouQjRvopdHyTKptP4VFsRM`). Two things differ from the first run and
+verification"), which reached `dev` as a fast-forward from `2babfd8` at
+2026-09-23T06:11Z. The GitHub `verify` check concluded `success` at 06:12:31Z (Actions run
+35825596092, all steps on Linux), and the Vercel build likewise concluded `success` (build
+inspector `.../2Pw5v3ouQjRvopdHyTKptP4VFsRM`). The suite was run against that build roughly
+thirteen hours later, at 19:13Z; no deployment to this alias intervened. Two things differ from the first run and
 are recorded rather than glossed: the URL is the durable `git-dev` branch alias, not a
 per-deployment URL, so it names whatever deployment the branch last produced; and the
 Vercel deployment id and GitHub deployment record were **not** read this time — the
@@ -356,15 +358,20 @@ applies unchanged.
 it print which source it used, so this line is itself a property of the rewritten script —
 the first run predates the change and its output carries no such line.
 
-**Instances observed.** Three exchanges, two instance ids, in this order: a pre-flight
-`GET /api/health` taken as soon as the build completed read
-`X-Cap-Instance: 2fb2127b-2327-4945-b9c5-4ada88208d21` with `uptime_s: 0`; the suite run
-minutes later read `d2cda23e-0961-4146-a740-7f2d6baf7dec`, constant across its own three
-health calls (check H); the oversized-body probe's response headers were not captured, so
-which instance served it is unrecorded. Two distinct ids minutes apart against one
-deployment is an observation about platform instance lifetime — not a cold start forced by
-anything done here, and not something the first run could show at all, since it read one
-id throughout.
+**Instances observed, and the interval between them.** Three exchanges, two instance ids.
+A pre-flight `GET /api/health` taken right after the build completed read
+`X-Cap-Instance: 2fb2127b-2327-4945-b9c5-4ada88208d21` with `uptime_s: 0`, at
+2026-09-23T06:13:52Z. The suite run read `d2cda23e-0961-4146-a740-7f2d6baf7dec`, constant
+across its own three health calls (check H), at 19:13Z — **twelve hours and fifty-nine
+minutes after the first reading**, not minutes after it, because the developer's
+instruction to run the suite arrived that much later. The oversized-body probe's response
+headers were not captured, so which instance served it is unrecorded. Two ids thirteen
+hours apart is therefore an unremarkable observation and no evidence about instance
+lifetime at all: nothing here shows whether the instance turned over once or a hundred
+times in between. The timestamps above are reconciled across three independent clocks that
+agree — the `Date` header this deployment sends, the epoch-milliseconds embedded in its own
+`X-Vercel-Id`, and GitHub's timestamps for run 35825596092 — rather than read off the
+developer's own machine alone.
 
 ## Result, second run
 
