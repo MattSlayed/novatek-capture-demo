@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Scaffold & conventions** - Project configuration, deployment headers, tokens, the governed-sentence module, the ribbon and the one build-check command, so the first (production) deploy is already labelled (completed 2026-09-08)
 - [x] **Phase 2: Fixtures & types** - The synthetic plant subset, artisans, orders and authored observations with cited records, closed by the human provenance check (completed 2026-09-17)
-- [x] **Phase 3: Server seam** - Session, the one authorisation accessor, memory store, the one mediating writer, the one responder, every route; proved by the curl suite A–H (completed 2026-09-19)
+- [x] **Phase 3: Server seam** - Session, the one authorisation accessor, memory store, the one mediating writer, the one responder, every route; proved by the curl suite A–H (16/16 plans landed 2026-09-19; closed 2026-09-23 after thirteen code-review fixes, the security audit and the human-verify override)
 - [ ] **Phase 4: Shell, gate, orders, clock (online)** - Entry, persona choice, long-form disclosure, order list and detail, the clock, on the one client projection
 - [ ] **Phase 5: Camera → verify → capture → proposals → decisions (online)** - Camera, file-input path, voice note, authored verification, authored proposals, accept/reject at parity, on real phones
 - [ ] **Phase 6: Offline** - Device storage, the queue, the connectivity probe, the deliberate-offline control, reconciliation and every conflict card
