@@ -1,0 +1,108 @@
+/* StateMark geometry — 04-UI-SPEC.md §The Five Primitives → Primitive 5.
+   All seven shapes of the closed set are declared here and nowhere else; no
+   screen module declares a mark's geometry, and plan 04-06's sweep asserts
+   both the single owner and the count of seven (invariant A4).
+
+   Stroke weight is part of the shape, not a tone. The 2px and the 1px hollow
+   squares are two different marks, meaning two different things, and they
+   are drawn as two different marks.
+
+   Every shape is drawn with a border and a gradient rather than a
+   pseudo-element, so each mark's geometry is one rule and the single-owner
+   count stays legible. The diamond's 45-degree rotation is static geometry —
+   the shape the source specifies — not motion: nothing here animates, and
+   §Motion's one moving thing in this phase is the record control's press.
+
+   Only the three marks Phase 4 renders bind a tone, each from the
+   contrast-pairs manifest. The other four draw in currentColor, so their
+   tone is the consumer's own text colour: the geometry is declared here
+   while no undeclared pair enters the build, which is what invariant B1
+   would otherwise fail on, and no exemption-register entry is added. The
+   faint hairline token appears nowhere in this module — it is 2.80:1 on a
+   panel, forbidden outright rather than exempted, and its one named
+   state-mark use was retired at the source.
+
+   The 10px block and the 4px gap to the word are §Primitive 5's and
+   §Surface 4's own figures (51 + 8 + 10 + 4 + 120 = 193 on the SOURCE pair
+   at 320px). The dot's 2px diameter is the heaviest stroke weight the set
+   already carries, so it introduces no third figure. */
+
+.root {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.mark {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+}
+
+/* ---- the closed set of seven, in the source's own order ---------------- */
+
+/* live, awaiting somebody — not rendered in Phase 4 */
+.hollow-square-2px {
+  border: 2px solid currentColor;
+}
+
+/* in hand, not yet bound — not rendered in Phase 4 */
+.half-filled-square {
+  background: linear-gradient(
+    to right,
+    currentColor 0 50%,
+    transparent 50% 100%
+  );
+}
+
+/* bound — rendered on a server-stamped segment */
+.filled-square {
+  background: var(--dk-good);
+}
+
+/* the server declined for a stated reason — rendered on every conflict */
+.filled-diamond {
+  background: var(--dk-warn);
+  transform: rotate(45deg);
+}
+
+/* refused or rejected, and retained — not rendered in Phase 4 */
+.hollow-square-diagonal {
+  border: 1px solid currentColor;
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - 0.5px),
+    currentColor calc(50% - 0.5px) calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
+}
+
+/* ended without binding — not rendered in Phase 4 */
+.hollow-square-1px {
+  border: 1px solid currentColor;
+}
+
+/* kept, and unresolved — rendered on a device-reconciled segment */
+.hollow-square-dot {
+  border: 1px solid var(--dk-warn);
+  background: radial-gradient(
+    circle at center,
+    var(--dk-warn) 0 1px,
+    transparent 1px
+  );
+}
+
+/* ---- the word ---------------------------------------------------------- */
+
+/* The word takes its type role from app/globals.css's .label class and its
+   ink from the consumer's own text colour — --viewer-ink at 12.64:1 on a
+   panel and 10.33:1 on the tinted head, both declared pairs — so this module
+   restates neither and declares no layout for it: a word longer than its row
+   wraps and the row grows, which is this system's rule everywhere.
+
+   One word in the set carries a tone of its own: the bound mark's, at 8.47:1
+   on the panel, declared as text in the manifest so it clears the stricter
+   floor rather than the non-text one. */
+.wordGood {
+  color: var(--dk-good);
+}
