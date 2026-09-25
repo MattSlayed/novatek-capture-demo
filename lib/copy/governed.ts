@@ -98,3 +98,18 @@ export const PLATFORM_413: GovernedSentence = {
   strong: "",
   after: "",
 };
+
+// [quoted] — REQ-FR-48a, UI-SPEC Decision 4: the gate's long-form
+// disposition sentence, quoted verbatim from EXPERIENCE.md's UJ-1
+// step 2. Not one of the eight and not a member of GOVERNED; like
+// PLATFORM_413 it is exported under its own name, and it is defined
+// here so it has one definition site inside the duplicate-literal
+// sweep and the claims audit's roots.
+//
+// A plain string, deliberately, not a GovernedSentence: a third
+// before/strong/after-shaped literal anywhere under app/, components/
+// or lib/ fails scripts/check-governed.mjs's closed-set sweep, which
+// excepts PLATFORM_413 alone, and the source quotes this sentence with
+// no emphasised clause, so the triple would carry nothing.
+export const FR48A_DISPOSITION =
+  "The work-order identity, the accept/reject gate and the offline queue are real and enforced server-side; the verification and the observations are authored.";
