@@ -34,6 +34,7 @@
   --dk-crit: #fca5a5; /* 8.83:1 ground / 7.78:1 panel */
   --dk-crit-edge: #f87171; /* 6.06:1 ground / 5.33:1 panel — non-text only */
   --surface-inset: #081424;
+  --tint-warn-head: #2D383C; /* the resolved hex of 0.10 alpha --dk-warn over --panel-solid, declared resolved for the same reason --control-border is — so it carries one value over every ground instead of drifting with what is behind it */
 
   /* ---- spacing scale, 4px base ------------------------------------ */
   --space-4: 4px;
@@ -70,4 +71,7 @@
 
   /* ---- radius ------------------------------------------------------- */
   --radius-control: 10px;
+
+  /* ---- timing ------------------------------------------------------- */
+  --dur-press: 90ms; /* the record control's press transition — NFR-4 requires the transition to complete inside the 100 ms budget, not to begin at it */
 }

@@ -86,12 +86,13 @@ const D13_MANIFEST = [
   "--cobalt-glow-ink",
   "--control-border",
   "--panel-solid",
-  // layer-2 authored tokens (5)
+  // layer-2 authored tokens (6)
   "--dk-good",
   "--dk-warn",
   "--dk-crit",
   "--dk-crit-edge",
   "--surface-inset",
+  "--tint-warn-head",
   // spacing scale, 4px base (9)
   "--space-4",
   "--space-8",
@@ -123,6 +124,8 @@ const D13_MANIFEST = [
   "--shadow-sheet",
   // radius (1)
   "--radius-control",
+  // timing (1)
+  "--dur-press",
 ];
 
 const PERMITTED_SHADOW = "--viewer-ink-dim";
