@@ -1,0 +1,40 @@
+/* SecondaryControl contract — 04-UI-SPEC.md §The Five Primitives →
+   Primitive 3. This module and components/rows/Row.module.css are the only
+   two places in the build that may declare the 44px target floor beside
+   Ribbon.module.css, whose own pre-existing link-target name invariant A2
+   exempts by name and which this module does not restate. No screen module
+   declares a target size locally; a third declaration is a build failure
+   rather than a style choice (plan 04-06's sweep).
+
+   min-height is a floor and no maximum is declared, which is what makes the
+   44px single-word rule read correctly: that rule's figure is vertical
+   capacity inside a box whose width is fixed by a row of peers, and no
+   Phase 4 control sits in one. Every consumer here is laid at content width,
+   so its text wraps and the control grows — the ribbon's own contract
+   (C-15) and the governing-document row's (C-22).
+
+   The fill is --surface-inset and the label is --viewer-ink at 15.84:1 on
+   it, never --cobalt-glow-ink: every Phase 4 consumer carries this fill, and
+   a cobalt label here would be an undeclared pair that invariant B1 fails
+   on (§Color). --surface-inset against the page ground is 1.10:1 and is
+   deliberately NOT a declared pair and NOT a register entry — the control is
+   carried entirely by its border and its label, which is the source's own
+   weight asymmetry.
+
+   The 12px padding and the 4px inner gap are the figures §Surface 1's door
+   budget derives (2 border + 24 padding + name + 4 + competency = 69), not
+   new numbers. */
+
+.control {
+  min-height: var(--target-min);
+  padding: var(--space-12);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-4);
+  text-align: left;
+  background: var(--surface-inset);
+  color: var(--viewer-ink);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-control);
+}

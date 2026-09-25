@@ -1,0 +1,38 @@
+/* Row contract — 04-UI-SPEC.md §Surface 2 (the order row), §Surface 3 items
+   6 and 7 (the asset row and the governing-document row) and §Surface 4 (the
+   segment row). This module is the row shell invariant A2 names as the third
+   permitted owner of the 44px target floor, beside
+   components/controls/SecondaryControl.module.css and Ribbon.module.css,
+   whose own pre-existing link-target name A2 exempts and which this module
+   does not restate. No screen module declares a target size locally.
+
+   min-height is a floor with no maximum: a governing-document row grows to
+   61px on its own content (C-22) and an order row to about 112px, and
+   nothing is shortened to fit. The 12px padding and the 4px inner gap are
+   §Surface 2's own row derivation (2 border + 24 padding + 17 + 4 + title +
+   4 + 17), not new figures. The one row this phase renders on a different
+   step is the time surface's segment row, whose budget charges --space-16;
+   that consumer composes the step it needs over this shell rather than
+   restating the shell.
+
+   The panel tone is read by its 1px --control-border edge at 3.58:1 from
+   inside, never by its own 1.136:1 against the page ground (register entry
+   4). --viewer-ink on the panel is 12.64:1 and is declared here so the
+   button form does not fall back to the platform's own control ink.
+
+   The module declares no focus rule: app/globals.css owns the build's only
+   one (invariant A3). */
+
+.row {
+  min-height: var(--target-min);
+  padding: var(--space-12);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-4);
+  text-align: left;
+  background: var(--panel-solid);
+  color: var(--viewer-ink);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-control);
+}
