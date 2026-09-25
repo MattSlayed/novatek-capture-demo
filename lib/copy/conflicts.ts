@@ -62,6 +62,19 @@ export const CONFLICT_COPY: Record<ConflictCode, RefusalCopy> = {
       "This order is not open, so there was nothing to close and nothing was bound. Open the order, then close it.",
     actions: ["Discard", "Open the order"],
   },
+  // [written here] — D-05. Names the actor (the server) and the
+  // mechanism (no second segment): FR-7's guarantee stated as a
+  // sentence. "nothing was lost" is deliberately not the neighbours'
+  // "nothing was bound" — on every other code a write failed to land,
+  // whereas here the first open did land, so "nothing was bound" would
+  // be false. It is the closed set's one benign entry, worded as
+  // neither a loss nor a decision because the server refused nothing,
+  // and its single action points at the time surface for that order.
+  already_open: {
+    sentence:
+      "The clock was already running on this order, so the server added no second segment and nothing was lost.",
+    actions: ["View time on this order"],
+  },
   // [written here] — the referral hand-off this refusal used to
   // offer is deliberately withdrawn: FR-R1 forbids reaching a
   // referral from this refusal, and offering it here would teach the

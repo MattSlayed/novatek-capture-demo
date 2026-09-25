@@ -124,11 +124,12 @@ test("QUEUE_ITEM_STATES is the closed set of six, in order", () => {
   );
 });
 
-test("CONFLICT_CODES is the closed set of nine, order_closed immediately followed by not_open (D-06), ending in referral_evidence_missing", () => {
+test("CONFLICT_CODES is the closed set of ten, order_closed immediately followed by not_open (D-06) and then already_open (D-05), ending in referral_evidence_missing", () => {
   assert.deepStrictEqual(CONFLICT_CODES, [
     "order_not_found",
     "order_closed",
     "not_open",
+    "already_open",
     "asset_not_in_order",
     "account_mismatch",
     "proposal_superseded",

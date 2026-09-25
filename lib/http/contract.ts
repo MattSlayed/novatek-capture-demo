@@ -227,6 +227,11 @@ export const STATUS_BY_CODE: Record<WireErrorCode, number> = {
   order_not_found: 404,
   order_closed: 409,
   not_open: 409,
+  // The one code below with no row in the seed's route table: D-05's
+  // `already_open` is a queue code, never emitted online (D-06's open is
+  // idempotent and returns 200 { clock }), so 409 is read from its
+  // conflict neighbours rather than quoted from the seed.
+  already_open: 409,
   asset_not_in_order: 409,
   account_mismatch: 409,
   proposal_superseded: 409,

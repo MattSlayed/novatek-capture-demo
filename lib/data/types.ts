@@ -367,14 +367,17 @@ export const QUEUE_ITEM_STATES: QueueItemState[] = [
 
 /**
  * `not_open` landed in P3 under D-06, with its sentence and next act
- * defined in `lib/copy/conflicts.ts`. AD-9's `already_open` remains on
- * its stated P4 schedule — no code for it is introduced in this
- * phase. `referral_evidence_missing` still has no sentence until P9.
+ * defined in `lib/copy/conflicts.ts`. AD-9's `already_open` landed in
+ * P4 under D-05, with its sentence and its one next act defined in the
+ * same module — nothing in P4 renders it, and P6 reconciliation is its
+ * first rendering path. `referral_evidence_missing` still has no
+ * sentence until P9.
  */
 export type ConflictCode =
   | "order_not_found"
   | "order_closed"
   | "not_open"
+  | "already_open"
   | "asset_not_in_order"
   | "account_mismatch"
   | "proposal_superseded"
@@ -386,6 +389,7 @@ export const CONFLICT_CODES: ConflictCode[] = [
   "order_not_found",
   "order_closed",
   "not_open",
+  "already_open",
   "asset_not_in_order",
   "account_mismatch",
   "proposal_superseded",
