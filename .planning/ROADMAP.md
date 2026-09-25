@@ -196,8 +196,8 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 04-01-PLAN.md — Tokens and the contrast manifest: `--dur-press`, `--tint-warn-head` and the 15 new pairs (wave 1)
-- [ ] 04-02-PLAN.md — The copy layer: `already_open`, the FR-48a disposition sentence, and the `[SECURITY]`-blocker decision (wave 1, not autonomous)
+- [x] 04-01-PLAN.md — Tokens and the contrast manifest: `--dur-press`, `--tint-warn-head` and the 15 new pairs (wave 1)
+- [x] 04-02-PLAN.md — The copy layer: `already_open`, the FR-48a disposition sentence, and the `[SECURITY]`-blocker decision (wave 1, not autonomous)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -331,7 +331,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 1. Scaffold & conventions | 9/9 | Complete    | 2026-09-08 |
 | 2. Fixtures & types | 7/7 | Complete    | 2026-09-17 |
 | 3. Server seam | 16/16 | Complete   | 2026-09-19 |
-| 4. Shell, gate, orders, clock (online) | 0/13 | Planned | - |
+| 4. Shell, gate, orders, clock (online) | 2/13 | In Progress|  |
 | 5. Camera → verify → capture → proposals → decisions (online) | 0/TBD | Not started | - |
 | 6. Offline | 0/TBD | Not started | - |
 | 7. PWA & desktop frame | 0/TBD | Not started | - |
