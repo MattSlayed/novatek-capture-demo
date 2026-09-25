@@ -1,0 +1,111 @@
+/* RecordControl contract — 04-UI-SPEC.md §The Five Primitives → Primitive 2
+   and §Decision 3. Two declarations here are load-bearing and single-owner
+   (asserted by plan 04-06's sweep as invariants A1 and A8): this is the only
+   module in the build that declares the 130px record-binding geometry, and
+   the only one that declares a transition. A second declaration of either,
+   anywhere, is a build failure rather than a style choice.
+
+   The perimeter is drawn with an inset box-shadow — never a border, and
+   never the ring property app/globals.css owns. A border would change the
+   box's measured size, and invariant C2 asserts the box measures exactly
+   130 x 130 in rest and pressed at both viewports and both text scales.
+   This module declares no focus rule at all (A3): app/globals.css carries
+   the only one in the build.
+
+   Phase 4 instantiates the clock variant only. The accept and reject
+   variants, and the armed geometry, are declared complete and unexercised —
+   the precedent is --record-fill-armed's own "declared and unused in this
+   phase" note in tokens.capture.css. Phase 5 implements the armed state's
+   behaviour. The fill never moves between states in any variant, because the
+   channel is exhausted by arithmetic (1.199:1 between the two fills), so the
+   state is carried by the label, which is a word. */
+
+.control {
+  width: var(--target-record);
+  height: var(--target-record);
+  padding: var(--space-8);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--radius-control);
+  /* The press change: two properties — the perimeter boundary and the radius
+     — completing inside --dur-press 90ms, so NFR-4's 100ms budget is met on
+     completion rather than on start. Both are legible around a gloved thumb
+     resting on the control, which is why the radius moves as well as the
+     perimeter (Primitive 2, REQ-NFR-4a). */
+  transition:
+    box-shadow var(--dur-press) var(--ease-out-expo),
+    border-radius var(--dur-press) var(--ease-out-expo);
+}
+
+/* Radius 10 -> 4px, shared by all three variants (Primitive 2). The 4px
+   figure is the design source's, not a token: no radius step below
+   --radius-control exists in the system. */
+.control:active {
+  border-radius: 4px;
+}
+
+/* ---- clock — instantiated in Phase 4 ---------------------------------- */
+
+/* No rest boundary. Decorative-exemption register entry 3 is scoped by its
+   own text to the accept side of a record-binding pair, and the clock
+   control has no partner: omitting the boundary adds no exemption and takes
+   a below-floor value out of the build. The control is identified by its
+   fill against the page ground at 7.75:1, and its pressed boundary
+   therefore runs 0 -> 4px, a larger perimeter change than accept's
+   (§Decision 3). Declared at zero spread rather than absent so the run
+   interpolates. */
+.clock {
+  background: var(--record-fill);
+  color: var(--record-ink);
+  box-shadow: inset 0 0 0 0 var(--record-ink);
+}
+
+.clock:active {
+  box-shadow: inset 0 0 0 4px var(--record-ink);
+}
+
+/* ---- accept — declared, not instantiated in Phase 4 ------------------- */
+
+.accept {
+  background: var(--record-fill);
+  color: var(--record-ink);
+  box-shadow: inset 0 0 0 1px var(--control-border);
+}
+
+.accept:active {
+  box-shadow: inset 0 0 0 4px var(--record-ink);
+}
+
+/* The armed geometry, declared for Phase 5 and applied by nothing in this
+   phase: a 3px --record-ink ring inset 3px from the edge, accept only
+   (C-17 scopes armed to accept). The outer band repaints the fill over the
+   ring, so the visible field runs 130 -> 118 while the box and the hit area
+   stay 130. Phase 5 owns the behaviour — the first tap, the twenty-second
+   idle disarm with its polite announcement, the label swap. */
+.armed {
+  box-shadow:
+    inset 0 0 0 3px var(--record-fill),
+    inset 0 0 0 6px var(--record-ink);
+}
+
+/* ---- reject — declared, not instantiated in Phase 4 ------------------- */
+
+.reject {
+  background: var(--surface-inset);
+  color: var(--dk-crit);
+  box-shadow: inset 0 0 0 1px var(--dk-crit-edge);
+}
+
+.reject:active {
+  box-shadow: inset 0 0 0 4px var(--dk-crit-edge);
+}
+
+/* Layout and case only. The type role — mono 500, clamped, 0.08em tracking
+   — comes from app/globals.css's .control-label class, which this module
+   never repeats. */
+.label {
+  text-align: center;
+  text-transform: uppercase;
+}
