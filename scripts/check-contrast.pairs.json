@@ -18,7 +18,7 @@
     "ink": "--cobalt-glow-ink",
     "ground": "--navy-deep",
     "kind": "text",
-    "note": "The ribbon link."
+    "note": "The ribbon link, and the Phase 4 section labels (ASSETS, GOVERNING DOCS) — one pair, two renderers, so no duplicate row is declared (04-UI-SPEC.md §Phase 4 contrast-pairs manifest)."
   },
   {
     "id": "ribbon-dot",
@@ -40,5 +40,110 @@
     "ground": "--navy-deep",
     "kind": "non-text",
     "note": "The ribbon's bottom border — the one exempted pair (docs/design/decorative-exemptions.json)."
+  },
+  {
+    "id": "panel-body-ink",
+    "ink": "--viewer-ink",
+    "ground": "--panel-solid",
+    "kind": "text",
+    "note": "Order and asset row titles, segment values, the disclosure's prose, the conflict card's body sentence and the header's account name (04-UI-SPEC.md §Phase 4 contrast-pairs manifest)."
+  },
+  {
+    "id": "panel-term-ink",
+    "ink": "--viewer-ink-dim",
+    "ground": "--panel-solid",
+    "kind": "text",
+    "note": "The order number and status word on a row, and every <dt> term — the tightest pass in the system (04-UI-SPEC.md §Phase 4 contrast-pairs manifest)."
+  },
+  {
+    "id": "panel-disclosure-heading",
+    "ink": "--cobalt-glow-ink",
+    "ground": "--panel-solid",
+    "kind": "text",
+    "note": "The gate disclosure's <h2> (04-UI-SPEC.md §Phase 4 contrast-pairs manifest)."
+  },
+  {
+    "id": "panel-edge",
+    "ink": "--control-border",
+    "ground": "--panel-solid",
+    "kind": "non-text",
+    "note": "Every panel, row and card edge, seen from inside (04-UI-SPEC.md §Phase 4 contrast-pairs manifest)."
+  },
+  {
+    "id": "panel-tone",
+    "ink": "--panel-solid",
+    "ground": "--navy-deep",
+    "kind": "non-text",
+    "note": "The panel tone on every surface — exemption register entry 4, read by its border and never by its tone (04-UI-SPEC.md §Phase 4 contrast-pairs manifest)."
+  },
+  {
+    "id": "clock-control-label",
+    "ink": "--record-ink",
+    "ground": "--record-fill",
+    "kind": "text",
+    "note": "The clock control's label (04-UI-SPEC.md §Phase 4 contrast-pairs manifest)."
+  },
+  {
+    "id": "clock-control-fill",
+    "ink": "--record-fill",
+    "ground": "--navy-deep",
+    "kind": "non-text",
+    "note": "The clock control's fill against the page ground (04-UI-SPEC.md §Phase 4 contrast-pairs manifest)."
+  },
+  {
+    "id": "secondary-control-label",
+    "ink": "--viewer-ink",
+    "ground": "--surface-inset",
+    "kind": "text",
+    "note": "Every 44px secondary control's label, and a gate door's name and competency (04-UI-SPEC.md §Phase 4 contrast-pairs manifest)."
+  },
+  {
+    "id": "secondary-control-border",
+    "ink": "--control-border",
+    "ground": "--surface-inset",
+    "kind": "non-text",
+    "note": "Every 44px secondary control's border (04-UI-SPEC.md §Phase 4 contrast-pairs manifest)."
+  },
+  {
+    "id": "focus-ring-on-panel",
+    "ink": "--cobalt-glow",
+    "ground": "--panel-solid",
+    "kind": "non-text",
+    "note": "The focus ring beside a focused row or control (04-UI-SPEC.md §Phase 4 contrast-pairs manifest)."
+  },
+  {
+    "id": "state-mark-good",
+    "ink": "--dk-good",
+    "ground": "--panel-solid",
+    "kind": "text",
+    "note": "The filled-square block and the SERVER-STAMPED word; declared text for the stricter 7:1 floor, which its 8.47:1 clears (04-UI-SPEC.md §Phase 4 contrast-pairs manifest)."
+  },
+  {
+    "id": "state-mark-warn",
+    "ink": "--dk-warn",
+    "ground": "--panel-solid",
+    "kind": "non-text",
+    "note": "The centred-dot block (04-UI-SPEC.md §Phase 4 contrast-pairs manifest)."
+  },
+  {
+    "id": "conflict-card-left-rule",
+    "ink": "--dk-warn",
+    "ground": "--navy-deep",
+    "kind": "non-text",
+    "note": "The conflict card's 3px full-tone left rule (04-UI-SPEC.md §Phase 4 contrast-pairs manifest)."
+  },
+  {
+    "id": "conflict-head-name",
+    "ink": "--viewer-ink",
+    "ground": "--tint-warn-head",
+    "kind": "text",
+    "note": "The conflict's name in the tinted head — the only ink permitted there (04-UI-SPEC.md §Phase 4 contrast-pairs manifest)."
+  },
+  {
+    "id": "conflict-head-mark",
+    "ink": "--dk-warn",
+    "ground": "--tint-warn-head",
+    "kind": "non-text",
+    "note": "The filled-diamond block inside the tinted head (04-UI-SPEC.md §Phase 4 contrast-pairs manifest)."
   }
 ]
