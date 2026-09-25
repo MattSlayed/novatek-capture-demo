@@ -1248,9 +1248,13 @@ would break `/`'s static claim and did not build here in any case.
 | A5 | Vercel's platform serves the `◐` PPR resume for `/` the same way `next start` does locally, so the first-paint behaviour measured here holds on the deployed preview | Pattern 1 | Everything in this document was measured against local `next start`. Phase 3's Assumptions Log A2 carries the same shape of gap for response headers and its designed falsification point is the human-run curl suite against a real Preview. The same run can check this one: fetch `/?s=time&id=wo-0142` with `curl` and confirm the resolved markup is in the body |
 | A6 | The eight-transition focus proof generalises to a real screen reader moving focus, i.e. VoiceOver/TalkBack actually announce the heading when `document.activeElement` becomes it | Pattern 4 | `document.activeElement` is what CI can assert and is the mechanism EXPERIENCE.md names, but an assistive-technology announcement is a separate observable. No automated tool checks it (the same class of gap the UI-SPEC records for SC 2.2.2). A real-device VoiceOver pass belongs on the same human-verification line as A1 |
 
-## Open Questions
+## Open Questions (RESOLVED — all three discharged by named plan tasks, 2026-09-24)
 
 1. **What the gate shows in the instant before `GET /api/session` answers**
+   - **RESOLVED — 04-11 Task 2.** The recommendation was taken: the switcher renders no `<main>`
+     until `GET /api/session` has answered, with the ribbon carrying the document in the meantime.
+     No `cookies()` read at page level, so no second reader of the credential enters the
+     non-bypassability enumeration and no expired or forged session sees an order-list skeleton.
    - *What we know:* the body cannot know whether a session exists at first paint, because
      the authoritative answer is `GET /api/session` and the client must issue it. The
      ribbon is already on screen (it is in the layout and statically prerendered), so
@@ -1273,6 +1277,13 @@ would break `/`'s static claim and did not build here in any case.
 
 2. **Whether the D-07 sweep should also assert "no cached server state outside the
    projection," and how**
+   - **RESOLVED — 04-06 Task 2, invariant A16.** Yes, in the recommended split form: the storage
+     half is asserted as absence of `localStorage`, `sessionStorage` and `indexedDB` from `app/`
+     and `components/` (the sweep's two roots, so presence under `lib/client/` is not the
+     assertable side); the mutable-module-state half matches a top-level `let`, `new Map(` or
+     `new Set(` in `*.tsx` under those roots. The false-positive limitation is carried in the
+     script's own header in the claims-audit's voice, naming `lib/client/projection.ts` and
+     `lib/client/disclosure.ts` as the modules the rule pushes that state into.
    - *What we know:* SC-5 states it, and a claim with no check is the failure mode D-07
      was written to prevent. A source sweep can get most of the way: no top-level `Map`,
      `Set`, `let` or mutable object in `components/**/*.tsx`; `localStorage`,
@@ -1287,6 +1298,13 @@ would break `/`'s static claim and did not build here in any case.
      repository does.
 
 3. **Whether `already_open`'s edit to `lib/data/types.ts` can proceed at all**
+   - **RESOLVED into a decision the developer owns — 04-02 Task 1.** The recommendation was taken
+     on both halves: the edit is scoped to exactly three changes with an instruction to stop and
+     surface any hunk the executor did not write, and the blocker itself is a **blocking
+     `checkpoint:decision`** placed before that task rather than worked around. The plan states the
+     consequence of deferring — `CONFLICT_COPY` is typed `Record<ConflictCode, RefusalCopy>` and
+     would not type-check without the union member, so the phase stops. Still open at plan time;
+     the answer is the developer's.
    - *What we know:* D-05 and UI-SPEC invariant D3 require `already_open` in
      `ConflictCode`, `CONFLICT_CODES` and `CONFLICT_COPY`. The first two live in
      `lib/data/types.ts` (verified: the union at lines 374–383, the array at 385–395), and

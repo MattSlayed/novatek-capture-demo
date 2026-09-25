@@ -191,7 +191,46 @@ Plans:
   5. Screens are switched by history state on the one route `/` (no `<Link>`, no `router.push`, `useSearchParams` behind `<Suspense>` on a static Server Component), focus moves to the new screen's heading on every transition, and all cached server state lives in the one client projection module with a single purge operation at the gate; every non-record-binding target is 44 px, non-text contrast is 3:1, no state is encoded by hue alone, and every consequential control confirms by a visible state change within NFR-4's window
 
 **Scheduled closures**: `already_open` / `not_open` sentences and next acts (AD-9); the primitives every later screen measures against (ribbon, record control, secondary control, focus ring, state marks) built against DESIGN.md
-**Plans**: TBD
+**Plans**: 13 plans in 8 waves
+
+Plans:
+**Wave 1**
+
+- [ ] 04-01-PLAN.md — Tokens and the contrast manifest: `--dur-press`, `--tint-warn-head` and the 15 new pairs (wave 1)
+- [ ] 04-02-PLAN.md — The copy layer: `already_open`, the FR-48a disposition sentence, and the `[SECURITY]`-blocker decision (wave 1, not autonomous)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 04-03-PLAN.md — `lib/client/navigate.ts` and `lib/client/clock.ts` with their unit proofs (wave 2)
+- [ ] 04-05-PLAN.md — The four primitive modules: record control, secondary control, row shell, state marks (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 04-04-PLAN.md — `lib/client/projection.ts`: the one cache, one purge, instance-keyed (wave 3)
+- [ ] 04-06-PLAN.md — `check-primitives.mjs`, its fixture proof, and the twenty-seventh STEPS entry (wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 04-07-PLAN.md — The gate: FR-48a's two states and the three persona doors (wave 4)
+- [ ] 04-08-PLAN.md — The order list and the conflict card (D-02) (wave 4)
+- [ ] 04-10-PLAN.md — Time on this order: the accrued record in full (FR-58) (wave 4)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 04-09-PLAN.md — Order detail and the clock: the tick, the control, the refusal (wave 5 — the clock's refusal renders 04-08's conflict card)
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
+- [ ] 04-11-PLAN.md — The switcher, the header, and the retirement of the Phase 1 shell (wave 6)
+
+**Wave 7** *(blocked on Wave 6 completion)*
+
+- [ ] 04-12-PLAN.md — check-wcag: session establishment, five surfaces, invariants C1–C8 (wave 7)
+
+**Wave 8** *(blocked on Wave 7 completion)*
+
+- [ ] 04-13-PLAN.md — The device pass on a real Android and a real iOS handset (wave 8, not autonomous)
+
 **UI hint**: yes
 
 ### Phase 5: Camera → verify → capture → proposals → decisions (online)
@@ -292,7 +331,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 1. Scaffold & conventions | 9/9 | Complete    | 2026-09-08 |
 | 2. Fixtures & types | 7/7 | Complete    | 2026-09-17 |
 | 3. Server seam | 16/16 | Complete   | 2026-09-19 |
-| 4. Shell, gate, orders, clock (online) | 0/TBD | Not started | - |
+| 4. Shell, gate, orders, clock (online) | 0/13 | Planned | - |
 | 5. Camera → verify → capture → proposals → decisions (online) | 0/TBD | Not started | - |
 | 6. Offline | 0/TBD | Not started | - |
 | 7. PWA & desktop frame | 0/TBD | Not started | - |
