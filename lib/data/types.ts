@@ -102,7 +102,12 @@ export interface CitedFact {
   /**
    * True when the value is re-read from the system of record at the
    * moment the overlay opens, rather than served from a cached copy.
-   * IPV has no IoT/SCADA path; this is a live business-system read.
+   * This is a fresh read of a business system on open, not a telemetry
+   * subscription. Plant condition data arrives on a separate, scheduled
+   * historian path (Business Plan v3.1 D23) and never through this flag.
+   * Revised 2026-09-17: the previous comment called this "a live
+   * business-system read", which audit FINDINGS.md:93 records as an
+   * overclaim. Do not reintroduce the word.
    */
   liveRead?: boolean;
   /** Clock at which a live value was read, for display. */

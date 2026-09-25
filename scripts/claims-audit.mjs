@@ -100,9 +100,25 @@ const PROHIBITED = [
     note: "Ceded to Prevu3D / Siemens.",
   },
   {
+    // Revised 2026-09-17 for Business Plan v3.1 D23. Kept identical to the
+    // ipv-demo copy of this rule — if you change one, change both.
+    // Two defects fixed at the same time, both from audit/2026-08-30-gold-standard:
+    //   FINDINGS.md:93 — the old note prescribed "reads live business-system
+    //     values", itself the overclaim the rule exists to prevent.
+    //   A2-claims.md:83 — the rule mis-fired inside out-of-scope registers that
+    //     DENY the capability; `allowQuoted` + RETIREMENT_MARKER now excuses those.
+    // Scope change: condition data IS in scope since D23, but only as a
+    // SCHEDULED read of an IT-side historian. The streamed half stays banned.
     kind: "never",
-    pattern: /\b(live |real[- ]time )?(IoT|SCADA)\b.{0,24}(feed|integration|connect)/i,
-    note: "IPV has no IoT/SCADA path. Correct form: reads live business-system values.",
+    pattern:
+      /\b(live|real[- ]time|streaming|streamed|continuous)\b[^.]{0,40}\b(IoT|SCADA|telemetry)\b|\b(IoT|SCADA)\b.{0,24}(feed|stream|integration|connect)|\bOT network\b|\boperational[-\s]technology network\b/i,
+    note:
+      "No streamed IoT/SCADA, no OT-network path, no alarms (Business Plan v3.1 §4.7). " +
+      "Condition data is in scope since v3.1 D23, but ONLY as a scheduled read of an " +
+      "IT-side historian. Correct form: 'reads condition data from the plant historian " +
+      "on a schedule, bound to the asset, dated and cited'. Status is shown; condition " +
+      "is never inferred.",
+    allowQuoted: true,
   },
   {
     kind: "never",
