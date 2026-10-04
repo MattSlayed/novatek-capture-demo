@@ -1,0 +1,75 @@
+/* The gate — 04-UI-SPEC.md Surface 1 (the vertical budget) and
+   Decision 4 (the disclosure panel and the doors). Template:
+   components/limits/Limits.module.css, whose main padding this repeats
+   so horizontal padding is charged exactly once and no box here adds
+   the bottom safe-area inset.
+
+   Every step below is one the budget names: 24 px between the heading
+   and the disclosure and between the disclosure and the doors, 16 px
+   for the panel's padding and between its heading and each sentence,
+   12 px between doors and nowhere else on this surface. The 4 px
+   between a door's two lines and the doors' own fill, edge, padding
+   and target floor all come from SecondaryControl's module and are not
+   restated here.
+
+   Nothing is pinned, nothing is raised and nothing moves: the panel is
+   opaque, so there is nothing behind it to blur, and the collapse from
+   the long form to the short form on re-entry is deliberately not
+   animated (04-RESEARCH Pattern 6). The focus ring is app/globals.css's
+   and is not redeclared. */
+
+.main {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-16) var(--safe-x) var(--space-48);
+}
+
+.heading {
+  margin-bottom: var(--space-24);
+}
+
+/* The long-form disclosure: in flow, above the doors, overlaying
+   nothing. Read by its 1 px edge, never by its fill's tone. */
+.disclosure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  margin-bottom: var(--space-24);
+  padding: var(--space-16);
+  background: var(--panel-solid);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-card);
+}
+
+/* The one element on this surface carrying the accent ink. Uppercased
+   here, not in the DOM, so its accessible name stays in sentence case. */
+.disclosureHeading {
+  color: var(--cobalt-glow-ink);
+  text-transform: uppercase;
+}
+
+/* Re-entry: the short form, then the control that reopens the long one. */
+.shortForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  margin-bottom: var(--space-24);
+}
+
+.doors {
+  display: flex;
+  flex-direction: column;
+  gap: var(--row-gap);
+}
+
+/* The competency line is uppercased by CSS; the name, a proper name,
+   never is. */
+.competency {
+  text-transform: uppercase;
+}
+
+/* The refusal's live region is empty until the server refuses a door,
+   and takes no space until then. */
+.refusal:not(:empty) {
+  margin-top: var(--space-24);
+}
