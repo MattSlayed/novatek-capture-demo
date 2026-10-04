@@ -1,0 +1,58 @@
+/* OrderList — 04-UI-SPEC.md §Surface 2's vertical budget and §Spacing Scale.
+   Sits directly on the --navy-deep page ground, like Limits.module.css, with
+   the same <main> padding figure. The bottom padding is the 48px step above
+   the home-indicator strip, and no box here adds the bottom safe-area inset:
+   the strip is already deducted from the usable box (C-11).
+
+   One gap between rows, and only one. A single stack rule carries it, and both
+   the row list and the bottom band are that stack, so the gap between rows
+   and the gap between the two foot controls cannot drift apart. Nothing else
+   on the surface uses it.
+
+   The row's fill, edge, radius, padding, floor and its 4px gap between lines
+   are the row primitive's own (components/rows/Row.module.css), and the foot
+   controls' are the secondary control's; this module repeats none of them.
+   It declares only where the blocks sit and the row's inks: the number and
+   the status word in --viewer-ink-dim, 7.03:1 on the panel and the tightest
+   pass in the system, and the title in --viewer-ink at 12.64:1. The status
+   word is uppercased here, so its DOM text stays the value the server sent.
+
+   No focus rule (app/globals.css owns the build's only one), no motion, no
+   pinned element and no colour literal. */
+
+.main {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-16) var(--safe-x) var(--space-48);
+}
+
+.heading {
+  margin-bottom: var(--space-24);
+}
+
+.refusal {
+  margin-bottom: var(--space-16);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--row-gap);
+}
+
+.band {
+  margin-top: var(--space-32);
+}
+
+.number {
+  color: var(--viewer-ink-dim);
+}
+
+.title {
+  color: var(--viewer-ink);
+}
+
+.status {
+  color: var(--viewer-ink-dim);
+  text-transform: uppercase;
+}
