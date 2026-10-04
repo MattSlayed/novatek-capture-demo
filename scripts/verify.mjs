@@ -144,6 +144,19 @@ export const STEPS = [
     command: process.execPath,
     args: ["scripts/check-non-bypassability.mjs"],
   },
+  /* Plan 04-06: D-07's primitive-ownership contract as a build rule.
+     The five primitives D-06 builds each have one owner, so a later
+     screen that re-declares a size, a focus rule, a mark's geometry or
+     a raw colour fails here rather than in review; nothing is fixed
+     or sticky, and nothing under app/ or components/ touches browser
+     storage. Source-side like the three sweeps above, needing no
+     browser and no build output, so it carries no vercelExcluded and
+     runs on Vercel's build as well as in the GitHub job. */
+  {
+    id: "check-primitives",
+    command: process.execPath,
+    args: ["scripts/check-primitives.mjs"],
+  },
   {
     id: "next-build",
     command: "npx",
