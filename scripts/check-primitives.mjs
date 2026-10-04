@@ -37,10 +37,44 @@
      A8  css-all      the one transition declaration is the record
                       control's.
      A9  css-all      no raw hex, rgb() or rgba() colour literal.
+     A10 tsx          aria-modal, nowhere: it hides everything outside
+                      a dialog from assistive technology, so the
+                      ribbon would be unreachable by rotor on the gate
+                      (Decision 4).
+     A12 tsx          no next/link import, no useRouter and no
+                      router.push (SC-5).
      A13 css-all      --cobalt-glow, --record-fill, --dk-crit-edge
                       and --rule-faint never on a color: property;
                       --viewer-border only on a border-* property.
      A14 css-modules  --rule-faint, zero times.
+     A15 tsx          navigator.vibrate in exactly one file, the
+                      record control's, which also carries the literal
+                      feature test "vibrate" in navigator (NFR-4a). A
+                      browser assertion cannot carry this: headless
+                      Chromium reports the API as present, so only the
+                      source can show that the call is feature-tested.
+     A16 tsx          localStorage, sessionStorage and indexedDB,
+                      nowhere; and no *.tsx declares module-scope
+                      mutable state, matched as a top-level let,
+                      new Map( or new Set( (SC-5, T-04-03).
+     A17 tsx          no file other than components/shell/Screen.tsx
+                      imports parseSurface or parseId from
+                      lib/client/navigate — D-01's one parse point, as
+                      an allowlist, so the rule is decidable before
+                      the switcher lands and after it.
+     D1  copy         lib/copy/governed.ts exports FR48A_DISPOSITION
+                      as a plain string, outside GOVERNED, which stays
+                      at eight (check-governed.mjs owns the eight).
+     D3  copy         already_open is in ConflictCode, CONFLICT_CODES
+                      and CONFLICT_COPY, with a non-empty sentence and
+                      exactly one action (D-05).
+
+   Two rows of the list are deliberately absent. A11 moved to C8 in
+   plan 04-12: whether the ribbon or any ancestor of it is hidden from
+   assistive technology is an ancestry question that needs a rendered
+   tree. B2 belongs to check-tokens.mjs, which already owns the
+   four-entry exemption register, and two owners of one rule is how a
+   rule gets half-removed later.
 
    WHAT IT CANNOT CATCH: this is a text sweep over comment-blanked
    source, not a CSS or TypeScript parser. A value composed at
@@ -55,6 +89,22 @@
    diamond is invisible to A4, and A9 reads hex, rgb() and rgba()
    only — a named colour keyword or another colour function is not
    swept.
+
+   The A16 module-state half is a string sweep that cannot tell a
+   frozen lookup table from a mutable one, which is why it matches
+   let and the two constructors rather than "a mutable object": a
+   constant Map is flagged, and an object literal mutated in place is
+   not. It reads brace depth, not scope, so a constructor nested in a
+   top-level object literal is missed, and module-scope text that
+   merely contains those words is a false positive. The storage half
+   asserts absence from this sweep's two roots rather than presence
+   under lib/client/, which is not one of them; lib/client/projection.ts
+   and lib/client/disclosure.ts are the modules that legitimately hold
+   the state this assertion pushes out of the component tree. A15 and
+   A17 read call sites and static import statements, so a destructured
+   vibrate and a dynamic import() of the navigation module are outside
+   them. D1 and D3 read their lib/ modules as text, from paths built
+   off process.cwd(), never a fixed path.
 
      node scripts/check-primitives.mjs
 
@@ -122,6 +172,26 @@ const RIBBON_MODULE = "components/shell/Ribbon.module.css";
 
 /** Tokens that are below the text floor on every ground they meet. */
 const NEVER_ON_COLOR = ["--cobalt-glow", "--record-fill", "--dk-crit-edge", "--rule-faint"];
+
+/**
+ * One entry, with the reason: the record control is the build's one
+ * haptic call site, behind a feature test (Primitive 2, NFR-4a). A
+ * second entry is an architectural change, never a maintenance edit.
+ */
+const HAPTIC_OWNERS = ["components/controls/RecordControl.tsx"];
+
+/**
+ * One entry, with the reason: D-01 names one parse point for the
+ * surface and the id, the screen switcher. Absence is allowed, so the
+ * rule holds before the switcher lands. A second entry is an
+ * architectural change, never a maintenance edit.
+ */
+const PARSE_POINT_OWNERS = ["components/shell/Screen.tsx"];
+
+const CWD = process.cwd();
+const GOVERNED_PATH = "lib/copy/governed.ts";
+const TYPES_PATH = "lib/data/types.ts";
+const CONFLICTS_PATH = "lib/copy/conflicts.ts";
 
 const problems = [];
 
@@ -516,6 +586,299 @@ async function checkRuleFaint(sources) {
 }
 
 /* ---------------------------------------------------------------
+   A10 — no modality anywhere (Decision 4)
+   --------------------------------------------------------------- */
+
+async function checkModality(sources) {
+  for (const [file, text] of scope(sources, isTsx)) {
+    for (const m of text.matchAll(/aria-modal/g)) {
+      problems.push(
+        `${file}:${lineOf(text, m.index)} carries aria-modal — it hides everything outside the dialog from assistive technology, which would make the ribbon unreachable by rotor on the gate (A10, Decision 4)`,
+      );
+    }
+  }
+}
+
+/* ---------------------------------------------------------------
+   A12 — navigation is the history API, never the router (SC-5)
+   --------------------------------------------------------------- */
+
+const NAVIGATION_RES = [
+  /["']next\/link["']/g,
+  /(?<![\w$])useRouter(?![\w$])/g,
+  /(?<![\w$])router\s*\.\s*push(?![\w$])/g,
+];
+
+async function checkNavigation(sources) {
+  for (const [file, text] of scope(sources, isTsx)) {
+    for (const re of NAVIGATION_RES) {
+      for (const m of text.matchAll(re)) {
+        problems.push(
+          `${file}:${lineOf(text, m.index)} uses ${m[0]} — in-app navigation is window.history, with no next/link, no useRouter and no router.push (A12, SC-5)`,
+        );
+      }
+    }
+  }
+}
+
+/* ---------------------------------------------------------------
+   A15 — one haptic call site, feature-tested (NFR-4a)
+   --------------------------------------------------------------- */
+
+const VIBRATE_RE = /navigator\s*\??\.\s*vibrate(?![\w$])/g;
+const FEATURE_TEST_RE = /["']vibrate["']\s+in\s+navigator(?![\w$])/;
+
+async function checkHaptic(sources) {
+  for (const [file, text] of scope(sources, isTsx)) {
+    if (HAPTIC_OWNERS.includes(file)) continue;
+    for (const m of text.matchAll(VIBRATE_RE)) {
+      problems.push(
+        `${file}:${lineOf(text, m.index)} calls ${m[0]} — the build's one haptic call site is ${HAPTIC_OWNERS[0]} (A15, NFR-4a)`,
+      );
+    }
+  }
+  const owner = sources.get(HAPTIC_OWNERS[0]);
+  if (owner === undefined || !owner.match(VIBRATE_RE)) {
+    problems.push(
+      `${HAPTIC_OWNERS[0]} carries no navigator.vibrate call — it appears in exactly one file, the record control's (A15, NFR-4a)`,
+    );
+  } else if (!FEATURE_TEST_RE.test(owner)) {
+    problems.push(
+      `${HAPTIC_OWNERS[0]} calls navigator.vibrate with no "vibrate" in navigator feature test beside it (A15, NFR-4a)`,
+    );
+  }
+}
+
+/* ---------------------------------------------------------------
+   A16 — no browser storage, and no module-scope mutable state, in
+   the component tree (SC-5, T-04-03)
+   --------------------------------------------------------------- */
+
+const STORAGE_RE = /(?<![\w$])(?:localStorage|sessionStorage|indexedDB)(?![\w$])/g;
+const MODULE_STATE_RES = [/(?<![\w$.])let\s+(?:[\w$]+|[[{])/g, /(?<![\w$.])new\s+(?:Map|Set)\s*\(/g];
+
+/** The text at brace depth zero; everything inside a block becomes spaces, newlines kept. */
+function moduleScope(src) {
+  let depth = 0;
+  let out = "";
+  for (const ch of src) {
+    if (ch === "{") depth++;
+    out += depth === 0 || ch === "\n" ? ch : " ";
+    if (ch === "}") depth = Math.max(0, depth - 1);
+  }
+  return out;
+}
+
+async function checkClientState(sources) {
+  for (const [file, text] of scope(sources, isTsx)) {
+    for (const m of text.matchAll(STORAGE_RE)) {
+      problems.push(
+        `${file}:${lineOf(text, m.index)} touches ${m[0]} — no file under app/ or components/ reads or writes browser storage; persisted client facts live under lib/client/ (A16, T-04-03)`,
+      );
+    }
+    if (!file.endsWith(".tsx")) continue;
+    const top = moduleScope(text);
+    for (const re of MODULE_STATE_RES) {
+      for (const m of top.matchAll(re)) {
+        problems.push(
+          `${file}:${lineOf(top, m.index)} declares module-scope mutable state (${m[0].trim()}) — cached state lives in lib/client/projection.ts, never in the component tree (A16, T-04-03)`,
+        );
+      }
+    }
+  }
+}
+
+/* ---------------------------------------------------------------
+   A17 — one parse point for the surface and the id (D-01)
+   --------------------------------------------------------------- */
+
+const IMPORT_RE = /(?:import|export)\s+(?:type\s+)?([^;]*?)\s+from\s+["']([^"']+)["']/g;
+const NAVIGATE_SOURCE_RE = /(?:^|\/)lib\/client\/navigate(?:\.ts)?$/;
+const PARSE_NAME_RE = /(?<![\w$])parse(?:Surface|Id)(?![\w$])/;
+
+async function checkParsePoint(sources) {
+  for (const [file, text] of scope(sources, isTsx)) {
+    if (PARSE_POINT_OWNERS.includes(file)) continue;
+    for (const m of text.matchAll(IMPORT_RE)) {
+      if (!NAVIGATE_SOURCE_RE.test(m[2])) continue;
+      const namespaced = /\*\s*as\s+[\w$]+/.test(m[1]) && /\.\s*parse(?:Surface|Id)(?![\w$])/.test(text);
+      if (PARSE_NAME_RE.test(m[1]) || namespaced) {
+        problems.push(
+          `${file}:${lineOf(text, m.index)} imports parseSurface / parseId from ${m[2]} — D-01's one parse point is ${PARSE_POINT_OWNERS[0]} (A17, D-01)`,
+        );
+      }
+    }
+  }
+}
+
+/* ---------------------------------------------------------------
+   source-level reading of two lib/ modules for D1 and D3 — the
+   brace-balancer from check-governed.mjs, unchanged, which skips
+   braces inside string literals
+   --------------------------------------------------------------- */
+
+/** Index of the "}" that closes the "{" at `openIndex`, skipping braces inside string literals. */
+function findMatchingBrace(text, openIndex) {
+  let depth = 0;
+  let inString = null;
+  for (let i = openIndex; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (ch === "\\") {
+        i++;
+        continue;
+      }
+      if (ch === inString) inString = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === "`") {
+      inString = ch;
+      continue;
+    }
+    if (ch === "{") depth++;
+    else if (ch === "}") {
+      depth--;
+      if (depth === 0) return i;
+    }
+  }
+  return -1;
+}
+
+/** First "{" at or after `fromIndex`, paired with `findMatchingBrace`. */
+function extractBraceBlock(text, fromIndex) {
+  const start = text.indexOf("{", fromIndex);
+  if (start === -1) return null;
+  const end = findMatchingBrace(text, start);
+  if (end === -1) return null;
+  return { start, end, content: text.slice(start, end + 1) };
+}
+
+/** Every top-level `key: { ... }` entry inside an object literal's inner text. */
+function extractTopLevelEntries(innerText) {
+  const entries = [];
+  let i = 0;
+  while (i < innerText.length) {
+    while (i < innerText.length && /[\s,]/.test(innerText[i])) i++;
+    if (i >= innerText.length) break;
+    const keyMatch = /^([A-Za-z_$][A-Za-z0-9_$]*)\s*:\s*/.exec(innerText.slice(i));
+    if (!keyMatch) {
+      i++;
+      continue;
+    }
+    const keyName = keyMatch[1];
+    const afterColon = i + keyMatch[0].length;
+    if (innerText[afterColon] !== "{") {
+      i = afterColon;
+      continue;
+    }
+    const closeIdx = findMatchingBrace(innerText, afterColon);
+    if (closeIdx === -1) break;
+    entries.push({ key: keyName, block: innerText.slice(afterColon, closeIdx + 1) });
+    i = closeIdx + 1;
+  }
+  return entries;
+}
+
+async function readLib(path, id) {
+  try {
+    return stripComments(await readFile(join(CWD, path), "utf8"));
+  } catch (e) {
+    problems.push(`could not read ${path}: ${e.message} (${id})`);
+    return null;
+  }
+}
+
+/* ---------------------------------------------------------------
+   D1 — the FR-48a disposition sentence exists, and sits outside the
+   closed set. check-governed.mjs already fails a ninth member and a
+   third triple; this carries the one thing it does not.
+   --------------------------------------------------------------- */
+
+async function checkDisposition() {
+  const src = await readLib(GOVERNED_PATH, "D1");
+  if (src === null) return;
+  const decl = /export\s+const\s+FR48A_DISPOSITION(?![\w$])[^=]*=\s*/.exec(src);
+  if (!decl) {
+    problems.push(
+      `${GOVERNED_PATH} does not export FR48A_DISPOSITION — the FR-48a disposition sentence is a named export beside PLATFORM_413 (D1)`,
+    );
+    return;
+  }
+  const at = decl.index + decl[0].length;
+  if (!/["'`]/.test(src[at] ?? "")) {
+    const end = src.indexOf(";", at);
+    const rhs = src.slice(at, end === -1 ? undefined : end);
+    const triple = ["before", "strong", "after"].every((k) =>
+      new RegExp(k + /\s*:/.source).test(rhs),
+    );
+    problems.push(
+      `${GOVERNED_PATH}:${lineOf(src, decl.index)} FR48A_DISPOSITION is ${triple ? "a {before, strong, after} triple" : "not a plain string"} — the disposition is a plain string, never a governed sentence (D1)`,
+    );
+  }
+  const head = /export\s+const\s+GOVERNED(?![\w$])[^=]*=\s*/.exec(src);
+  const block = head ? extractBraceBlock(src, head.index + head[0].length) : null;
+  if (!block) {
+    problems.push(
+      `${GOVERNED_PATH} has no GOVERNED object literal, so FR48A_DISPOSITION cannot be shown to sit outside it (D1)`,
+    );
+    return;
+  }
+  if (decl.index > block.start && decl.index < block.end) {
+    problems.push(
+      `${GOVERNED_PATH}:${lineOf(src, decl.index)} declares FR48A_DISPOSITION inside GOVERNED's object literal (D1)`,
+    );
+  }
+  const member = /(?<![\w$])FR48A_DISPOSITION(?![\w$])/.exec(block.content);
+  if (member) {
+    problems.push(
+      `${GOVERNED_PATH}:${lineOf(src, block.start + member.index)} names FR48A_DISPOSITION inside GOVERNED — the disposition is not a member of the closed set of eight (D1, D-09)`,
+    );
+  }
+}
+
+/* ---------------------------------------------------------------
+   D3 — already_open in all three places, with one next act (D-05)
+   --------------------------------------------------------------- */
+
+const ALREADY_OPEN_RE = /["']already_open["']/;
+
+async function checkAlreadyOpen() {
+  const types = await readLib(TYPES_PATH, "D3");
+  const copy = await readLib(CONFLICTS_PATH, "D3");
+  if (types === null || copy === null) return;
+
+  const union = /export\s+type\s+ConflictCode\s*=([^;]*);/.exec(types);
+  if (!union || !ALREADY_OPEN_RE.test(union[1])) {
+    problems.push(`${TYPES_PATH} ConflictCode does not carry "already_open" (D3, D-05)`);
+  }
+  const codes = /export\s+const\s+CONFLICT_CODES(?![\w$])[^=]*=\s*(?:Object\.freeze\(\s*)?\[([^\]]*)\]/.exec(types);
+  if (!codes || !ALREADY_OPEN_RE.test(codes[1])) {
+    problems.push(`${TYPES_PATH} CONFLICT_CODES does not carry "already_open" (D3, D-05)`);
+  }
+
+  const head = /export\s+const\s+CONFLICT_COPY(?![\w$])[^=]*=\s*/.exec(copy);
+  const block = head ? extractBraceBlock(copy, head.index + head[0].length) : null;
+  const entry = block
+    ? extractTopLevelEntries(block.content.slice(1, -1)).find((e) => e.key === "already_open")
+    : undefined;
+  if (!entry) {
+    problems.push(`${CONFLICTS_PATH} CONFLICT_COPY has no already_open entry (D3, D-05)`);
+    return;
+  }
+  const sentence = /(?<![\w$])sentence\s*:\s*(["'`])([\s\S]*?)\1/.exec(entry.block);
+  if (!sentence || !sentence[2].trim()) {
+    problems.push(`${CONFLICTS_PATH} CONFLICT_COPY.already_open has no non-empty sentence (D3, D-05)`);
+  }
+  const actions = /(?<![\w$])actions\s*:\s*\[([^\]]*)\]/.exec(entry.block);
+  const count = actions ? [...actions[1].matchAll(/(["'`])(?:(?!\1)[^\n])*\1/g)].length : 0;
+  if (count !== 1) {
+    problems.push(
+      `${CONFLICTS_PATH} CONFLICT_COPY.already_open carries ${count} actions — it carries exactly one next act (D3, D-05)`,
+    );
+  }
+}
+
+/* ---------------------------------------------------------------
    run every assertion and report
    --------------------------------------------------------------- */
 
@@ -529,20 +892,27 @@ await checkNoSticky(sources);
 await checkRibbonHeight(sources);
 await checkTransitions(sources);
 await checkRawColours(sources);
+await checkModality(sources);
+await checkNavigation(sources);
 await checkTokenPlacement(sources);
 await checkRuleFaint(sources);
+await checkHaptic(sources);
+await checkClientState(sources);
+await checkParsePoint(sources);
+await checkDisposition();
+await checkAlreadyOpen();
 
 console.log("PRIMITIVES CHECK");
 console.log("=".repeat(72));
 console.log(`Problems: ${problems.length}`);
 
 if (problems.length) {
-  console.log("\nDEFECTS — a primitive is re-declared outside its one owner:");
+  console.log("\nDEFECTS — a primitive escaped its one owner, or D-07's contract is broken:");
   for (const p of problems) console.log(`  !  ${p}`);
   process.exit(1);
 }
 
 console.log(
-  "\nEvery primitive has one owner: no module re-declares a size, a focus rule,",
+  "\nEvery primitive has one owner and nothing in the build is pinned, modal, routed",
 );
-console.log("a mark's geometry or a raw colour, and nothing in the build is pinned.");
+console.log("or stored outside lib/client/; the disposition and already_open are in place.");
