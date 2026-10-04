@@ -1,0 +1,56 @@
+/* ConflictCard — 04-UI-SPEC.md Decision 5 and §Color, C-21. The tinted-callout
+   anatomy every conflict in this phase and in Phase 6 renders on: one box,
+   two zones, and no third.
+
+   The surrounding boundary is 1px --control-border, and that is a correction
+   made at source rather than an exemption. DESIGN.md's tinted-callout entry
+   still states a translucent border drawn from the conflict's own tone; over
+   the --navy-deep page ground that value composites to 2.003:1, which is
+   below the 3:1 non-text floor (REQ-NFR-6). The decorative-exemption register
+   is closed at four entries and states that nothing else can be added to it
+   by argument, so a fifth entry is not available to a phase decision.
+   --control-border is the token for every meaning-bearing boundary: 4.07:1
+   against the ground outside the card, 3.58:1 against the panel inside it.
+
+   The card was never read by that boundary anyway. It is read by its 3px
+   full-tone --dk-warn left rule, 10.04:1 on the page ground, exactly as a
+   panel is read by its edge rather than its tone.
+
+   Carry this correction back into DESIGN.md before Phase 6 renders twelve of
+   these cards; whoever builds them will otherwise reach for the translucent
+   value the source still states.
+
+   The tinted head is --tint-warn-head, the tone's declared tint resolved over
+   the panel. --viewer-ink is the only ink permitted on it, which is why the
+   card sets that ink once on the box: the code in the head and the sentence
+   in the body both take it, and the state mark's block binds its own tone in
+   StateMark.module.css (7.22:1 on the tint). Secondary prose lives in the
+   untinted body and never in the head — the structural consequence of the
+   tint, not a colour substitution.
+
+   The radius is on the box, and the box clips its children so the head's
+   tint follows the top corners. The head's 16px padding around a 17px label
+   line and the body's 16px padding around two prose-sm lines are §Surface
+   2's own figures: 2 border + head 49 + body 79 = 130 in its budget.
+
+   The code is uppercased here and only here. The DOM text stays the code as
+   the closed set writes it, so a reviewer can match the screen to the wire. */
+
+.card {
+  border: 1px solid var(--control-border);
+  border-left: 3px solid var(--dk-warn);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  color: var(--viewer-ink);
+}
+
+.head {
+  padding: var(--space-16);
+  background: var(--tint-warn-head);
+  text-transform: uppercase;
+}
+
+.body {
+  padding: var(--space-16);
+  background: var(--panel-solid);
+}
