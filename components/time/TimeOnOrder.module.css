@@ -1,0 +1,85 @@
+/* Time on this order — 04-UI-SPEC.md §Surface 4 and its vertical budget,
+   §Spacing Scale, §Accessibility Floor (the 320 CSS px and 200 % clauses).
+
+   The phase's densest screen, and it reflows by construction. Each
+   term/value pair is a wrapping flex line, term first: where a term and
+   its value exceed the row interior, the value stacks under the term, the
+   row grows, and height is the only axis that scrolls.
+
+   Why wrapping and not a two-column grid: at 200 % the longest term alone,
+   MEASURED OFFSET (15 characters at 17.16 px each, 257 px), exceeds the
+   254 px row interior at 320 CSS px. A fixed two-column layout could not
+   hold a term and its value on one line there, and the horizontal scroll
+   that would follow is what SC 1.4.10 forbids.
+
+   --space-8 separates a term from its value and one pair from the next
+   inside a block, and never one segment row from the next; the segment rows
+   are separated by the one gap value every row list in this phase shares.
+
+   This module declares no target size, no tone of its own beyond the two
+   inks a term and a value take, and nothing about the segment row's shell:
+   its fill, edge, radius, padding and size floor are the row primitive's
+   (components/rows/Row.module.css). The page ground is the body's own, so
+   <main> carries padding only, and --safe-b is charged by nothing on this
+   surface (C-11). */
+
+.main {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-16) var(--safe-x) var(--space-48);
+}
+
+.heading {
+  margin-bottom: var(--space-12);
+}
+
+/* A <dl> of pairs: the clock-level block (ACCRUED, READ AT) and the inside
+   of every segment row. */
+.pairs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.pair {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-8);
+}
+
+.pair dt {
+  color: var(--viewer-ink-dim);
+}
+
+.pair dd {
+  color: var(--viewer-ink);
+}
+
+/* The time-zone statement, with --space-16 on both sides: after the clock
+   block, and before the stated limitation. */
+.zone {
+  margin-block: var(--space-16);
+}
+
+/* --space-24 before the first segment row: a section gap inside a screen. */
+.segments {
+  list-style: none;
+  margin-top: var(--space-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--row-gap);
+}
+
+/* The segment row's budget charges --space-16 of padding; the row shell
+   supplies --space-12, so this composes the remaining step over the shell
+   rather than restating the shell (Row.module.css says the same). */
+.segment {
+  padding: var(--space-4);
+}
+
+/* The empty sentence stands where the segment list would, after the same
+   --space-24 section gap. */
+.empty {
+  margin-top: var(--space-24);
+}
