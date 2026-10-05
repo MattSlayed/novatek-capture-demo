@@ -12,7 +12,7 @@ import styles from "./Limits.module.css";
 export function Limits() {
   return (
     <main aria-labelledby="screen-title" className={styles.main}>
-      <h1 id="screen-title" className={`screen-title ${styles.heading}`}>
+      <h1 id="screen-title" tabIndex={-1} className={`screen-title ${styles.heading}`}>
         Preview limits
       </h1>
       <div className={styles.list}>
