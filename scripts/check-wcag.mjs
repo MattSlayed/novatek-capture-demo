@@ -78,9 +78,10 @@
    added once 5f90cd1 made Limits' heading focusable; history.back()
    to the order list; ending the session, back to the gate; and the
    gate's disclosure reopen, where focus lands on the disclosure's
-   <h2>, not the <h1>. The two order ids come from GET /api/orders,
-   whose X-CAP-Account header is also asserted to equal the minted
-   persona (SC-1).
+   <h2>, not the <h1>. The two order ids come from the order list's
+   own GET /api/orders, captured as /?s=orders loads, whose
+   X-CAP-Account header is also asserted to equal the minted persona
+   (SC-1).
 
    Startup guard, before anything else: this repository's Research
    Open Question 1 found that axe-core@4.13.0 exposes 105 rules, that
@@ -337,7 +338,7 @@ function runToCompletion(command, args, env) {
    console error with the URL Chromium attaches to it, and every GET
    /api/session the page itself makes, with the status it got.
    page.request calls never pass through these page events, so the mint
-   and the orders read are not counted as the page's own reads. */
+   is not counted as one of the page's own reads. */
 function attachRecorders(page) {
   const rec = { consoleErrors: [], sessionReads: [] };
   page.on("console", (m) => {
@@ -817,25 +818,53 @@ if (build.code !== 0) {
         );
       } else {
         const { account } = await mint.json();
-        const ordersRes = await page.request.get(`${BASE_URL}/api/orders`);
+
+        /* The orders come from the order list's own GET /api/orders,
+           captured as /?s=orders loads, never from page.request. The
+           session cookie is Secure under next start, and page.request
+           does not send a Secure cookie over plain http while the page
+           does: real run 1's page.request read answered 401, and a
+           scratch server reproduced it. SC-1 is then asserted on the
+           very response the app rendered from. The body is read as soon
+           as the response lands, while the page is still on the list. */
+        const ordersRead = page
+          .waitForResponse(
+            (r) => r.request().method() === "GET" && new URL(r.url()).pathname === "/api/orders",
+            { timeout: HEADING_TIMEOUT_MS },
+          )
+          .then(
+            async (r) => ({
+              status: r.status(),
+              actingAccount: r.headers()["x-cap-account"],
+              orders: r.status() === 200 ? await r.json().then((b) => b.orders, () => null) : null,
+            }),
+            () => null,
+          );
+
+        await scanSurface(page, rec, { path: "/?s=orders", heading: "Your work orders" });
+
+        const read = await ordersRead;
         let orders = [];
-        if (ordersRes.status() !== 200) {
-          problems.push(`GET /api/orders answered ${ordersRes.status()} after the mint, not 200`);
+        if (read === null) {
+          problems.push(
+            `/?s=orders: the order list made no GET /api/orders within ${HEADING_TIMEOUT_MS / 1000}s of loading`,
+          );
+        } else if (read.status !== 200) {
+          problems.push(`GET /api/orders answered ${read.status} after the mint, not 200`);
         } else {
-          orders = (await ordersRes.json()).orders;
+          if (Array.isArray(read.orders)) orders = read.orders;
+          else problems.push("GET /api/orders answered 200 without an orders array");
           /* SC-1's own wording: the orders response names the account
              the session was minted for. */
-          const actingAccount = ordersRes.headers()["x-cap-account"];
-          if (actingAccount !== PERSONA_ID) {
+          if (read.actingAccount !== PERSONA_ID) {
             problems.push(
-              `SC-1: GET /api/orders carries X-CAP-Account "${actingAccount}", not the minted persona ${PERSONA_ID}`,
+              `SC-1: GET /api/orders carries X-CAP-Account "${read.actingAccount}", not the minted persona ${PERSONA_ID}`,
             );
           }
         }
         const shown = orders.find((o) => o.id === ORDER_ID);
         const second = orders.find((o) => o.id !== ORDER_ID);
 
-        await scanSurface(page, rec, { path: "/?s=orders", heading: "Your work orders" });
         await scanSurface(page, rec, {
           path: `/?s=order&id=${ORDER_ID}`,
           heading: shown ? `${shown.number} ${shown.title}` : null,
