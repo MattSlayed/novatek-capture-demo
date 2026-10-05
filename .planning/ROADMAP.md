@@ -217,11 +217,11 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 04-09-PLAN.md — Order detail and the clock: the tick, the control, the refusal (wave 5 — the clock's refusal renders 04-08's conflict card)
+- [x] 04-09-PLAN.md — Order detail and the clock: the tick, the control, the refusal (wave 5 — the clock's refusal renders 04-08's conflict card)
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
-- [ ] 04-11-PLAN.md — The switcher, the header, and the retirement of the Phase 1 shell (wave 6)
+- [x] 04-11-PLAN.md — The switcher, the header, and the retirement of the Phase 1 shell (wave 6)
 
 **Wave 7** *(blocked on Wave 6 completion)*
 
@@ -331,7 +331,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 1. Scaffold & conventions | 9/9 | Complete    | 2026-09-08 |
 | 2. Fixtures & types | 7/7 | Complete    | 2026-09-17 |
 | 3. Server seam | 16/16 | Complete   | 2026-09-19 |
-| 4. Shell, gate, orders, clock (online) | 9/13 | In Progress|  |
+| 4. Shell, gate, orders, clock (online) | 11/13 | In Progress|  |
 | 5. Camera → verify → capture → proposals → decisions (online) | 0/TBD | Not started | - |
 | 6. Offline | 0/TBD | Not started | - |
 | 7. PWA & desktop frame | 0/TBD | Not started | - |

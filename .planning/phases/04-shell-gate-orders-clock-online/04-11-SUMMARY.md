@@ -172,3 +172,38 @@ None. No external service configuration is required.
 ## Self-Check: PASSED
 
 All six plan files and this SUMMARY exist on disk, and commits `4ce3fba`, `2a00f03` and `b7ab8d7` are present in `git log`.
+
+## Orchestrator addendum — the full gate, 2026-10-05
+
+The orchestrator ran `node scripts/verify.mjs` once on `e9fb830`, after memory was freed
+on this machine. **Steps 1–26 exited 0; step 27, `check-wcag`, exited 1.** So this plan's
+Task 3 criterion that the full verify exits 0 with `check-wcag` passing on `/` and
+`/?s=limits` is **not met**. It is open and assigned to plan 04-12.
+
+Discharged by that run:
+- `next-build` succeeded, and the route table shows `┌ ○ /`, a static route rather than `ƒ`.
+- `check-structure-build-output`, `check-register-isolation-bundle`, `route-suite` (16/16),
+  `fixture-suite` (339/339), `unit-suite` (225/225) and `check-contrast` all exited 0.
+
+Not discharged — the three `check-wcag` defects, verbatim:
+```
+!  /: unexpected console/page error — Failed to load resource: the server responded with a status of 401 (Unauthorized)
+!  /?s=limits: unexpected console/page error — Failed to load resource: the server responded with a status of 401 (Unauthorized)
+!  /?s=limits: unexpected console/page error — Failed to load resource: the server responded with a status of 401 (Unauthorized)
+```
+No axe rule fired and no ribbon-contract defect was reported. The 401 is this plan working
+as designed: with no session, the switcher's `GET /api/session` returns 401, the definite
+"no session" answer D-03 requires, and Chromium logs every 4xx resource load as a console
+error. The Phase 1 harness (`scripts/lib/harness.mjs`, `scripts/check-wcag.mjs`) counts
+every console error outside favicon and DevTools noise as a defect, and it scans without a
+session. Plan 04-12's plan text does not mention this 401. The orchestrator has briefed it
+to add a narrow, named exemption: a 401 from `/api/session`, matched on the response or the
+message's location rather than its text, and allowed only on scans made before the mint.
+A 401 after the mint stays a defect.
+
+`/` logged one 401 and `/?s=limits` logged two. Plan 04-12 is asked to count the
+`GET /api/session` requests per load and explain any count above one, rather than leave
+that to inference.
+
+Gap 1 above (Limits' heading not focusable) was fixed by the orchestrator in `5f90cd1`.
+Plan 04-12 adds `orders → limits` to its C6 transition matrix so the gate proves the fix.
