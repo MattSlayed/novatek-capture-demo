@@ -1,0 +1,48 @@
+/* The running clock on order detail — 04-UI-SPEC.md Decision 3 and
+   Surface 3 items 3 and 4.
+
+   This module declares the block's internal spacing and nothing else
+   about its layout: --space-8 inside the block (the term to the figure,
+   the figure to the derivation line), --space-16 above the record
+   control, and the one row-gap value between the record control and the
+   row beneath it, which order detail renders. A refusal, when one
+   arrives, takes the same --space-16 slot immediately above the control.
+
+   The figure's numerals are fixed-width so its glyph box does not jitter
+   as the value changes (C-7). The figure role class in app/globals.css
+   sets the same rule; it is restated on this one element because the
+   no-jitter property is this block's own contract, not a coincidence of
+   a distant declaration.
+
+   The record control's size, fill, ink, radius, press change and haptic
+   belong to its own component and module. Nothing here sizes a box,
+   names a tone beyond the two text inks, declares a font family, size or
+   weight, or moves: the tick is a value changing rather than an
+   animation, so there is no reduced-motion block to write. The page
+   ground is the body's own; the control sits on it, not in a card. */
+
+.block {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--row-gap);
+}
+
+.term {
+  color: var(--viewer-ink-dim);
+}
+
+.figure {
+  margin-top: var(--space-8);
+  color: var(--viewer-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.derivation {
+  margin-top: var(--space-8);
+  color: var(--viewer-ink-dim);
+}
+
+.refusal,
+.control {
+  margin-top: var(--space-16);
+}
