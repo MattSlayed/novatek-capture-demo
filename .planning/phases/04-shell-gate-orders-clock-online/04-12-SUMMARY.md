@@ -110,9 +110,9 @@ Each step parks focus on the first rendered button (or the body when there is no
 
 | Pattern | Count | Criterion |
 |---|---|---|
-| `page.request.post` | 1 | at least 1, names `/api/session` (line 811) |
+| `page.request.post` | 1 | at least 1, names `/api/session` (line 812) |
 | `scanSurface(` | 6 | five call sites plus the definition |
-| order of `scanSurface(` / `page.request.post` | `/` at 806, mint at 811, `/?s=limits` at 845 | `/` before the mint, `/?s=limits` after |
+| order of `scanSurface(` / `page.request.post` | `/` at 807, mint at 812, `/?s=limits` at 874 | `/` before the mint, `/?s=limits` after |
 | `screen-title` | 19 | at least 1, used as the wait before axe |
 | `process.exit(problems.length > 0 ? 1 : 0)` | 1 | still exactly 1 |
 | `44` | 8 | width and height both compared (`r.width < min \|\| r.height < min`, min = 44) |
@@ -126,13 +126,13 @@ Each step parks focus on the first rendered button (or the body when there is no
 
 ## The grouping-break experiment (for the orchestrator to run)
 
-Move this line, currently line 845 inside the mint's success branch:
+Move this line, currently line 874 inside the mint's success branch:
 
 ```js
         await scanSurface(page, rec, { path: "/?s=limits", heading: "Preview limits" });
 ```
 
-to directly after line 806 (the `/` scan) and before the `/* The mint (T-04-26)` comment, at six spaces of indent. Then run `timeout 900 node scripts/check-wcag.mjs`. Expected: exit 1, with `/?s=limits: expected the #screen-title heading "Preview limits", found "Choose an artisan" — the surface did not render, or was scanned in the wrong session state; its other assertions were not run`, and also an unexempted `/?s=limits: unexpected console/page error — Failed to load resource: ... 401`, because that call does not carry `preMint: true`. Revert with `git checkout -- scripts/check-wcag.mjs`.
+to directly after line 807 (the `/` scan) and before the `/* The mint (T-04-26)` comment, at six spaces of indent. Then run `timeout 900 node scripts/check-wcag.mjs`. Expected: exit 1, with `/?s=limits: expected the #screen-title heading "Preview limits", found "Choose an artisan" — the surface did not render, or was scanned in the wrong session state; its other assertions were not run`, and also an unexempted `/?s=limits: unexpected console/page error — Failed to load resource: ... 401`, because that call does not carry `preMint: true`. Revert with `git checkout -- scripts/check-wcag.mjs`.
 
 ## Session reads per load
 
@@ -202,3 +202,41 @@ The harness is complete pending the orchestrator's real `check-wcag` and `verify
 ## Self-Check: PASSED
 
 Both files exist (`scripts/check-wcag.mjs`, this SUMMARY) and all three task commits (`ae36152`, `5892200`, `b4d6a52`) are present in `git log`. The real `check-wcag` and `verify` runs are not part of this self-check; they are pending the orchestrator.
+
+## Real run 1 (orchestrator, on 4a5addf): exit 1, fixed in fe37f5f
+
+The orchestrator ran `node scripts/check-wcag.mjs` on `4a5addf`. It exited 1 with this output, verbatim:
+
+```
+Scanning (GET /api/session counts are the page's own reads):
+  /: 1 GET /api/session on this load (401)
+  /?s=orders: 1 GET /api/session on this load (200)
+  /?s=order&id=wo-0142: 0 GET /api/session on this load (none)
+  /?s=time&id=wo-0142: 1 GET /api/session on this load (200)
+  /?s=limits: 1 GET /api/session on this load (200)
+
+Problems: 3
+  !  GET /api/orders answered 401 after the mint, not 200
+  !  /?s=order&id=wo-0142: no expected heading — GET /api/orders did not list the order this surface shows, so the scan cannot prove what rendered
+  !  C6: GET /api/orders listed 0 order(s) for acc-mabaso; the focus matrix needs wo-0142 and a second order to drive order(A) -> order(B), so it was not driven
+```
+
+**What it confirmed.** The pre-mint 401 exemption held, and so did its non-vacuity assertion. Every load that waited for its heading made exactly one `GET /api/session`, which confirms that the earlier double 401 came from the harness, not from `Screen.tsx`. No axe, C1, C3, C5 or C8 defect fired on the four scans that ran. C2 and C6 did not run.
+
+**The one cause, which was in the harness.** The harness read the orders with `page.request.get`. The session cookie is `Secure` under `next start` (`lib/session/cookie.ts:154`). Playwright's request context does not send a `Secure` cookie over plain `http://127.0.0.1`, while the page does. So the page's own session reads answered 200 after the `page.request.post` mint, but the harness's own orders read answered 401. A scratch server reproduced it in this session: after the mint, `page.request.get` answered 401 and the page's `fetch` answered 200. My first probe had tested only the page half.
+
+**Why order detail showed 0 reads.** The scan did navigate: `page.goto` runs before the heading check. With no expected heading it skipped the heading wait and counted reads at `domcontentloaded`, before the client had issued its session read. With the orders read fixed, the heading is known, the wait runs, and the count should be 1 like the others.
+
+**The fix (`fe37f5f`).**
+- The orders now come from the order list's own `GET /api/orders`. `page.waitForResponse` is registered before the `/?s=orders` scan navigates, and the body is read as soon as the response lands, while the page is still on the list.
+- SC-1's `X-CAP-Account` comparison against `acc-mabaso` now runs on the very response the app rendered from. A non-200 after the mint is still reported as `GET /api/orders answered <status> after the mint, not 200`.
+- A missing response is reported as its own problem.
+- `page.request.post` remains the mint, and no route or cookie changed.
+
+This departs from Task 3's wording ("read the two order ids from GET /api/orders through page.request"), at the orchestrator's direction.
+
+**Checks after the fix, all run in this session.**
+- A toy-server probe ran the committed capture text and returned `{status: 200, actingAccount: "acc-mabaso", orders: [...]}` when the page fetched, and `null` when it did not.
+- `--self-test` exited 0, eslint exited 0 and `tsc --noEmit` exited 0.
+- The literal greps are unchanged except for line numbers (`page.request.post` 1, `scanSurface(` 6, the exit line 1, and `page.request.get` now 0).
+- The next real run is the orchestrator's.
