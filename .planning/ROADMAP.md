@@ -225,7 +225,7 @@ Plans:
 
 **Wave 7** *(blocked on Wave 6 completion)*
 
-- [ ] 04-12-PLAN.md — check-wcag: session establishment, five surfaces, invariants C1–C8 (wave 7)
+- [x] 04-12-PLAN.md — check-wcag: session establishment, five surfaces, invariants C1–C8 (wave 7)
 
 **Wave 8** *(blocked on Wave 7 completion)*
 
@@ -331,7 +331,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 1. Scaffold & conventions | 9/9 | Complete    | 2026-09-08 |
 | 2. Fixtures & types | 7/7 | Complete    | 2026-09-17 |
 | 3. Server seam | 16/16 | Complete   | 2026-09-19 |
-| 4. Shell, gate, orders, clock (online) | 11/13 | In Progress|  |
+| 4. Shell, gate, orders, clock (online) | 12/13 | In Progress|  |
 | 5. Camera → verify → capture → proposals → decisions (online) | 0/TBD | Not started | - |
 | 6. Offline | 0/TBD | Not started | - |
 | 7. PWA & desktop frame | 0/TBD | Not started | - |

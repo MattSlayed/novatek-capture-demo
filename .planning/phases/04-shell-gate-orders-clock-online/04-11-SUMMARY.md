@@ -207,3 +207,7 @@ that to inference.
 
 Gap 1 above (Limits' heading not focusable) was fixed by the orchestrator in `5f90cd1`.
 Plan 04-12 adds `orders → limits` to its C6 transition matrix so the gate proves the fix.
+
+**Discharged, 2026-10-05.** The full gate on `b677725`, after plan 04-12's harness, exited 0
+at all 27 steps, `check-wcag` included. This plan's open Task 3 criterion is closed. See
+04-12-SUMMARY.md, "Real runs 2 and 3, and the full gate".

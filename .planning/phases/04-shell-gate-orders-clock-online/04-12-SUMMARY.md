@@ -240,3 +240,42 @@ This departs from Task 3's wording ("read the two order ids from GET /api/orders
 - `--self-test` exited 0, eslint exited 0 and `tsc --noEmit` exited 0.
 - The literal greps are unchanged except for line numbers (`page.request.post` 1, `scanSurface(` 6, the exit line 1, and `page.request.get` now 0).
 - The next real run is the orchestrator's.
+
+## Real runs 2 and 3, and the full gate (orchestrator, on b677725)
+
+All three runs below were made by the orchestrator on `b677725` (with `fe37f5f`'s fix). The
+output is quoted from the captured logs under the gitignored `scripts/.check/`, not
+paraphrased. An earlier attempt at run 2 was stopped mid-run by Claude Code because the
+machine ran critically low on memory. It produced no result and is not counted. The
+`next start` server it left on port 4311 was stopped before the next run.
+
+**Real run 2 — `node scripts/check-wcag.mjs`: exit 0, `Problems: 0`.**
+```
+  /: 1 GET /api/session on this load (401)
+  /?s=orders: 1 GET /api/session on this load (200)
+  /?s=order&id=wo-0142: 1 GET /api/session on this load (200)
+  /?s=time&id=wo-0142: 1 GET /api/session on this load (200)
+  /?s=limits: 1 GET /api/session on this load (200)
+Focus matrix (C6): 12 of 12 transitions landed focus on their target
+```
+Every load makes exactly one session read, including order detail now that its heading
+wait runs. All twelve C6 transitions passed, among them `order(A) -> order(B)` (wo-0142 ->
+wo-0151) and `order list -> Limits`, which proves the orchestrator's `5f90cd1` fix.
+
+**Real run 3 — the grouping-break experiment: exit 1, as required.** The `/?s=limits` scan
+was moved directly after the `/` scan, ahead of the mint. The run named the mismatch rather
+than passing with five labels:
+```
+!  /?s=limits: expected the #screen-title heading "Preview limits", found "Choose an artisan" — the surface did not render, or was scanned in the wrong session state; its other assertions were not run
+!  /?s=limits: unexpected console/page error — Failed to load resource: the server responded with a status of 401 (Unauthorized)
+```
+The second line shows the exemption holding its scope: that scan did not carry `preMint`,
+so its 401 was reported, not excused. The edit was reverted with `git checkout --
+scripts/check-wcag.mjs`, and `git diff` printed nothing afterwards.
+
+**The full gate — `node scripts/verify.mjs`: exit 0, "All steps exited 0."** All 27 steps
+ran: fixture-suite 339/339, unit-suite 225/225 and route-suite 16/16, and both `check-wcag`
+steps passed, with 12 of 12 C6 transitions.
+
+Every criterion that the "Status of the real run" section above marked pending is now
+discharged.
