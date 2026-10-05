@@ -1,0 +1,65 @@
+/* Order detail — 04-UI-SPEC.md §Surface 3 and its vertical budget,
+   §Spacing Scale, §Color and §Typography.
+
+   The build's first scrolling screen, and it scrolls on one axis only.
+   Nothing on it is pinned to the viewport, so <main> carries padding and
+   nothing else, and --safe-b is charged by no box here: the one box that
+   legitimately charges it is Phase 9's referral bar, which does not exist
+   yet (C-11, Decision 6).
+
+   The steps, top to bottom: --space-24 from the heading to the clock
+   block; --space-32 from the clock block to the assets and from the
+   assets to the governing documents; --space-12 after each section label.
+   The asset rows and the governing-document rows share one rule for the
+   gap between rows, so the two adjacent lists cannot differ (§Spacing:
+   one between-rows value on every surface). The clock block's own inner
+   steps, and the step between the record control and the time control
+   beneath it, are components/order/Clock.module.css's.
+
+   The section labels are the one --cobalt-glow-ink use on this surface;
+   no control label here takes it. Each governing-document code may break
+   anywhere (C-22). That wrap rule is declared and not exercised by this
+   phase's fixtures: at 320 CSS px a row interior holds 31 characters and
+   the longest code in the set is 10.
+
+   Everything about a row's shell (fill, edge, radius, padding, the inner
+   step between a tag and a name, and the size floor) is the row
+   primitive's, in components/rows/Row.module.css. This module declares no
+   target size, no tone beyond the section label's ink, no type metrics,
+   no elevation and nothing that moves. */
+
+.main {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-16) var(--safe-x) var(--space-48);
+}
+
+.heading {
+  margin-bottom: var(--space-24);
+}
+
+/* The order number's run inside the heading: its own line, the figure
+   role, and still part of the heading's one accessible string. */
+.number {
+  display: block;
+}
+
+.block {
+  margin-top: var(--space-32);
+}
+
+.sectionLabel {
+  margin-bottom: var(--space-12);
+  color: var(--cobalt-glow-ink);
+}
+
+.rows {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--row-gap);
+}
+
+.code {
+  overflow-wrap: anywhere;
+}
