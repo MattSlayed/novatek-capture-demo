@@ -38,6 +38,26 @@
    /api/session -> 401 was observed, so the exemption is never
    vacuous: it proves the gate rendered from the server's own answer.
 
+   GEOMETRY AND REFLOW (UI-SPEC C1, C2, C3). On every scanned surface,
+   at the pinned profile's 390 px width and again at the 360 px and
+   320 px widths C1 names: every rendered button, link and element with
+   a role of button or link measures at least 44 x 44 CSS px; on order
+   detail the clock control measures exactly 130 x 130 at rest and
+   while pressed; and at 320 px the page scrolls on one axis only. The
+   pinned profile is restored after each surface.
+
+   TEXT SCALE — A STATED LIMIT, NOT A SILENT GAP. C1, C2 and C3 also
+   name 200 % text, and this harness cannot emulate it. The type roles
+   are declared in CSS pixels, so a text-only scale has no browser
+   setting to reach; halving the viewport is page zoom, not text zoom;
+   and injecting a stylesheet would assert against the injected CSS
+   rather than the build. CI therefore carries the viewport widths
+   only. The 200 % claim is carried by the device pass —
+   04-VALIDATION.md § Manual-Only Verifications, row 4 ("200 % text
+   reflow on real handsets"), recorded in docs/analysis/ with the
+   build id — which is where that document already assigns it
+   (T-04-27).
+
    Startup guard, before anything else: this repository's Research
    Open Question 1 found that axe-core@4.13.0 exposes 105 rules, that
    the "wcag22aa" tag exists and carries exactly one rule
@@ -78,7 +98,7 @@ import { execSync, spawn } from "node:child_process";
 import { createRequire } from "node:module";
 import axe from "axe-core";
 import { AxeBuilder } from "@axe-core/playwright";
-import { launch, openMobilePage } from "./lib/harness.mjs";
+import { launch, MOBILE_PROFILE, openMobilePage } from "./lib/harness.mjs";
 import { startServer, stopServer } from "./lib/server.mjs";
 
 const require = createRequire(import.meta.url);
@@ -103,6 +123,18 @@ const SETTLE_TIMEOUT_MS = 10_000;
 const PERSONA_ID = "acc-mabaso";
 /* The fixture order the three id-bearing surface paths in C7 name. */
 const ORDER_ID = "wo-0142";
+
+/* C1's widths: the pinned profile's own, where axe runs, then the two
+   UI-SPEC C1 names. C3 is asserted at the narrowest of them. */
+const GEOMETRY_WIDTHS = [MOBILE_PROFILE.viewport.width, 360, 320];
+const REFLOW_WIDTH = 320;
+const TARGET_MIN_PX = 44;
+/* An exact figure, not a minimum: the perimeter is an inset shadow so
+   the box cannot change size between rest and pressed. */
+const RECORD_BOX_PX = 130;
+/* Longer than --dur-press (90 ms), so the pressed box is measured once
+   the press transition has finished. */
+const PRESS_SETTLE_MS = 150;
 
 /**
  * One entry, with the reason: with no session, the switcher
@@ -331,10 +363,130 @@ async function waitForHeading(page, expected, timeout) {
   }
 }
 
+/* C1 (REQ-NFR-2): every rendered button, a, and element with a role of
+   button or link measures at least 44 x 44 CSS px, width and height
+   both, from its bounding box. An element with no layout box is not on
+   screen and is not a target. */
+async function assertTargetSize(page, surface, width) {
+  const { measured, small } = await page.evaluate((min) => {
+    const out = { measured: 0, small: [] };
+    for (const el of document.querySelectorAll('button, a, [role="button"], [role="link"]')) {
+      if (el.getClientRects().length === 0) continue;
+      out.measured += 1;
+      const r = el.getBoundingClientRect();
+      if (r.width < min || r.height < min) {
+        const name = (el.getAttribute("aria-label") ?? el.textContent ?? "")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 60);
+        out.small.push(
+          `<${el.tagName.toLowerCase()}> "${name}" measures ${r.width.toFixed(1)} x ${r.height.toFixed(1)}`,
+        );
+      }
+    }
+    return out;
+  }, TARGET_MIN_PX);
+  if (measured === 0) {
+    problems.push(`${surface} at ${width}px: C1 found no rendered interactive element to measure`);
+  }
+  for (const s of small) {
+    problems.push(
+      `${surface} at ${width}px: C1 — ${s} CSS px, under ${TARGET_MIN_PX} x ${TARGET_MIN_PX}`,
+    );
+  }
+}
+
+/* C3 (REQ-NFR-7's shape): at 320 px the scrolling element is no wider
+   than the viewport's client width, so the page scrolls on one axis. */
+async function assertOneAxis(page, surface) {
+  const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+    scrollWidth: document.scrollingElement.scrollWidth,
+    clientWidth: document.documentElement.clientWidth,
+  }));
+  if (clientWidth !== REFLOW_WIDTH) {
+    problems.push(
+      `${surface}: C3 — the viewport's client width measured ${clientWidth}px, not ${REFLOW_WIDTH}px, so the reflow measurement would prove nothing`,
+    );
+  } else if (scrollWidth > clientWidth) {
+    problems.push(
+      `${surface} at ${REFLOW_WIDTH}px: C3 — the page scrolls in two dimensions: scrollWidth ${scrollWidth}px exceeds the viewport's client width ${clientWidth}px`,
+    );
+  }
+}
+
+/* C2 (REQ-NFR-4): the clock control measures exactly 130 x 130 at rest
+   and while pressed. The press is held with the pointer down, measured
+   once the press transition has run, then released off the control, so
+   no click fires and no segment is opened on the server; the label is
+   compared before and after the press to prove that. */
+async function assertClockBox(page, surface, width) {
+  const control = page.locator("main button").filter({ hasText: /^(OPEN|CLOSE|REOPEN)$/ });
+  try {
+    await control.first().waitFor({ timeout: HEADING_TIMEOUT_MS });
+  } catch {
+    problems.push(`${surface} at ${width}px: C2 — no clock control (OPEN, CLOSE or REOPEN) rendered`);
+    return;
+  }
+  const count = await control.count();
+  if (count !== 1) {
+    problems.push(`${surface} at ${width}px: C2 — expected exactly one clock control, found ${count}`);
+    return;
+  }
+  const measure = () =>
+    control.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { w: r.width, h: r.height, active: el.matches(":active"), label: el.textContent.trim() };
+    });
+
+  const rest = await measure();
+  await control.scrollIntoViewIfNeeded();
+  const box = await control.boundingBox();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.waitForTimeout(PRESS_SETTLE_MS);
+  const pressed = await measure();
+  await page.mouse.move(0, 0);
+  await page.mouse.up();
+  const after = await measure();
+
+  if (!pressed.active) {
+    problems.push(
+      `${surface} at ${width}px: C2 — the held press did not put the clock control in its :active state, so the pressed measurement proves nothing`,
+    );
+  }
+  for (const [state, m] of [["at rest", rest], ["pressed", pressed]]) {
+    if (m.w !== RECORD_BOX_PX || m.h !== RECORD_BOX_PX) {
+      problems.push(
+        `${surface} at ${width}px: C2 — the clock control measures ${m.w} x ${m.h} ${state}, not exactly ${RECORD_BOX_PX} x ${RECORD_BOX_PX}`,
+      );
+    }
+  }
+  if (after.label !== rest.label) {
+    problems.push(
+      `${surface} at ${width}px: C2 — the measurement press fired the clock control (${rest.label} became ${after.label}); the harness changed server state`,
+    );
+  }
+}
+
+/* C1 at every width, C2 where the surface carries the clock control,
+   and C3 at the narrowest width; the pinned profile always comes back. */
+async function assertGeometry(page, surface, { clock }) {
+  try {
+    for (const width of GEOMETRY_WIDTHS) {
+      await page.setViewportSize({ width, height: MOBILE_PROFILE.viewport.height });
+      await assertTargetSize(page, surface, width);
+      if (clock) await assertClockBox(page, surface, width);
+      if (width === REFLOW_WIDTH) await assertOneAxis(page, surface);
+    }
+  } finally {
+    await page.setViewportSize(MOBILE_PROFILE.viewport);
+  }
+}
+
 /* One surface: load it, prove it is the screen it claims to be, then
    run every per-surface assertion against it. The path is the label,
    so the report names each of the five surfaces as C7 does. */
-async function scanSurface(page, rec, { path, heading, preMint = false }) {
+async function scanSurface(page, rec, { path, heading, preMint = false, clock = false }) {
   const errorsFrom = page.__captureErrors.length;
   const consoleFrom = rec.consoleErrors.length;
   const readsFrom = rec.sessionReads.length;
@@ -364,6 +516,7 @@ async function scanSurface(page, rec, { path, heading, preMint = false }) {
     }
 
     await assertRibbonContract(page, path);
+    await assertGeometry(page, path, { clock });
   }
 
   const reads = rec.sessionReads.slice(readsFrom);
@@ -482,6 +635,7 @@ if (build.code !== 0) {
         await scanSurface(page, rec, {
           path: `/?s=order&id=${ORDER_ID}`,
           heading: shown ? `${shown.number} ${shown.title}` : null,
+          clock: true,
         });
         await scanSurface(page, rec, { path: `/?s=time&id=${ORDER_ID}`, heading: "Time on this order" });
         await scanSurface(page, rec, { path: "/?s=limits", heading: "Preview limits" });
