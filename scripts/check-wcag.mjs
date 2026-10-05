@@ -747,6 +747,16 @@ console.log("=".repeat(72));
    only — never written to a committed file — so next.config.ts's
    build-id gate (D-03) does not throw. */
 const childEnv = { ...process.env };
+
+/* CAPTURE_SESSION_KEY, in the CHILD environment only, for the same
+   reason scripts/server/route-suite.proof.mjs gives: `next start` runs
+   under a production NODE_ENV, so lib/session/key.ts refuses to sign a
+   session without a key of at least sixteen characters, and the mint
+   below would answer 500. Locally .env.local supplies one, which is
+   why this went unnoticed until the GitHub "verify" job, whose
+   environment carries no .env.local, answered the mint with 500. A
+   real key, when present, is used as given. */
+childEnv.CAPTURE_SESSION_KEY ??= "check-wcag-throwaway-key-0000000";
 if (
   !childEnv.VERCEL_GIT_COMMIT_SHA &&
   !childEnv.VERCEL_DEPLOYMENT_ID &&
