@@ -1,47 +1,31 @@
 import { Suspense } from "react";
-import { Limits } from "@/components/limits/Limits";
+import { Screen } from "@/components/shell/Screen";
 
 /* RESEARCH.md Pattern 1 (static shell with a streamed dynamic
    island): this file stays a plain, non-async Server Component so `/`
-   is statically prerendered; only the Screen child below reads
-   searchParams, behind <Suspense>, which requires cacheComponents:
-   true in next.config.ts (already set, plan 01-01). Typed as
-   Promise<{ s?: string }> rather than the generated PageProps<"/">
-   so this route type-checks without a prior `next typegen` run. */
-export default function Page({
-  searchParams,
-}: {
-  searchParams: Promise<{ s?: string }>;
-}) {
+   is statically prerendered; only the Screen child below reads the
+   query, behind <Suspense>, which requires cacheComponents: true in
+   next.config.ts (already set, plan 01-01).
+
+   Since Phase 4 that child is a Client Component, and it is the only
+   mechanism that works (04-RESEARCH.md Pattern 1 and Pitfall 1): a
+   Server Component's searchParams prop does not update on
+   history.pushState, measured frozen at its first-render value across
+   every push, replace and pop with zero server round trips, while the
+   client hook Screen reads tracks every one of them. So this page no
+   longer threads searchParams anywhere; the client reads the query
+   itself. The boundary below is a build gate as well as a streaming
+   seam: that hook outside a Suspense boundary is a hard prerender
+   error, so removing it fails next build rather than shipping.
+
+   Nothing here may make `/` dynamic (Pitfall 8): no route-segment
+   config export and no request-cookie read at page level. Either
+   would move `/` off its static route-table glyph and fail
+   check-structure.mjs --build-output. */
+export default function Page() {
   return (
     <Suspense fallback={null}>
-      <Screen searchParams={searchParams} />
+      <Screen />
     </Suspense>
-  );
-}
-
-async function Screen({
-  searchParams,
-}: {
-  searchParams: Promise<{ s?: string }>;
-}) {
-  const { s } = await searchParams;
-
-  /* The only untrusted input in Phase 1: read for a two-way branch
-     only, never interpolated into markup, a URL or a header. */
-  if (s === "limits") {
-    return <Limits />;
-  }
-
-  /* Otherwise-empty, labelled <main> and nothing else (D-11, D-19) —
-     no body copy, no wordmark, no header bar, no navigation. The
-     reader's next step is the ribbon link, rendered by the layout
-     above this page. */
-  return (
-    <main aria-labelledby="screen-title">
-      <h1 id="screen-title" className="screen-title">
-        NOVATEK Capture
-      </h1>
-    </main>
   );
 }

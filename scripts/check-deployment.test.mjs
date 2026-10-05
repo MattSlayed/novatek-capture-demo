@@ -42,7 +42,7 @@ const PASSING_BODY = `<!doctype html><html><body>
 <p><span>Designed preview.</span> Capture is specified, not yet built.</p>
 <a href="/?s=limits">Read the full preview limits</a>
 </section>
-<main><h1 id="screen-title">NOVATEK Capture</h1></main>
+<main aria-labelledby="screen-title"><h1 id="screen-title" tabindex="-1">Choose an artisan</h1></main>
 </body></html>`;
 
 test("exits 0 when every header and the ribbon markup are present", async () => {

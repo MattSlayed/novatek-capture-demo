@@ -19,9 +19,17 @@ export function Ribbon() {
           <strong>{strong}</strong>
           {after}
         </p>
-        {/* D-11 locks a plain anchor in this phase — no <Link>, no
-            router.push. Phase 4 replaces it with a history.pushState
-            switcher without changing the URL contract. */}
+        {/* A plain anchor, kept on purpose (D-11). The ribbon is
+            Primitive 1 and Phase 4 holds it unchanged (04-UI-SPEC.md
+            §The Five Primitives), so this link is not a history-state
+            move: a Limits visit through the ribbon is a full document
+            load, which the screen switcher then resolves as s=limits.
+            That is the right trade. The build's one permanent landmark
+            stays a plain Server Component with no state and no event
+            handler, and the client projection is scoped to the
+            document by design and rebuilds from the server on its next
+            read, so a full load costs a re-read and nothing else. The
+            URL contract is unchanged. */}
         {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a href="/?s=limits" className={`label ${styles.link}`}>
           Read the full preview limits
