@@ -207,13 +207,13 @@ Plans:
 **Wave 3** *(blocked on Wave 2 completion)*
 
 - [x] 04-04-PLAN.md — `lib/client/projection.ts`: the one cache, one purge, instance-keyed (wave 3)
-- [ ] 04-06-PLAN.md — `check-primitives.mjs`, its fixture proof, and the twenty-seventh STEPS entry (wave 3)
+- [x] 04-06-PLAN.md — `check-primitives.mjs`, its fixture proof, and the twenty-seventh STEPS entry (wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 04-07-PLAN.md — The gate: FR-48a's two states and the three persona doors (wave 4)
-- [ ] 04-08-PLAN.md — The order list and the conflict card (D-02) (wave 4)
-- [ ] 04-10-PLAN.md — Time on this order: the accrued record in full (FR-58) (wave 4)
+- [x] 04-07-PLAN.md — The gate: FR-48a's two states and the three persona doors (wave 4)
+- [x] 04-08-PLAN.md — The order list and the conflict card (D-02) (wave 4)
+- [x] 04-10-PLAN.md — Time on this order: the accrued record in full (FR-58) (wave 4)
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
@@ -331,7 +331,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 1. Scaffold & conventions | 9/9 | Complete    | 2026-09-08 |
 | 2. Fixtures & types | 7/7 | Complete    | 2026-09-17 |
 | 3. Server seam | 16/16 | Complete   | 2026-09-19 |
-| 4. Shell, gate, orders, clock (online) | 5/13 | In Progress|  |
+| 4. Shell, gate, orders, clock (online) | 9/13 | In Progress|  |
 | 5. Camera → verify → capture → proposals → decisions (online) | 0/TBD | Not started | - |
 | 6. Offline | 0/TBD | Not started | - |
 | 7. PWA & desktop frame | 0/TBD | Not started | - |
