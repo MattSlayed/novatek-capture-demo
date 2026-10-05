@@ -58,6 +58,30 @@
    build id — which is where that document already assigns it
    (T-04-27).
 
+   HEADINGS AND THE RIBBON'S ANCESTRY (UI-SPEC C5, C8). On every
+   scanned surface there is exactly one <h1 id="screen-title">, inside
+   one <main aria-labelledby="screen-title">; and neither the ribbon's
+   section nor any ancestor of it carries aria-hidden, found by walking
+   up the rendered tree — ancestry cannot be decided by a source sweep,
+   which is why C8 lives here.
+
+   FOCUS ON EVERY TRANSITION (UI-SPEC C6, T-04-25). In a fresh context
+   with no session, every transition this phase has is driven with
+   focus parked elsewhere first, so the assertion cannot pass on focus
+   that was already on a heading, and focus must then land on the new
+   screen's heading: the gate's persona door to the order list (a
+   replace); the order list to order detail and on to the time surface
+   (pushes); the header's back control twice; history.back();
+   order(A) -> order(B), the id-only transition the UI-SPEC's C6 does
+   not list and the one an effect keyed on the surface alone skips;
+   back to the order list; the order list's foot control to Limits,
+   added once 5f90cd1 made Limits' heading focusable; history.back()
+   to the order list; ending the session, back to the gate; and the
+   gate's disclosure reopen, where focus lands on the disclosure's
+   <h2>, not the <h1>. The two order ids come from GET /api/orders,
+   whose X-CAP-Account header is also asserted to equal the minted
+   persona (SC-1).
+
    Startup guard, before anything else: this repository's Research
    Open Question 1 found that axe-core@4.13.0 exposes 105 rules, that
    the "wcag22aa" tag exists and carries exactly one rule
@@ -135,6 +159,9 @@ const RECORD_BOX_PX = 130;
 /* Longer than --dur-press (90 ms), so the pressed box is measured once
    the press transition has finished. */
 const PRESS_SETTLE_MS = 150;
+/* How long a driven transition has to land focus once its new heading
+   has rendered. */
+const FOCUS_TIMEOUT_MS = 2_000;
 
 /**
  * One entry, with the reason: with no session, the switcher
@@ -468,6 +495,50 @@ async function assertClockBox(page, surface, width) {
   }
 }
 
+/* C5: exactly one <h1 id="screen-title">, and the surface's one <main>
+   carries aria-labelledby="screen-title". */
+async function assertHeadingAndMain(page, surface) {
+  const counts = await page.evaluate(() => ({
+    titles: document.querySelectorAll("#screen-title").length,
+    h1Titles: document.querySelectorAll("h1#screen-title").length,
+    mains: document.querySelectorAll("main").length,
+    labelled: document.querySelectorAll('main[aria-labelledby="screen-title"]').length,
+  }));
+  if (counts.titles !== 1 || counts.h1Titles !== 1) {
+    problems.push(
+      `${surface}: C5 — expected exactly one <h1 id="screen-title">, found ${counts.h1Titles} such <h1> among ${counts.titles} element(s) with that id`,
+    );
+  }
+  if (counts.mains !== 1 || counts.labelled !== 1) {
+    problems.push(
+      `${surface}: C5 — expected one <main aria-labelledby="screen-title">, found ${counts.mains} <main> of which ${counts.labelled} carry it`,
+    );
+  }
+}
+
+/* C8: walk up the rendered tree from the ribbon's section to the root;
+   neither it nor any ancestor may carry aria-hidden. */
+async function assertRibbonAncestry(page, surface) {
+  const hidden = await page.evaluate(() => {
+    const ribbon = document.querySelector('section[aria-label="Preview disclosure"]');
+    if (ribbon === null) return null;
+    const found = [];
+    for (let el = ribbon; el !== null; el = el.parentElement) {
+      if (el.hasAttribute("aria-hidden")) {
+        found.push(`<${el.tagName.toLowerCase()}> aria-hidden="${el.getAttribute("aria-hidden")}"`);
+      }
+    }
+    return found;
+  });
+  /* A missing ribbon is already reported by assertRibbonContract. */
+  if (hidden === null) return;
+  for (const h of hidden) {
+    problems.push(
+      `${surface}: C8 — ${h} on the ribbon or one of its ancestors hides the ribbon from assistive technology`,
+    );
+  }
+}
+
 /* C1 at every width, C2 where the surface carries the clock control,
    and C3 at the narrowest width; the pinned profile always comes back. */
 async function assertGeometry(page, surface, { clock }) {
@@ -516,6 +587,8 @@ async function scanSurface(page, rec, { path, heading, preMint = false, clock = 
     }
 
     await assertRibbonContract(page, path);
+    await assertHeadingAndMain(page, path);
+    await assertRibbonAncestry(page, path);
     await assertGeometry(page, path, { clock });
   }
 
@@ -542,6 +615,127 @@ async function scanSurface(page, rec, { path, heading, preMint = false, clock = 
     }
     problems.push(`${path}: unexpected console/page error — ${e.slice(0, 240)}`);
   }
+}
+
+/* ---------------------------------------------------------------
+   C6 — focus on the new screen's heading after every transition
+   --------------------------------------------------------------- */
+
+/* The focused element's id, or its tag when it has none. */
+function focusedElement(page) {
+  return page.evaluate(() => {
+    const a = document.activeElement;
+    return a === null ? "(none)" : a.id || `<${a.tagName.toLowerCase()}>`;
+  });
+}
+
+/* Park focus on the first rendered button, or on the body when the
+   screen has none, so no assertion can pass on focus that was already
+   on a heading before the transition ran (Code Examples 5). */
+async function parkFocus(page) {
+  await page.evaluate(() => {
+    const button = [...document.querySelectorAll("button")].find(
+      (b) => b.getClientRects().length > 0,
+    );
+    if (button) button.focus();
+    else if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+  });
+  return focusedElement(page);
+}
+
+/* One transition: park focus, drive it, wait for the new screen's
+   heading, then assert document.activeElement is `focusId`. Returns
+   false when the expected screen never rendered, so the matrix stops
+   rather than driving the rest of it from the wrong screen. */
+async function assertFocusMoves(page, landed, { name, heading, focusId = "screen-title", act }) {
+  const parked = await parkFocus(page);
+  if (parked === focusId) {
+    problems.push(
+      `C6 ${name}: focus could not be parked away from #${focusId} first, so the assertion would pass vacuously`,
+    );
+    return false;
+  }
+  try {
+    await act();
+  } catch (e) {
+    problems.push(`C6 ${name}: the transition could not be driven — ${String(e?.message ?? e).split("\n")[0]}`);
+    return false;
+  }
+  const found = await waitForHeading(page, heading, HEADING_TIMEOUT_MS);
+  if (found !== heading) {
+    problems.push(
+      `C6 ${name}: expected the new screen's heading "${heading}", found ${found === null ? "no #screen-title" : `"${found}"`}; the rest of the matrix was not driven`,
+    );
+    return false;
+  }
+  try {
+    await page.waitForFunction((id) => document.activeElement?.id === id, focusId, {
+      timeout: FOCUS_TIMEOUT_MS,
+    });
+    landed.push(name);
+  } catch {
+    problems.push(
+      `C6 ${name}: focus is on "${await focusedElement(page)}" after the transition (parked on "${parked}" before it), not #${focusId}`,
+    );
+  }
+  return true;
+}
+
+/* The matrix, in its own context so it starts with no session and no
+   disclosure flag, whatever the scans left behind. The persona door
+   mints this context's session through the gate itself. */
+async function assertFocusMatrix(browser, { personaName, orderA, orderB }) {
+  const GATE = "Choose an artisan";
+  const LIST = "Your work orders";
+  const detail = (o) => `${o.number} ${o.title}`;
+  const { context, page } = await openMobilePage(browser);
+  page.setDefaultTimeout(HEADING_TIMEOUT_MS);
+  const inMain = (name) => page.locator("main").getByRole("button", { name, exact: true });
+  const back = () => page.locator("header").getByRole("button", { name: "Back", exact: true }).click();
+  const historyBack = () => page.evaluate(() => history.back());
+
+  const steps = [
+    { name: "gate -> order list (the persona door, a replace)", heading: LIST,
+      act: () => page.locator("main button", { hasText: personaName }).click() },
+    { name: "order list -> order detail (a push)", heading: detail(orderA),
+      act: () => page.locator("main button", { hasText: orderA.number }).click() },
+    { name: "order detail -> time on this order (a push)", heading: "Time on this order",
+      act: () => inMain("Time on this order").click() },
+    { name: "header back: time on this order -> order detail", heading: detail(orderA), act: back },
+    { name: "header back: order detail -> order list", heading: LIST, act: back },
+    { name: "history.back(): order list -> order detail", heading: detail(orderA), act: historyBack },
+    { name: `order(A) -> order(B): ${orderA.id} -> ${orderB.id}, only the id changes (a push)`,
+      heading: detail(orderB),
+      act: () => page.evaluate((href) => history.pushState(null, "", href), `/?s=order&id=${orderB.id}`) },
+    { name: "header back: order detail -> order list", heading: LIST, act: back },
+    { name: "order list -> Limits (the foot control, a push)", heading: "Preview limits",
+      act: () => inMain("Read the full preview limits").click() },
+    { name: "history.back(): Limits -> order list", heading: LIST, act: historyBack },
+    { name: "order list -> gate (ending the session)", heading: GATE,
+      act: () => inMain("End this session and choose a different artisan").click() },
+    { name: "the gate's disclosure reopen (focus on the disclosure's <h2>)", heading: GATE,
+      focusId: "disclosure-title", act: () => inMain("Read the full disclosure").click() },
+  ];
+
+  const landed = [];
+  try {
+    await page.goto(`${BASE_URL}/`, { waitUntil: "domcontentloaded" });
+    const first = await waitForHeading(page, GATE, HEADING_TIMEOUT_MS);
+    if (first !== GATE) {
+      problems.push(
+        `C6: / in a fresh context rendered ${first === null ? "no #screen-title" : `"${first}"`}, not the gate's "${GATE}"; the focus matrix was not driven`,
+      );
+    } else {
+      for (const step of steps) {
+        if (!(await assertFocusMoves(page, landed, step))) break;
+      }
+    }
+  } finally {
+    await context.close();
+  }
+
+  console.log(`\nFocus matrix (C6): ${landed.length} of ${steps.length} transitions landed focus on their target:`);
+  for (const name of landed) console.log(`  ok  ${name}`);
 }
 
 console.log("WCAG CHECK");
@@ -622,14 +816,24 @@ if (build.code !== 0) {
           `POST /api/session for ${PERSONA_ID} answered ${mint.status()}, not 201 — the four surfaces that need a session were not scanned`,
         );
       } else {
+        const { account } = await mint.json();
         const ordersRes = await page.request.get(`${BASE_URL}/api/orders`);
         let orders = [];
         if (ordersRes.status() !== 200) {
           problems.push(`GET /api/orders answered ${ordersRes.status()} after the mint, not 200`);
         } else {
           orders = (await ordersRes.json()).orders;
+          /* SC-1's own wording: the orders response names the account
+             the session was minted for. */
+          const actingAccount = ordersRes.headers()["x-cap-account"];
+          if (actingAccount !== PERSONA_ID) {
+            problems.push(
+              `SC-1: GET /api/orders carries X-CAP-Account "${actingAccount}", not the minted persona ${PERSONA_ID}`,
+            );
+          }
         }
         const shown = orders.find((o) => o.id === ORDER_ID);
+        const second = orders.find((o) => o.id !== ORDER_ID);
 
         await scanSurface(page, rec, { path: "/?s=orders", heading: "Your work orders" });
         await scanSurface(page, rec, {
@@ -639,6 +843,14 @@ if (build.code !== 0) {
         });
         await scanSurface(page, rec, { path: `/?s=time&id=${ORDER_ID}`, heading: "Time on this order" });
         await scanSurface(page, rec, { path: "/?s=limits", heading: "Preview limits" });
+
+        if (!shown || !second) {
+          problems.push(
+            `C6: GET /api/orders listed ${orders.length} order(s) for ${PERSONA_ID}; the focus matrix needs ${ORDER_ID} and a second order to drive order(A) -> order(B), so it was not driven`,
+          );
+        } else {
+          await assertFocusMatrix(browser, { personaName: account.name, orderA: shown, orderB: second });
+        }
       }
       await context.close();
     }
@@ -666,7 +878,7 @@ if (problems.length) {
   for (const p of problems) console.log(`  !  ${p}`);
 } else {
   console.log(
-    "\nZero A/AA violations on all five surfaces, each scanned once it rendered its own heading; the ribbon is present once, never aria-hidden, position: static, max-height: none, with a >=44px named link and no dismiss-shaped control.",
+    "\nZero A/AA violations on all five surfaces, each scanned once it rendered its own heading; C1, C2, C3, C5 and C8 hold wherever they apply; focus landed on its target after every driven transition; X-CAP-Account names the minted persona; the ribbon is present once, never aria-hidden, position: static, max-height: none, with a >=44px named link and no dismiss-shaped control.",
   );
 }
 
