@@ -1,0 +1,39 @@
+/* Header contract — 04-UI-SPEC.md §Surface 2's header paragraph and slot
+   table, and §Decision 1. A band on the same --navy-deep ground as the ribbon
+   above it, closed by the decorative divider the ribbon's own bottom edge
+   uses: the header is identified by its content, a name and where present a
+   back control, and nothing depends on seeing its edge, so it spends no
+   meaning-bearing boundary and adds no exemption (the register stays at
+   four).
+
+   The height is C-10's measured 56px figure, held as a floor rather than a
+   fixed box so the band grows with its content at 200% text and nothing is
+   clipped. It is kept even though Phase 6's two slots are absent from the
+   DOM, because every other screen's body height is derived from it.
+
+   The back control's size, fill, edge and padding are the secondary
+   control's own (components/controls/SecondaryControl.module.css); this
+   module declares none of them. It declares only where the two blocks sit
+   and the name's ink, --viewer-ink on the page ground. The type role is
+   app/globals.css's object-title, applied in the component.
+
+   No focus rule (app/globals.css owns the build's only one), no motion, no
+   pinned element, no colour literal and no font property. */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  min-height: var(--header-h);
+  padding: var(--space-4) var(--safe-x);
+  background: var(--navy-deep);
+  border-bottom: 1px solid var(--viewer-border);
+}
+
+/* The flex remainder, so a long name wraps inside the band rather than
+   pushing the back control off its edge. */
+.name {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--viewer-ink);
+}
